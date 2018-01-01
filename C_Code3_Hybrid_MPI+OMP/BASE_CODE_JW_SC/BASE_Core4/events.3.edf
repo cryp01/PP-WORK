@@ -1,0 +1,104 @@
+103 dynamic_trace_events
+# FunctionId Group Tag "Name Type" Parameters
+0 TAUEVENT 0 ".TAU <unknown event>" TriggerValue
+1 TAU_USER 0 ".TAU application " EntryExit
+2 TAU_DEFAULT 0 "addr=<0x432f30> [{(unknown)} {0,0}] " EntryExit
+3 MPI 0 "MPI_Init()  " EntryExit
+5 MPI 0 "MPI_Comm_rank()  " EntryExit
+6 MPI 0 "MPI_Comm_size()  " EntryExit
+7 MPI 0 "MPI_Bcast()  " EntryExit
+9 TAU_DEFAULT 0 "addr=<0x433db0> [{(unknown)} {0,0}] " EntryExit
+10 MPI 0 "MPI_Scatter()  " EntryExit
+12 TAU_DEFAULT 0 "addr=<0x433be0> [{(unknown)} {0,0}] " EntryExit
+13 MPI 0 "MPI_Send()  " EntryExit
+15 MPI 0 "MPI_Recv()  " EntryExit
+17 TAU_DEFAULT 0 "addr=<0x433a00> [{(unknown)} {0,0}] " EntryExit
+18 TAU_DISABLE 0 "addr=<0x433930> [{(unknown)} {0,0}] [THROTTLED]" EntryExit
+19 TAU_DISABLE 0 "addr=<0x4339a0> [{(unknown)} {0,0}] [THROTTLED]" EntryExit
+20 MPI 0 "MPI_Reduce()  " EntryExit
+22 MPI 0 "MPI_Gather()  " EntryExit
+23 MPI 0 "MPI_Finalize()  " EntryExit
+4 TAUEVENT 0 "TauTraceClockOffsetStart" TriggerValue
+8 TAUEVENT 0 "Message size for broadcast" TriggerValue
+11 TAUEVENT 0 "Message size for scatter" TriggerValue
+14 TAUEVENT 0 "Message size sent to all nodes" TriggerValue
+16 TAUEVENT 0 "Message size received from all nodes" TriggerValue
+21 TAUEVENT 0 "Message size for reduce" TriggerValue
+24 TAUEVENT 0 "TauTraceClockOffsetEnd" TriggerValue
+25 TAUEVENT 0 "CPU Cores | 4" TriggerValue
+26 TAUEVENT 0 "CPU MHz | 1596.000" TriggerValue
+27 TAUEVENT 0 "CPU Type | Intel(R) Core(TM) i7 CPU 950 @ 3.07GHz" TriggerValue
+28 TAUEVENT 0 "CPU Vendor | GenuineIntel" TriggerValue
+29 TAUEVENT 0 "CRAY_CORE_ID | 3" TriggerValue
+30 TAUEVENT 0 "CWD | /home/master/ppM/ppM-1-1/Escritorio/MPI/BasicTAU/Core4" TriggerValue
+31 TAUEVENT 0 "Cache Size | 8192 KB" TriggerValue
+32 TAUEVENT 0 "Command Line | lapMPI8 1000" TriggerValue
+33 TAUEVENT 0 "Ending Timestamp | 1513821824850466" TriggerValue
+34 TAUEVENT 0 "Executable | /home/master/ppM/ppM-1-1/Escritorio/MPI/BasicTAU/Core4/lapMPI8" TriggerValue
+35 TAUEVENT 0 "Hostname | aolin21.uab.es" TriggerValue
+36 TAUEVENT 0 "Local Time | 2017-12-21T03:03:26+01:00" TriggerValue
+37 TAUEVENT 0 "MPI Processor Name | aolin21.uab.es" TriggerValue
+38 TAUEVENT 0 "Memory Size | 7999984 kB" TriggerValue
+39 TAUEVENT 0 "Node Name | aolin21.uab.es" TriggerValue
+40 TAUEVENT 0 "OS Machine | x86_64" TriggerValue
+41 TAUEVENT 0 "OS Name | Linux" TriggerValue
+42 TAUEVENT 0 "OS Release | 3.10.0-327.13.1.el7.x86_64" TriggerValue
+43 TAUEVENT 0 "OS Version | #1 SMP Thu Mar 31 16:04:38 UTC 2016" TriggerValue
+44 TAUEVENT 0 "Starting Timestamp | 1513821806905072" TriggerValue
+45 TAUEVENT 0 "TAU Architecture | default" TriggerValue
+46 TAUEVENT 0 "TAU Config |  -prefix=/home/master/ppM/ppM-1-1/TAU/tau_install/ -mpi" TriggerValue
+47 TAUEVENT 0 "TAU Makefile | /home/master/ppM/ppM-1-1/TAU/tau_install//x86_64/lib/Makefile.tau-mpi" TriggerValue
+48 TAUEVENT 0 "TAU Version | 2.27-git" TriggerValue
+49 TAUEVENT 0 "TAU_BFD_LOOKUP | on" TriggerValue
+50 TAUEVENT 0 "TAU_CALLPATH_DEPTH | 2" TriggerValue
+51 TAUEVENT 0 "TAU_CALLSITE_DEPTH | 1" TriggerValue
+52 TAUEVENT 0 "TAU_COMM_MATRIX | off" TriggerValue
+53 TAUEVENT 0 "TAU_CUDA_BINARY_EXE | " TriggerValue
+54 TAUEVENT 0 "TAU_CUPTI_API | runtime" TriggerValue
+55 TAUEVENT 0 "TAU_EBS_KEEP_UNRESOLVED_ADDR | off" TriggerValue
+56 TAUEVENT 0 "TAU_IBM_BG_HWP_COUNTERS | off" TriggerValue
+57 TAUEVENT 0 "TAU_MAX_THREADS | 1" TriggerValue
+58 TAUEVENT 0 "TAU_MEASURE_TAU | off" TriggerValue
+59 TAUEVENT 0 "TAU_MEMDBG_PROTECT_ABOVE | off" TriggerValue
+60 TAUEVENT 0 "TAU_MEMDBG_PROTECT_BELOW | off" TriggerValue
+61 TAUEVENT 0 "TAU_MEMDBG_PROTECT_FREE | off" TriggerValue
+62 TAUEVENT 0 "TAU_OPENMP_RUNTIME | on" TriggerValue
+63 TAUEVENT 0 "TAU_OPENMP_RUNTIME_EVENTS | on" TriggerValue
+64 TAUEVENT 0 "TAU_OPENMP_RUNTIME_STATES | off" TriggerValue
+65 TAUEVENT 0 "TAU_OUTPUT_CUDA_CSV | off" TriggerValue
+66 TAUEVENT 0 "TAU_PAPI_MULTIPLEXING | off" TriggerValue
+67 TAUEVENT 0 "TAU_PROFILE | off" TriggerValue
+68 TAUEVENT 0 "TAU_PROFILE_FORMAT | profile" TriggerValue
+69 TAUEVENT 0 "TAU_SAMPLING | off" TriggerValue
+70 TAUEVENT 0 "TAU_SHOW_MEMORY_FUNCTIONS | off" TriggerValue
+71 TAUEVENT 0 "TAU_SIGNALS_GDB | off" TriggerValue
+72 TAUEVENT 0 "TAU_SYNCHRONIZE_CLOCKS | on" TriggerValue
+73 TAUEVENT 0 "TAU_THROTTLE | on" TriggerValue
+74 TAUEVENT 0 "TAU_THROTTLE_NUMCALLS | 100000" TriggerValue
+75 TAUEVENT 0 "TAU_THROTTLE_PERCALL | 10" TriggerValue
+76 TAUEVENT 0 "TAU_TRACE | on" TriggerValue
+77 TAUEVENT 0 "TAU_TRACE_FORMAT | tau" TriggerValue
+78 TAUEVENT 0 "TAU_TRACK_CUDA_CDP | off" TriggerValue
+79 TAUEVENT 0 "TAU_TRACK_CUDA_INSTRUCTIONS | " TriggerValue
+80 TAUEVENT 0 "TAU_TRACK_CUDA_SASS | off" TriggerValue
+81 TAUEVENT 0 "TAU_TRACK_HEADROOM | off" TriggerValue
+82 TAUEVENT 0 "TAU_TRACK_HEAP | off" TriggerValue
+83 TAUEVENT 0 "TAU_TRACK_IO_PARAMS | off" TriggerValue
+84 TAUEVENT 0 "TAU_TRACK_MEMORY_FOOTPRINT | off" TriggerValue
+85 TAUEVENT 0 "TAU_TRACK_MEMORY_LEAKS | off" TriggerValue
+86 TAUEVENT 0 "TAU_TRACK_MESSAGE | on" TriggerValue
+87 TAUEVENT 0 "TAU_TRACK_SIGNALS | off" TriggerValue
+88 TAUEVENT 0 "TAU_TRACK_UNIFIED_MEMORY | off" TriggerValue
+89 TAUEVENT 0 "Timestamp | 1513821806905170" TriggerValue
+90 TAUEVENT 0 "UTC Time | 2017-12-21T02:03:26Z" TriggerValue
+91 TAUEVENT 0 "pid | 6514" TriggerValue
+92 TAUEVENT 0 "tid | 6514" TriggerValue
+93 TAUEVENT 0 "username | ppM-1-1" TriggerValue
+60000 TRACER 0 "EV_INIT" none
+60001 TRACER 0 "FLUSH" EntryExit
+60003 TRACER 0 "FLUSH_CLOSE" none
+60004 TRACER 0 "FLUSH_INITM" none
+60005 TRACER 0 "WALL_CLOCK" none
+60006 TRACER 0 "CONT_EVENT" none
+60007 TAU_MESSAGE -7 "MESSAGE_SEND" par
+60008 TAU_MESSAGE -8 "MESSAGE_RECV" par

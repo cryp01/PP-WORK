@@ -1,0 +1,70 @@
+
+LapFusionMPI9_hybrid.c (Hybrid FILE)
+
+module load gcc/6.1.0 openmpi/1.8.1
+
+MPI - Core 2 and 4 (Hybrid Code)---------------------
+
+mpicc -g -Wall -lm -fopenmp -o lapMPI9_HY LapFusionMPI9_hybrid.c
+mpirun -np 2 lapMPI8 1000
+mpirun -np 4 lapMPI8 1000
+mpirun -np 2 lapMPI8 2000
+mpirun -np 4 lapMPI8 2000
+
+MPI - Core 2 and 4 (Code with -Ofast) ---------------------
+
+mpicc -g -Wall -lm -Ofast -fopenmp -o lapMPI9_HY LapFusionMPI9_hybrid.c
+
+mpirun -np 2 lapMPI8 1000
+mpirun -np 4 lapMPI8 1000
+mpirun -np 2 lapMPI8 2000
+mpirun -np 4 lapMPI8 2000
+
+MPI - Core 2 ---------------------TAU - (Hybrid TAU FILE - Core2)
+
+module load gcc/6.1.0 openmpi/1.8.1 
+
+export PATH=/home/master/ppM/ppM-1-1/TAU/tau_install/x86_64/bin:$PATH
+
+export TAU_MAKEFILE=/home/master/ppM/ppM-1-1/TAU/tau_install/x86_64/lib/Makefile.tau-mpi
+
+export TAU_OPTIONS=-optCompInst
+
+tau_cc.sh -o lapMPI9_HY -g -Wall -lm -Ofast -fopenmp LapFusionMPI9_hybrid.c
+
+mpirun -np 2 lapMPI9_HY 1000
+pprof
+paraprof
+
+TAU TRACING----Core 2
+
+export TAU_TRACE=1
+tau_cc.sh -o lapMPI9_HY -g -Wall -lm -Ofast -fopenmp LapFusionMPI9_hybrid.c
+tau_treemerge.pl
+tau2slog2 tau.trc tau.edf -o tau.slog2
+jumpshot
+
+
+MPI - Core 4 ---------------------TAU - (BasicTAU FILE- Core4)
+
+module load gcc/6.1.0 openmpi/1.8.1 
+
+export PATH=/home/master/ppM/ppM-1-1/TAU/tau_install/x86_64/bin:$PATH
+
+export TAU_MAKEFILE=/home/master/ppM/ppM-1-1/TAU/tau_install/x86_64/lib/Makefile.tau-mpi
+
+export TAU_OPTIONS=-optCompInst
+
+tau_cc.sh -o lapMPI9_HY -g -Wall -lm -Ofast -fopenmp LapFusionMPI9_hybrid.c
+
+mpirun -np 4 lapMPI9_HY 1000
+pprof
+paraprof
+
+TAU TRACING----Core 4
+
+export TAU_TRACE=1
+tau_cc.sh -o lapMPI9_HY -g -Wall -lm -Ofast -fopenmp LapFusionMPI9_hybrid.c
+tau_treemerge.pl
+tau2slog2 tau.trc tau.edf -o tau.slog4
+jumpshot

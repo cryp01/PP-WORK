@@ -1,0 +1,482 @@
+LapFusionMPI8.c
+
+MPI - Core 2 and 4 (Base Code)---------------------
+
+ppM-1-1@aolin21:~$ cd Escritorio/MPI/Basic/
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic$ module load gcc/6.1.0 openmpi/1.8.1
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic$ mpicc -g -Wall -lm -fopenmp -o lapMPI8 lapFusionMPI8.c
+
+Arguments => 1000
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic$ mpirun -np 2 lapMPI8 1000
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.015535, A[7][7]= 0.016615
+ [0]            time: 17.092315
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic$ mpirun -np 4 lapMPI8 1000
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.015535, A[7][7]= 0.016615
+ [0]            time: 8.560498
+
+Arguments => 2000
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic$ mpirun -np 2 lapMPI8 2000
+Jacobi relaxation Calculation: 2000 x 2000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 2000 x 2000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.017999, A[15][15]= 0.012064
+ [0]            time: 58.154199
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic$ mpirun -np 4 lapMPI8 2000
+Jacobi relaxation Calculation: 2000 x 2000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 2000 x 2000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 2000 x 2000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 2000 x 2000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.017999, A[15][15]= 0.012064
+ [0]            time: 28.783829
+
+
+MPI - Core 2 and 4 (Code with -Ofast) ---------------------
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic$ mpicc -g -Wall -lm -Ofast -fopenmp -o lapMPI8 lapFusionMPI8.c
+
+Arguments => 1000
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic$ mpirun -np 2 lapMPI8 1000
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.015535, A[7][7]= 0.016615
+ [0]            time: 0.579609
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic$ mpirun -np 4 lapMPI8 1000
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.015535, A[7][7]= 0.016615
+ [0]            time: 0.530142
+
+Arguments => 2000
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic$ mpirun -np 2 lapMPI8 2000
+Jacobi relaxation Calculation: 2000 x 2000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 2000 x 2000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.017999, A[15][15]= 0.012064
+ [0]            time: 4.112238
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic$ mpirun -np 4 lapMPI8 2000
+Jacobi relaxation Calculation: 2000 x 2000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 2000 x 2000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 2000 x 2000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 2000 x 2000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.017999, A[15][15]= 0.012064
+ [0]            time: 4.072224
+
+
+MPI - Core 2 ---------------------TAU
+
+ppM-1-1@aolin21:~$ cd Escritorio/MPI/BasicTAU/
+ppM-1-1@aolin21:~/Escritorio/MPI/BasicTAU$ ls
+Core2  Core4
+ppM-1-1@aolin21:~/Escritorio/MPI/BasicTAU$ cd Core2/
+ppM-1-1@aolin21:~/Escritorio/MPI/BasicTAU/Core2$ export PATH=/home/master/ppM/ppM-1-1/TAU/tau_install/x86_64/bin:$PATH
+ppM-1-1@aolin21:~/Escritorio/MPI/BasicTAU/Core2$ export TAU_MAKEFILE=/home/master/ppM/ppM-1-1/TAU/tau_install/x86_64/lib/Makefile.tau-mpi
+ppM-1-1@aolin21:~/Escritorio/MPI/BasicTAU/Core2$ export TAU_OPTIONS=-optCompInst
+ppM-1-1@aolin21:~/Escritorio/MPI/BasicTAU/Core2$ export TAU_COMM_MATRIX=1
+ppM-1-1@aolin21:~/Escritorio/MPI/BasicTAU/Core2$ export TAU_TRACK_MESSAGE=1
+ppM-1-1@aolin21:~/Escritorio/MPI/BasicTAU/Core2$ tau_cc.sh -o lapMPI8 -g -Wall -lm -Ofast -fopenmp lapFusionMPI8.c
+Debug: Using compiler-based instrumentation
+
+
+Debug: Compiling (Individually) with Instrumented Code
+Executing> /soft/gcc-6.1.0/bin/gcc -g -Wall -lm -Ofast -fopenmp -I. -c lapFusionMPI8.c -g -DPROFILING_ON -DTAU_GNU -DTAU_DOT_H_LESS_HEADERS -DTAU_MPI -DTAU_UNIFY -DTAU_MPI_THREADED -DTAU_LINUX_TIMERS -DTAU_MPIGREQUEST -DTAU_MPIDATAREP -DTAU_MPIERRHANDLER -DTAU_MPICONSTCHAR -DTAU_MPIATTRFUNCTION -DTAU_MPITYPEEX -DTAU_MPIADDERROR -DTAU_LARGEFILE -D_LARGEFILE64_SOURCE -DTAU_MPIFILE -DHAVE_TR1_HASH_MAP -DTAU_SS_ALLOC_SUPPORT -DEBS_CLOCK_RES=1 -DTAU_STRSIGNAL_OK -DTAU_TRACK_LD_LOADER -DTAU_MPICH3 -DTAU_MPI_EXTENSIONS -I/home/master/ppM/ppM-1-1/TAU/tau_install//include -I/soft/openmpi-1.8.1/include -I/soft/openmpi-1.8.1/include/openmpi -I/soft/openmpi-1.8.1/include/openmpi/ompi -I/soft/openmpi-1.8.1/lib -o lapFusionMPI8.o -g -finstrument-functions -finstrument-functions-exclude-file-list=/usr/include
+
+
+Debug: Linking (Together) object files
+Executing> /soft/gcc-6.1.0/bin/gcc -g -Wall -lm -Ofast -fopenmp lapFusionMPI8.o -L/home/master/ppM/ppM-1-1/TAU/tau_install//x86_64/lib -lTauMpi-mpi -L/soft/openmpi-1.8.1/lib -lmpi -lmpi_cxx -Wl,-rpath,/soft/openmpi-1.8.1/lib -L/home/master/ppM/ppM-1-1/TAU/tau_install//x86_64/lib -ltau-mpi -Wl,--export-dynamic -lrt -L/soft/openmpi-1.8.1/lib -lmpi -lmpi_cxx -Wl,-rpath,/soft/openmpi-1.8.1/lib -ldl -lm -L/soft/gcc-6.1.0/lib/gcc/x86_64-pc-linux-gnu/6.1.0/ -lstdc++ -lgcc_s -L/home/master/ppM/ppM-1-1/TAU/tau_install//x86_64/lib/static-mpi -g -o lapMPI8
+
+ppM-1-1@aolin21:~/Escritorio/MPI/BasicTAU/Core2$ mpirun -np 2 lapMPI8 1000
+TAU Warning: BFD is not available in at least one part of this TAU-instrumented application! Please check to see if BFD is not shared or not present. Expect some missing BFD functionality.
+TAU Warning: Comp_gnu - BFD is not available during TAU build. Symbols may not be resolved!
+TAU Warning: BFD is not available in at least one part of this TAU-instrumented application! Please check to see if BFD is not shared or not present. Expect some missing BFD functionality.
+TAU Warning: Comp_gnu - BFD is not available during TAU build. Symbols may not be resolved!
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.015535, A[7][7]= 0.016615
+ [0]            time: 35.031950
+
+
+ppM-1-1@aolin21:~/Escritorio/MPI/BasicTAU/Core2$ pprof
+Reading Profile files in profile.*
+
+NODE 0;CONTEXT 0;THREAD 0:
+---------------------------------------------------------------------------------------
+%Time    Exclusive    Inclusive       #Call      #Subrs  Inclusive Name
+              msec   total msec                          usec/call
+---------------------------------------------------------------------------------------
+100.0        0.051       35,402           1           1   35402109 .TAU application
+100.0            2       35,402           1        4010   35402058 addr=<0x432f30>
+ 98.7       34,926       34,956        1000      200002      34957 addr=<0x433a00>
+  0.8          287          287           1           0     287452 MPI_Init()
+  0.2           82           82           1           0      82584 MPI_Finalize()
+  0.2           61           61        1000           0         62 MPI_Reduce()
+  0.0           14           14      100001           0          0 addr=<0x4339a0> [THROTTLED]
+  0.0           14           14      100001           0          0 addr=<0x433930> [THROTTLED]
+  0.0            2            2           2           0       1334 addr=<0x433db0>
+  0.0            2            2        1000           0          3 MPI_Recv()
+  0.0            2            2        1000           0          2 MPI_Send()
+  0.0            1            1           1           0       1970 MPI_Scatter()
+  0.0            1            1           1           0       1050 MPI_Gather()
+  0.0        0.978        0.978           1           0        978 addr=<0x433be0>
+  0.0        0.025        0.025           1           0         25 MPI_Bcast()
+  0.0        0.001        0.001           1           0          1 MPI_Comm_rank()
+  0.0            0            0           1           0          0 MPI_Comm_size()
+---------------------------------------------------------------------------------------
+
+USER EVENTS Profile :NODE 0, CONTEXT 0, THREAD 0
+---------------------------------------------------------------------------------------
+NumSamples   MaxValue   MinValue  MeanValue  Std. Dev.  Event Name
+---------------------------------------------------------------------------------------
+         1          4          4          4          0  Message size for broadcast
+         1      2E+06      2E+06      2E+06          0  Message size for gather
+      1000          4          4          4          0  Message size for reduce
+         1      2E+06      2E+06      2E+06          0  Message size for scatter
+      1000       4000       4000       4000          0  Message size received from all nodes
+      1000       4000       4000       4000          0  Message size sent to all nodes
+         0          0          0          0          0  Message size sent to node 0
+         0          0          0          0          0  Message size sent to node 0 : addr=<0x432f30> => MPI_Send()
+      1000       4000       4000       4000          0  Message size sent to node 1
+      1000       4000       4000       4000          0  Message size sent to node 1 : addr=<0x432f30> => MPI_Send()
+---------------------------------------------------------------------------------------
+
+NODE 1;CONTEXT 0;THREAD 0:
+---------------------------------------------------------------------------------------
+%Time    Exclusive    Inclusive       #Call      #Subrs  Inclusive Name
+              msec   total msec                          usec/call
+---------------------------------------------------------------------------------------
+100.0        0.046       35,401           1           1   35401759 .TAU application
+100.0            2       35,401           1        4010   35401713 addr=<0x432f30>
+ 98.6       34,865       34,895        1000      200002      34895 addr=<0x433a00>
+  0.8          287          287           1           0     287077 MPI_Init()
+  0.3          121          121        1000           0        121 MPI_Recv()
+  0.2           82           82           1           0      82632 MPI_Finalize()
+  0.0           15           15      100001           0          0 addr=<0x4339a0> [THROTTLED]
+  0.0           14           14      100001           0          0 addr=<0x433930> [THROTTLED]
+  0.0            3            3        1000           0          4 MPI_Reduce()
+  0.0            2            2        1000           0          3 MPI_Send()
+  0.0            2            2           2           0       1274 addr=<0x433db0>
+  0.0            2            2           1           0       2071 MPI_Scatter()
+  0.0            1            1           1           0       1047 MPI_Gather()
+  0.0        0.917        0.917           1           0        917 addr=<0x433be0>
+  0.0        0.042        0.042           1           0         42 MPI_Bcast()
+  0.0            0            0           1           0          0 MPI_Comm_rank()
+  0.0            0            0           1           0          0 MPI_Comm_size()
+---------------------------------------------------------------------------------------
+
+USER EVENTS Profile :NODE 1, CONTEXT 0, THREAD 0
+---------------------------------------------------------------------------------------
+NumSamples   MaxValue   MinValue  MeanValue  Std. Dev.  Event Name
+---------------------------------------------------------------------------------------
+         1          4          4          4          0  Message size for broadcast
+         0          0          0          0          0  Message size for gather
+      1000          4          4          4          0  Message size for reduce
+         1      2E+06      2E+06      2E+06          0  Message size for scatter
+      1000       4000       4000       4000          0  Message size received from all nodes
+      1000       4000       4000       4000          0  Message size sent to all nodes
+      1000       4000       4000       4000          0  Message size sent to node 0
+      1000       4000       4000       4000          0  Message size sent to node 0 : addr=<0x432f30> => MPI_Send()
+         0          0          0          0          0  Message size sent to node 1
+         0          0          0          0          0  Message size sent to node 1 : addr=<0x432f30> => MPI_Send()
+---------------------------------------------------------------------------------------
+
+FUNCTION SUMMARY (total):
+---------------------------------------------------------------------------------------
+%Time    Exclusive    Inclusive       #Call      #Subrs  Inclusive Name
+              msec   total msec                          usec/call
+---------------------------------------------------------------------------------------
+100.0        0.097     1:10.803           2           2   35401934 .TAU application
+100.0            4     1:10.803           2        8020   35401886 addr=<0x432f30>
+ 98.7     1:09.792     1:09.851        2000      400004      34926 addr=<0x433a00>
+  0.8          574          574           2           0     287264 MPI_Init()
+  0.2          165          165           2           0      82608 MPI_Finalize()
+  0.2          123          123        2000           0         62 MPI_Recv()
+  0.1           65           65        2000           0         33 MPI_Reduce()
+  0.0           29           29      200002           0          0 addr=<0x4339a0> [THROTTLED]
+  0.0           29           29      200002           0          0 addr=<0x433930> [THROTTLED]
+  0.0            5            5        2000           0          3 MPI_Send()
+  0.0            5            5           4           0       1304 addr=<0x433db0>
+  0.0            4            4           2           0       2020 MPI_Scatter()
+  0.0            2            2           2           0       1048 MPI_Gather()
+  0.0            1            1           2           0        948 addr=<0x433be0>
+  0.0        0.067        0.067           2           0         34 MPI_Bcast()
+  0.0        0.001        0.001           2           0          0 MPI_Comm_rank()
+  0.0            0            0           2           0          0 MPI_Comm_size()
+
+FUNCTION SUMMARY (mean):
+---------------------------------------------------------------------------------------
+%Time    Exclusive    Inclusive       #Call      #Subrs  Inclusive Name
+              msec   total msec                          usec/call
+---------------------------------------------------------------------------------------
+100.0       0.0485       35,401           1           1   35401934 .TAU application
+100.0            2       35,401           1        4010   35401886 addr=<0x432f30>
+ 98.7       34,896       34,925        1000      200002      34926 addr=<0x433a00>
+  0.8          287          287           1           0     287264 MPI_Init()
+  0.2           82           82           1           0      82608 MPI_Finalize()
+  0.2           61           61        1000           0         62 MPI_Recv()
+  0.1           32           32        1000           0         33 MPI_Reduce()
+  0.0           14           14      100001           0          0 addr=<0x4339a0> [THROTTLED]
+  0.0           14           14      100001           0          0 addr=<0x433930> [THROTTLED]
+  0.0            2            2        1000           0          3 MPI_Send()
+  0.0            2            2           2           0       1304 addr=<0x433db0>
+  0.0            2            2           1           0       2020 MPI_Scatter()
+  0.0            1            1           1           0       1048 MPI_Gather()
+  0.0        0.948        0.948           1           0        948 addr=<0x433be0>
+  0.0       0.0335       0.0335           1           0         34 MPI_Bcast()
+  0.0       0.0005       0.0005           1           0          0 MPI_Comm_rank()
+  0.0            0            0           1           0          0 MPI_Comm_size()
+
+ppM-1-1@aolin21:~/Escritorio/MPI/BasicTAU/Core2$ paraprof
+Exception in thread "AWT-EventQueue-0" java.awt.HeadlessException:
+No X11 DISPLAY variable was set, but this program performed an operation which requires it.
+        at java.awt.GraphicsEnvironment.checkHeadless(GraphicsEnvironment.java:204)
+        at java.awt.Window.<init>(Window.java:536)
+        at java.awt.Frame.<init>(Frame.java:420)
+        at java.awt.Frame.<init>(Frame.java:385)
+        at javax.swing.JFrame.<init>(JFrame.java:189)
+        at edu.uoregon.tau.paraprof.ParaProfErrorDialog.<init>(ParaProfErrorDialog.java:37)
+        at edu.uoregon.tau.paraprof.ParaProfUtils.handleException(ParaProfUtils.java:1719)
+        at edu.uoregon.tau.paraprof.ParaProf$1.run(ParaProf.java:754)
+        at java.awt.event.InvocationEvent.dispatch(InvocationEvent.java:311)
+        at java.awt.EventQueue.dispatchEventImpl(EventQueue.java:756)
+        at java.awt.EventQueue.access$500(EventQueue.java:97)
+        at java.awt.EventQueue$3.run(EventQueue.java:709)
+        at java.awt.EventQueue$3.run(EventQueue.java:703)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:80)
+        at java.awt.EventQueue.dispatchEvent(EventQueue.java:726)
+        at java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:201)
+        at java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:116)
+        at java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:105)
+        at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:101)
+        at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:93)
+        at java.awt.EventDispatchThread.run(EventDispatchThread.java:82)
+
+MPI - Core 4 ---------------------TAU
+
+
+ppM-1-1@aolin21:~/Escritorio/MPI/BasicTAU/Core4$ export TAU_TRACE=0
+ppM-1-1@aolin21:~/Escritorio/MPI/BasicTAU/Core4$ tau_cc.sh -o lapMPI8 -g -Wall -lm -Ofast -fopenmp lapFusionMPI8.c
+Debug: Using compiler-based instrumentation
+
+
+Debug: Compiling (Individually) with Instrumented Code
+Executing> /soft/gcc-6.1.0/bin/gcc -g -Wall -lm -Ofast -fopenmp -I. -c lapFusionMPI8.c -g -DPROFILING_ON -DTAU_GNU -DTAU_DOT_H_LESS_HEADERS -DTAU_MPI -DTAU_UNIFY -DTAU_MPI_THREADED -DTAU_LINUX_TIMERS -DTAU_MPIGREQUEST -DTAU_MPIDATAREP -DTAU_MPIERRHANDLER -DTAU_MPICONSTCHAR -DTAU_MPIATTRFUNCTION -DTAU_MPITYPEEX -DTAU_MPIADDERROR -DTAU_LARGEFILE -D_LARGEFILE64_SOURCE -DTAU_MPIFILE -DHAVE_TR1_HASH_MAP -DTAU_SS_ALLOC_SUPPORT -DEBS_CLOCK_RES=1 -DTAU_STRSIGNAL_OK -DTAU_TRACK_LD_LOADER -DTAU_MPICH3 -DTAU_MPI_EXTENSIONS -I/home/master/ppM/ppM-1-1/TAU/tau_install//include -I/soft/openmpi-1.8.1/include -I/soft/openmpi-1.8.1/include/openmpi -I/soft/openmpi-1.8.1/include/openmpi/ompi -I/soft/openmpi-1.8.1/lib -o lapFusionMPI8.o -g -finstrument-functions -finstrument-functions-exclude-file-list=/usr/include
+
+
+Debug: Linking (Together) object files
+Executing> /soft/gcc-6.1.0/bin/gcc -g -Wall -lm -Ofast -fopenmp lapFusionMPI8.o -L/home/master/ppM/ppM-1-1/TAU/tau_install//x86_64/lib -lTauMpi-mpi -L/soft/openmpi-1.8.1/lib -lmpi -lmpi_cxx -Wl,-rpath,/soft/openmpi-1.8.1/lib -L/home/master/ppM/ppM-1-1/TAU/tau_install//x86_64/lib -ltau-mpi -Wl,--export-dynamic -lrt -L/soft/openmpi-1.8.1/lib -lmpi -lmpi_cxx -Wl,-rpath,/soft/openmpi-1.8.1/lib -ldl -lm -L/soft/gcc-6.1.0/lib/gcc/x86_64-pc-linux-gnu/6.1.0/ -lstdc++ -lgcc_s -L/home/master/ppM/ppM-1-1/TAU/tau_install//x86_64/lib/static-mpi -g -o lapMPI8
+
+ppM-1-1@aolin21:~/Escritorio/MPI/BasicTAU/Core4$ mpirun -np 4 lapMPI8 1000
+TAU Warning: BFD is not available in at least one part of this TAU-instrumented application! Please check to see if BFD is not shared or not present. Expect some missing BFD functionality.
+TAU Warning: Comp_gnu - BFD is not available during TAU build. Symbols may not be resolved!
+TAU Warning: BFD is not available in at least one part of this TAU-instrumented application! Please check to see if BFD is not shared or not present. Expect some missing BFD functionality.
+TAU Warning: Comp_gnu - BFD is not available during TAU build. Symbols may not be resolved!
+TAU Warning: BFD is not available in at least one part of this TAU-instrumented application! Please check to see if BFD is not shared or not present. Expect some missing BFD functionality.
+TAU Warning: Comp_gnu - BFD is not available during TAU build. Symbols may not be resolved!
+TAU Warning: BFD is not available in at least one part of this TAU-instrumented application! Please check to see if BFD is not shared or not present. Expect some missing BFD functionality.
+TAU Warning: Comp_gnu - BFD is not available during TAU build. Symbols may not be resolved!
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.015535, A[7][7]= 0.016615
+ [0]            time: 17.692171
+
+
+ppM-1-1@aolin21:~/Escritorio/MPI/BasicTAU/Core4$ pprof
+Reading Profile files in profile.*
+
+NODE 0;CONTEXT 0;THREAD 0:
+---------------------------------------------------------------------------------------
+%Time    Exclusive    Inclusive       #Call      #Subrs  Inclusive Name
+              msec   total msec                          usec/call
+---------------------------------------------------------------------------------------
+100.0        0.048       18,068           1           1   18068854 .TAU application
+100.0            2       18,068           1        4010   18068806 addr=<0x432f30>
+ 96.9       17,480       17,510        1000      200002      17511 addr=<0x433a00>
+  1.6          294          294           1           0     294487 MPI_Init()
+  0.9          167          167        1000           0        167 MPI_Reduce()
+  0.5           82           82           1           0      82069 MPI_Finalize()
+  0.1           15           15      100001           0          0 addr=<0x4339a0> [THROTTLED]
+  0.1           15           15      100001           0          0 addr=<0x433930> [THROTTLED]
+  0.0            4            4           2           0       2106 addr=<0x433db0>
+  0.0            2            2           1           0       2166 MPI_Scatter()
+  0.0            1            1        1000           0          2 MPI_Send()
+  0.0            1            1        1000           0          2 MPI_Recv()
+  0.0            1            1           1           0       1266 MPI_Gather()
+  0.0        0.507        0.507           1           0        507 addr=<0x433be0>
+  0.0        0.034        0.034           1           0         34 MPI_Bcast()
+  0.0        0.001        0.001           1           0          1 MPI_Comm_rank()
+  0.0            0            0           1           0          0 MPI_Comm_size()
+---------------------------------------------------------------------------------------
+
+USER EVENTS Profile :NODE 0, CONTEXT 0, THREAD 0
+---------------------------------------------------------------------------------------
+NumSamples   MaxValue   MinValue  MeanValue  Std. Dev.  Event Name
+---------------------------------------------------------------------------------------
+         1          4          4          4          0  Message size for broadcast
+         1      1E+06      1E+06      1E+06          0  Message size for gather
+      1000          4          4          4          0  Message size for reduce
+         1      1E+06      1E+06      1E+06          0  Message size for scatter
+---------------------------------------------------------------------------------------
+
+NODE 1;CONTEXT 0;THREAD 0:
+---------------------------------------------------------------------------------------
+%Time    Exclusive    Inclusive       #Call      #Subrs  Inclusive Name
+              msec   total msec                          usec/call
+---------------------------------------------------------------------------------------
+100.0        0.054       18,068           1           1   18068709 .TAU application
+100.0            2       18,068           1        6010   18068655 addr=<0x432f30>
+ 97.2       17,530       17,560        1000      200002      17561 addr=<0x433a00>
+  1.6          294          294           1           0     294287 MPI_Init()
+  0.6          116          116        2000           0         58 MPI_Recv()
+  0.5           82           82           1           0      82361 MPI_Finalize()
+  0.1           15           15      100001           0          0 addr=<0x4339a0> [THROTTLED]
+  0.1           15           15      100001           0          0 addr=<0x433930> [THROTTLED]
+  0.0            3            3           2           0       1935 addr=<0x433db0>
+  0.0            2            2        1000           0          3 MPI_Reduce()
+  0.0            2            2        2000           0          1 MPI_Send()
+  0.0            1            1           1           0       1123 MPI_Scatter()
+  0.0            1            1           1           0       1000 MPI_Gather()
+  0.0        0.467        0.467           1           0        467 addr=<0x433be0>
+  0.0        0.046        0.046           1           0         46 MPI_Bcast()
+  0.0        0.001        0.001           1           0          1 MPI_Comm_rank()
+  0.0        0.001        0.001           1           0          1 MPI_Comm_size()
+---------------------------------------------------------------------------------------
+
+USER EVENTS Profile :NODE 1, CONTEXT 0, THREAD 0
+---------------------------------------------------------------------------------------
+NumSamples   MaxValue   MinValue  MeanValue  Std. Dev.  Event Name
+---------------------------------------------------------------------------------------
+         1          4          4          4          0  Message size for broadcast
+         0          0          0          0          0  Message size for gather
+      1000          4          4          4          0  Message size for reduce
+         1      1E+06      1E+06      1E+06          0  Message size for scatter
+---------------------------------------------------------------------------------------
+
+NODE 2;CONTEXT 0;THREAD 0:
+---------------------------------------------------------------------------------------
+%Time    Exclusive    Inclusive       #Call      #Subrs  Inclusive Name
+              msec   total msec                          usec/call
+---------------------------------------------------------------------------------------
+100.0        0.055       18,066           1           1   18066578 .TAU application
+100.0            2       18,066           1        6010   18066523 addr=<0x432f30>
+ 97.2       17,525       17,555        1000      200002      17556 addr=<0x433a00>
+  1.6          292          292           1           0     292022 MPI_Init()
+  0.7          120          120        2000           0         60 MPI_Recv()
+  0.5           82           82           1           0      82304 MPI_Finalize()
+  0.1           15           15      100001           0          0 addr=<0x4339a0> [THROTTLED]
+  0.1           14           14      100001           0          0 addr=<0x433930> [THROTTLED]
+  0.0            4            4           2           0       2130 addr=<0x433db0>
+  0.0            2            2        1000           0          3 MPI_Reduce()
+  0.0            2            2        2000           0          1 MPI_Send()
+  0.0            1            1           1           0       1617 MPI_Scatter()
+  0.0            1            1           1           0       1156 MPI_Gather()
+  0.0        0.453        0.453           1           0        453 addr=<0x433be0>
+  0.0        0.131        0.131           1           0        131 MPI_Bcast()
+  0.0        0.001        0.001           1           0          1 MPI_Comm_rank()
+  0.0        0.001        0.001           1           0          1 MPI_Comm_size()
+---------------------------------------------------------------------------------------
+
+USER EVENTS Profile :NODE 2, CONTEXT 0, THREAD 0
+---------------------------------------------------------------------------------------
+NumSamples   MaxValue   MinValue  MeanValue  Std. Dev.  Event Name
+---------------------------------------------------------------------------------------
+         1          4          4          4          0  Message size for broadcast
+         0          0          0          0          0  Message size for gather
+      1000          4          4          4          0  Message size for reduce
+         1      1E+06      1E+06      1E+06          0  Message size for scatter
+---------------------------------------------------------------------------------------
+
+NODE 3;CONTEXT 0;THREAD 0:
+---------------------------------------------------------------------------------------
+%Time    Exclusive    Inclusive       #Call      #Subrs  Inclusive Name
+              msec   total msec                          usec/call
+---------------------------------------------------------------------------------------
+100.0         0.04       18,064           1           1   18064986 .TAU application
+100.0            1       18,064           1        4010   18064946 addr=<0x432f30>
+ 96.9       17,468       17,498        1000      200002      17499 addr=<0x433a00>
+  1.6          290          290           1           0     290425 MPI_Init()
+  1.0          178          178        1000           0        178 MPI_Recv()
+  0.5           82           82           1           0      82272 MPI_Finalize()
+  0.1           15           15      100001           0          0 addr=<0x4339a0> [THROTTLED]
+  0.1           14           14      100001           0          0 addr=<0x433930> [THROTTLED]
+  0.0            4            4           2           0       2085 addr=<0x433db0>
+  0.0            3            3        1000           0          4 MPI_Reduce()
+  0.0            1            1           1           0       1918 MPI_Scatter()
+  0.0            1            1        1000           0          2 MPI_Send()
+  0.0            1            1           1           0       1336 MPI_Gather()
+  0.0        0.426        0.426           1           0        426 addr=<0x433be0>
+  0.0        0.403        0.403           1           0        403 MPI_Bcast()
+  0.0        0.001        0.001           1           0          1 MPI_Comm_rank()
+  0.0            0            0           1           0          0 MPI_Comm_size()
+---------------------------------------------------------------------------------------
+
+USER EVENTS Profile :NODE 3, CONTEXT 0, THREAD 0
+---------------------------------------------------------------------------------------
+NumSamples   MaxValue   MinValue  MeanValue  Std. Dev.  Event Name
+---------------------------------------------------------------------------------------
+         1          4          4          4          0  Message size for broadcast
+         0          0          0          0          0  Message size for gather
+      1000          4          4          4          0  Message size for reduce
+         1      1E+06      1E+06      1E+06          0  Message size for scatter
+---------------------------------------------------------------------------------------
+
+FUNCTION SUMMARY (total):
+---------------------------------------------------------------------------------------
+%Time    Exclusive    Inclusive       #Call      #Subrs  Inclusive Name
+              msec   total msec                          usec/call
+---------------------------------------------------------------------------------------
+100.0        0.197     1:12.269           4           4   18067282 .TAU application
+100.0            9     1:12.268           4       20040   18067232 addr=<0x432f30>
+ 97.0     1:10.005     1:10.126        4000      800008      17532 addr=<0x433a00>
+  1.6        1,171        1,171           4           0     292805 MPI_Init()
+  0.6          417          417        6000           0         70 MPI_Recv()
+  0.5          329          329           4           0      82252 MPI_Finalize()
+  0.2          176          176        4000           0         44 MPI_Reduce()
+  0.1           60           60      400004           0          0 addr=<0x4339a0> [THROTTLED]
+  0.1           60           60      400004           0          0 addr=<0x433930> [THROTTLED]
+  0.0           16           16           8           0       2064 addr=<0x433db0>
+  0.0            8            8        6000           0          1 MPI_Send()
+  0.0            6            6           4           0       1706 MPI_Scatter()
+  0.0            4            4           4           0       1190 MPI_Gather()
+  0.0            1            1           4           0        463 addr=<0x433be0>
+  0.0        0.614        0.614           4           0        154 MPI_Bcast()
+  0.0        0.004        0.004           4           0          1 MPI_Comm_rank()
+  0.0        0.002        0.002           4           0          0 MPI_Comm_size()
+
+FUNCTION SUMMARY (mean):
+---------------------------------------------------------------------------------------
+%Time    Exclusive    Inclusive       #Call      #Subrs  Inclusive Name
+              msec   total msec                          usec/call
+---------------------------------------------------------------------------------------
+100.0       0.0493       18,067           1           1   18067282 .TAU application
+100.0            2       18,067           1        5010   18067232 addr=<0x432f30>
+ 97.0       17,501       17,531        1000      200002      17532 addr=<0x433a00>
+  1.6          292          292           1           0     292805 MPI_Init()
+  0.6          104          104        1500           0         70 MPI_Recv()
+  0.5           82           82           1           0      82252 MPI_Finalize()
+  0.2           44           44        1000           0         44 MPI_Reduce()
+  0.1           15           15      100001           0          0 addr=<0x4339a0> [THROTTLED]
+  0.1           15           15      100001           0          0 addr=<0x433930> [THROTTLED]
+  0.0            4            4           2           0       2064 addr=<0x433db0>
+  0.0            2            2        1500           0          1 MPI_Send()
+  0.0            1            1           1           0       1706 MPI_Scatter()
+  0.0            1            1           1           0       1190 MPI_Gather()
+  0.0        0.463        0.463           1           0        463 addr=<0x433be0>
+  0.0        0.153        0.153           1           0        154 MPI_Bcast()
+  0.0        0.001        0.001           1           0          1 MPI_Comm_rank()
+  0.0       0.0005       0.0005           1           0          0 MPI_Comm_size()

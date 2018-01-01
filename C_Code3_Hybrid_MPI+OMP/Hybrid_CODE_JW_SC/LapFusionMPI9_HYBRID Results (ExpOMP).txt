@@ -1,0 +1,1379 @@
+
+lapFusionMPI9_hybrid.c
+
+##### Without export OMP_NUM_THREADS=4 and export I_MPI_PIN_DOMAIN=omp
+
+Note: 
+ -Set the number of OpenMP threads per MPI process:
+    export OMP_NUM_THREADS=4
+
+  - Pin the MPI processes:
+     export I_MPI_PIN_DOMAIN=omp 
+
+ppM-1-1@aolin21:~$ cd Escritorio/MPI/Basic_TAU_FINAL/Test_Hybrid/
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Test_Hybrid$ module load gcc/6.1.0 openmpi/1.8.1 
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Test_Hybrid$ mpicc -g -Wall -lm -Ofast -fopenmp -o lapMPI9_HY lapFusionMPI9_hybrid.c
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Test_Hybrid$ mpirun -np 4 lapMPI9_HY 1000
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.015535, A[7][7]= 0.016615
+ [0]            time: 28.799432
+
+
+##### With export OMP_NUM_THREADS=4 and export I_MPI_PIN_DOMAIN=omp
+
+Note: 
+
+ -Set the number of OpenMP threads per MPI process:
+    export OMP_NUM_THREADS=4
+
+  - Pin the MPI processes:
+     export I_MPI_PIN_DOMAIN=omp 
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Test_Hybrid$ export OMP_NUM_THREADS=4
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Test_Hybrid$ export I_MPI_PIN_DOMAIN=omp
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Test_Hybrid$ mpicc -g -Wall -lm -Ofast -fopenmp -o lapMPI9_HY lapFusionMPI9_hybrid.c
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Test_Hybrid$ mpirun -np 4 lapMPI9_HY 1000
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.015535, A[7][7]= 0.016615
+ [0]            time: 9.703054
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Test_Hybrid$ mpirun -np 4 lapMPI9_HY 4000
+Jacobi relaxation Calculation: 4000 x 4000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 4000 x 4000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 4000 x 4000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 4000 x 4000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.024827, A[31][31]= 0.004645
+ [0]            time: 22.472800
+
+See at 4000 arguments above it is faster then 1000 arguments 
+
+Now....
+
+Compare result with Core 2 and Core 4 with and without...
+
+##### Without export OMP_NUM_THREADS=4 and export I_MPI_PIN_DOMAIN=omp
+
+ppM-1-1@aolin21:~$ cd Escritorio/MPI/Basic_TAU_FINAL/Test_Hybrid/
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Test_Hybrid$ module load gcc/6.1.0 openmpi/1.8.1 mpe2/mpi-1.10.2/2.4.8
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Test_Hybrid$ mpicc -g -Wall -lm -Ofast -fopenmp -o lapMPI9_HY lapFusionMPI9_hybrid.c
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Test_Hybrid$ mpirun -np 2 lapMPI9_HY 1000
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.015535, A[7][7]= 0.016615
+ [0]            time: 0.740816
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Test_Hybrid$ mpirun -np 2 lapMPI9_HY 2000
+Jacobi relaxation Calculation: 2000 x 2000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 2000 x 2000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.017999, A[15][15]= 0.012064
+ [0]            time: 4.653237
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Test_Hybrid$ mpirun -np 2 lapMPI9_HY 3000
+Jacobi relaxation Calculation: 3000 x 3000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 3000 x 3000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.022895, A[23][23]= 0.007810
+ [0]            time: 9.075872
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Test_Hybrid$ mpirun -np 2 lapMPI9_HY 4000
+Jacobi relaxation Calculation: 4000 x 4000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 4000 x 4000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.024827, A[31][31]= 0.004645
+ [0]            time: 16.085783
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Test_Hybrid$ mpirun -np 4 lapMPI9_HY 1000
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.015535, A[7][7]= 0.016615
+ [0]            time: 28.733717
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Test_Hybrid$ mpirun -np 4 lapMPI9_HY 2000
+Jacobi relaxation Calculation: 2000 x 2000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 2000 x 2000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 2000 x 2000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 2000 x 2000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.017999, A[15][15]= 0.012064
+ [0]            time: 29.892970
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Test_Hybrid$ mpirun -np 4 lapMPI9_HY 3000
+Jacobi relaxation Calculation: 3000 x 3000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 3000 x 3000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 3000 x 3000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 3000 x 3000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.022895, A[23][23]= 0.007810
+ [0]            time: 32.211852
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Test_Hybrid$ mpirun -np 4 lapMPI9_HY 4000
+Jacobi relaxation Calculation: 4000 x 4000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 4000 x 4000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 4000 x 4000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 4000 x 4000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.024827, A[31][31]= 0.004645
+ [0]            time: 37.972362
+
+
+##### With export OMP_NUM_THREADS=4 and export I_MPI_PIN_DOMAIN=omp
+
+Note: 
+ -Set the number of OpenMP threads per MPI process:
+    export OMP_NUM_THREADS=4
+
+  - Pin the MPI processes:
+     export I_MPI_PIN_DOMAIN=omp 
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Test_Hybrid$
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Test_Hybrid$ export OMP_NUM_THREADS=4
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Test_Hybrid$ export I_MPI_PIN_DOMAIN=omp
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Test_Hybrid$ mpicc -g -Wall -lm -Ofast -fopenmp -o lapMPI9_HY lapFusionMPI9_hybrid.c
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Test_Hybrid$ mpirun -np 2 lapMPI9_HY 1000
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.015535, A[7][7]= 0.016615
+ [0]            time: 0.664403
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Test_Hybrid$ mpirun -np 2 lapMPI9_HY 2000
+Jacobi relaxation Calculation: 2000 x 2000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 2000 x 2000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.017999, A[15][15]= 0.012064
+ [0]            time: 4.148886
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Test_Hybrid$ mpirun -np 2 lapMPI9_HY 3000
+Jacobi relaxation Calculation: 3000 x 3000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 3000 x 3000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.022895, A[23][23]= 0.007810
+ [0]            time: 8.899622
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Test_Hybrid$ mpirun -np 2 lapMPI9_HY 4000
+Jacobi relaxation Calculation: 4000 x 4000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 4000 x 4000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.024827, A[31][31]= 0.004645
+ [0]            time: 16.007913
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Test_Hybrid$ mpirun -np 4 lapMPI9_HY 1000
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.015535, A[7][7]= 0.016615
+ [0]            time: 9.694052
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Test_Hybrid$ mpirun -np 4 lapMPI9_HY 2000
+Jacobi relaxation Calculation: 2000 x 2000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 2000 x 2000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 2000 x 2000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 2000 x 2000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.017999, A[15][15]= 0.012064
+ [0]            time: 11.775820
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Test_Hybrid$ mpirun -np 4 lapMPI9_HY 3000
+Jacobi relaxation Calculation: 3000 x 3000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 3000 x 3000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 3000 x 3000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 3000 x 3000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.022895, A[23][23]= 0.007810
+ [0]            time: 15.421200
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Test_Hybrid$ mpirun -np 4 lapMPI9_HY 4000
+Jacobi relaxation Calculation: 4000 x 4000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 4000 x 4000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 4000 x 4000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 4000 x 4000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.024827, A[31][31]= 0.004645
+ [0]            time: 22.460893
+
+#TAU Hybrid Core 2.......... 
+With export OMP_NUM_THREADS=4 and export I_MPI_PIN_DOMAIN=omp 
+
+ppM-1-1@aolin21:~$ module load gcc/6.1.0 openmpi/1.8.1
+ppM-1-1@aolin21:~$ export PATH=/home/master/ppM/ppM-1-1/TAU/tau_install/x86_64/bin:$PATH
+ppM-1-1@aolin21:~$ export TAU_MAKEFILE=/home/master/ppM/ppM-1-1/TAU/tau_install/x86_64/lib/Makefile.tau-mpi
+ppM-1-1@aolin21:~$ export TAU_OPTIONS=-optCompInst
+ppM-1-1@aolin21:~$ export OMP_NUM_THREADS=4
+ppM-1-1@aolin21:~$ export I_MPI_PIN_DOMAIN=omp
+ppM-1-1@aolin21:~$ export TAU_COMM_MATRIX=1
+ppM-1-1@aolin21:~$ export TAU_TRACK_MESSAGE=1
+ppM-1-1@aolin21:~$ export TAU_CALLPATH=1
+ppM-1-1@aolin21:~$ export TAU_TRACK_HEAP=1
+ppM-1-1@aolin21:~$ cd Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore2_OMPExport/
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore2_OMPExport$ tau_cc.sh -o lapMPI9_HY -g -Wall -lm -Ofast -fopenmp lapFusionMPI9_hybrid.c
+Debug: Using compiler-based instrumentation
+
+
+Debug: Compiling (Individually) with Instrumented Code
+Executing> /soft/gcc-6.1.0/bin/gcc -g -Wall -lm -Ofast -fopenmp -I. -c lapFusionMPI9_hybrid.c -g -DPROFILING_ON -DTAU_GNU -DTAU_DOT_H_LESS_HEADERS -DTAU_MPI -DTAU_UNIFY -DTAU_MPI_THREADED -DTAU_LINUX_TIMERS -DTAU_MPIGREQUEST -DTAU_MPIDATAREP -DTAU_MPIERRHANDLER -DTAU_MPICONSTCHAR -DTAU_MPIATTRFUNCTION -DTAU_MPITYPEEX -DTAU_MPIADDERROR -DTAU_LARGEFILE -D_LARGEFILE64_SOURCE -DTAU_MPIFILE -DHAVE_TR1_HASH_MAP -DTAU_SS_ALLOC_SUPPORT -DEBS_CLOCK_RES=1 -DTAU_STRSIGNAL_OK -DTAU_TRACK_LD_LOADER -DTAU_MPICH3 -DTAU_MPI_EXTENSIONS -I/home/master/ppM/ppM-1-1/TAU/tau_install//include -I/soft/openmpi-1.8.1/include -I/soft/openmpi-1.8.1/include/openmpi -I/soft/openmpi-1.8.1/include/openmpi/ompi -I/soft/openmpi-1.8.1/lib -o lapFusionMPI9_hybrid.o -g -finstrument-functions -finstrument-functions-exclude-file-list=/usr/include
+
+
+Debug: Linking (Together) object files
+Executing> /soft/gcc-6.1.0/bin/gcc -g -Wall -lm -Ofast -fopenmp lapFusionMPI9_hybrid.o -L/home/master/ppM/ppM-1-1/TAU/tau_install//x86_64/lib -lTauMpi-mpi -L/soft/openmpi-1.8.1/lib -lmpi -lmpi_cxx -Wl,-rpath,/soft/openmpi-1.8.1/lib -L/home/master/ppM/ppM-1-1/TAU/tau_install//x86_64/lib -ltau-mpi -Wl,--export-dynamic -lrt -L/soft/openmpi-1.8.1/lib -lmpi -lmpi_cxx -Wl,-rpath,/soft/openmpi-1.8.1/lib -ldl -lm -L/soft/gcc-6.1.0/lib/gcc/x86_64-pc-linux-gnu/6.1.0/ -lstdc++ -lgcc_s -L/home/master/ppM/ppM-1-1/TAU/tau_install//x86_64/lib/static-mpi -g -o lapMPI9_HY
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore2_OMPExport$ mpirun -np 2 lapMPI9_HY 1000
+TAU Warning: BFD is not available in at least one part of this TAU-instrumented application! Please check to see if BFD is not shared or not present. Expect some missing BFD functionality.
+TAU Warning: Comp_gnu - BFD is not available during TAU build. Symbols may not be resolved!
+TAU Warning: BFD is not available in at least one part of this TAU-instrumented application! Please check to see if BFD is not shared or not present. Expect some missing BFD functionality.
+TAU Warning: Comp_gnu - BFD is not available during TAU build. Symbols may not be resolved!
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.015535, A[7][7]= 0.016615
+ [0]            time: 34.382044
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore2_OMPExport$ pprof
+Reading Profile files in profile.*
+
+NODE 0;CONTEXT 0;THREAD 0:
+---------------------------------------------------------------------------------------
+%Time    Exclusive    Inclusive       #Call      #Subrs  Inclusive Name
+              msec   total msec                          usec/call
+---------------------------------------------------------------------------------------
+100.0        0.171       34,752           1           1   34752872 .TAU application
+100.0           29       34,752           1        4010   34752701 .TAU application => addr=<0x433060>
+100.0           29       34,752           1        4010   34752701 addr=<0x433060>
+ 97.5       33,593       33,885        1000      200002      33886 addr=<0x433060> => addr=<0x433d30>
+ 97.5       33,593       33,885        1000      200002      33886 addr=<0x433d30>
+  1.3          445          445        1000           0        445 MPI_Reduce()
+  1.3          445          445        1000           0        445 addr=<0x433060> => MPI_Reduce()
+  0.8          287          287           1           0     287936 MPI_Init_thread()
+  0.8          287          287           1           0     287936 addr=<0x433060> => MPI_Init_thread()
+  0.4          147          147      100001           0          1 addr=<0x433a40> [THROTTLED]
+  0.4          147          147      100001           0          1 addr=<0x433d30> => addr=<0x433a40>
+  0.4          144          144      100001           0          1 addr=<0x4339d0> [THROTTLED]
+  0.4          144          144      100001           0          1 addr=<0x433d30> => addr=<0x4339d0>
+  0.2           82           82           1           0      82543 MPI_Finalize()
+  0.2           82           82           1           0      82543 addr=<0x433060> => MPI_Finalize()
+  0.0            9            9        1000           0         10 MPI_Recv()
+  0.0            9            9        1000           0         10 addr=<0x433060> => MPI_Recv()
+  0.0            5            5        1000           0          5 MPI_Send()
+  0.0            5            5        1000           0          5 addr=<0x433060> => MPI_Send()
+  0.0            2            2           2           0       1270 addr=<0x433060> => addr=<0x433c70>
+  0.0            2            2           2           0       1270 addr=<0x433c70>
+  0.0            1            1           1           0       1808 MPI_Scatter()
+  0.0            1            1           1           0       1808 addr=<0x433060> => MPI_Scatter()
+  0.0            1            1           1           0       1087 MPI_Gather()
+  0.0            1            1           1           0       1087 addr=<0x433060> => MPI_Gather()
+  0.0        0.911        0.911           1           0        911 addr=<0x433060> => addr=<0x433aa0>
+  0.0        0.911        0.911           1           0        911 addr=<0x433aa0>
+  0.0        0.037        0.037           1           0         37 MPI_Bcast()
+  0.0        0.037        0.037           1           0         37 addr=<0x433060> => MPI_Bcast()
+  0.0         0.02         0.02           1           0         20 MPI_Comm_rank()
+  0.0         0.02         0.02           1           0         20 addr=<0x433060> => MPI_Comm_rank()
+  0.0        0.011        0.011           1           0         11 MPI_Comm_size()
+  0.0        0.011        0.011           1           0         11 addr=<0x433060> => MPI_Comm_size()
+---------------------------------------------------------------------------------------
+
+USER EVENTS Profile :NODE 0, CONTEXT 0, THREAD 0
+---------------------------------------------------------------------------------------
+NumSamples   MaxValue   MinValue  MeanValue  Std. Dev.  Event Name
+---------------------------------------------------------------------------------------
+         1       2632       2632       2632          0  Decrease in Heap Memory (KB)
+         1       2632       2632       2632          0  Decrease in Heap Memory (KB) : addr=<0x433060> => MPI_Finalize()
+  2.04E+05  1.459E+04        133  1.458E+04      71.95  Heap Memory Used (KB) at Entry
+         1        133        133        133  1.907E-06  Heap Memory Used (KB) at Entry : .TAU application
+         1      135.7      135.7      135.7  1.907E-06  Heap Memory Used (KB) at Entry : addr=<0x433060>
+         1  1.064E+04  1.064E+04  1.064E+04  0.0002114  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Bcast()
+         1       2820       2820       2820          0  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Comm_rank()
+         1       2823       2823       2823          0  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Comm_size()
+         1       2862       2862       2862          0  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Finalize()
+         1  1.459E+04  1.459E+04  1.459E+04          0  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Gather()
+         1      137.9      137.9      137.9          0  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Init_thread()
+      1000  1.459E+04  1.457E+04  1.459E+04     0.5363  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Recv()
+      1000  1.459E+04  1.459E+04  1.459E+04     0.1274  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Reduce()
+         1  1.456E+04  1.456E+04  1.456E+04  0.0001726  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Scatter()
+      1000  1.459E+04  1.458E+04  1.459E+04     0.4672  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Send()
+         1  1.457E+04  1.457E+04  1.457E+04  0.0002441  Heap Memory Used (KB) at Entry : addr=<0x433060> => addr=<0x433aa0>
+         2  1.456E+04  1.456E+04  1.456E+04          0  Heap Memory Used (KB) at Entry : addr=<0x433060> => addr=<0x433c70>
+      1000  1.459E+04  1.458E+04  1.459E+04     0.3778  Heap Memory Used (KB) at Entry : addr=<0x433060> => addr=<0x433d30>
+     1E+05  1.458E+04  1.458E+04  1.458E+04    0.02228  Heap Memory Used (KB) at Entry : addr=<0x433060> => addr=<0x433d30> => addr=<0x4339d0>
+     1E+05  1.458E+04  1.458E+04  1.458E+04    0.02393  Heap Memory Used (KB) at Entry : addr=<0x433060> => addr=<0x433d30> => addr=<0x433a40>
+  2.04E+05  1.459E+04      229.8  1.458E+04      71.71  Heap Memory Used (KB) at Exit
+         1      229.8      229.8      229.8  2.697E-06  Heap Memory Used (KB) at Exit : .TAU application
+         1      229.8      229.8      229.8  2.697E-06  Heap Memory Used (KB) at Exit : addr=<0x433060>
+         1  1.064E+04  1.064E+04  1.064E+04  0.0002114  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Bcast()
+         1       2820       2820       2820          0  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Comm_rank()
+         1       2823       2823       2823          0  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Comm_size()
+         1      229.8      229.8      229.8  2.697E-06  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Finalize()
+         1  1.459E+04  1.459E+04  1.459E+04  0.0001726  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Gather()
+         1       2818       2818       2818          0  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Init_thread()
+      1000  1.459E+04  1.457E+04  1.459E+04     0.5363  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Recv()
+      1000  1.459E+04  1.459E+04  1.459E+04  0.0002441  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Reduce()
+         1  1.456E+04  1.456E+04  1.456E+04  0.0001726  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Scatter()
+      1000  1.459E+04  1.458E+04  1.459E+04     0.4652  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Send()
+         1  1.457E+04  1.457E+04  1.457E+04  0.0002441  Heap Memory Used (KB) at Exit : addr=<0x433060> => addr=<0x433aa0>
+         2  1.456E+04  1.456E+04  1.456E+04          0  Heap Memory Used (KB) at Exit : addr=<0x433060> => addr=<0x433c70>
+      1000  1.459E+04  1.458E+04  1.459E+04     0.1966  Heap Memory Used (KB) at Exit : addr=<0x433060> => addr=<0x433d30>
+     1E+05  1.458E+04  1.458E+04  1.458E+04    0.02228  Heap Memory Used (KB) at Exit : addr=<0x433060> => addr=<0x433d30> => addr=<0x4339d0>
+     1E+05  1.458E+04  1.458E+04  1.458E+04    0.02393  Heap Memory Used (KB) at Exit : addr=<0x433060> => addr=<0x433d30> => addr=<0x433a40>
+         8       2680     0.0625      360.2      877.6  Increase in Heap Memory (KB)
+         1      96.81      96.81      96.81          0  Increase in Heap Memory (KB) : .TAU application
+         1      94.09      94.09      94.09          0  Increase in Heap Memory (KB) : addr=<0x433060>
+         1     0.1562     0.1562     0.1562          0  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Bcast()
+         1      1.031      1.031      1.031          0  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Gather()
+         1       2680       2680       2680          0  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Init_thread()
+         1      4.031      4.031      4.031          0  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Reduce()
+         1     0.0625     0.0625     0.0625          0  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Send()
+         1      5.734      5.734      5.734          0  Increase in Heap Memory (KB) : addr=<0x433060> => addr=<0x433d30>
+         1          4          4          4          0  Message size for broadcast
+         1      2E+06      2E+06      2E+06          0  Message size for gather
+      1000          4          4          4          0  Message size for reduce
+         1      2E+06      2E+06      2E+06          0  Message size for scatter
+      1000       4000       4000       4000          0  Message size received from all nodes
+      1000       4000       4000       4000          0  Message size sent to all nodes
+         0          0          0          0          0  Message size sent to node 0
+         0          0          0          0          0  Message size sent to node 0 : addr=<0x433060> => MPI_Send()
+      1000       4000       4000       4000          0  Message size sent to node 1
+      1000       4000       4000       4000          0  Message size sent to node 1 : addr=<0x433060> => MPI_Send()
+---------------------------------------------------------------------------------------
+
+NODE 1;CONTEXT 0;THREAD 0:
+---------------------------------------------------------------------------------------
+%Time    Exclusive    Inclusive       #Call      #Subrs  Inclusive Name
+              msec   total msec                          usec/call
+---------------------------------------------------------------------------------------
+100.0        0.089       34,752           1           1   34752347 .TAU application
+100.0           32       34,752           1        4010   34752258 .TAU application => addr=<0x433060>
+100.0           32       34,752           1        4010   34752258 addr=<0x433060>
+ 98.5       33,948       34,238        1000      200002      34238 addr=<0x433060> => addr=<0x433d30>
+ 98.5       33,948       34,238        1000      200002      34238 addr=<0x433d30>
+  0.8          287          287           1           0     287599 MPI_Init_thread()
+  0.8          287          287           1           0     287599 addr=<0x433060> => MPI_Init_thread()
+  0.4          146          146      100001           0          1 addr=<0x433a40> [THROTTLED]
+  0.4          146          146      100001           0          1 addr=<0x433d30> => addr=<0x433a40>
+  0.4          143          143      100001           0          1 addr=<0x4339d0> [THROTTLED]
+  0.4          143          143      100001           0          1 addr=<0x433d30> => addr=<0x4339d0>
+  0.3           88           88        1000           0         88 MPI_Recv()
+  0.3           88           88        1000           0         88 addr=<0x433060> => MPI_Recv()
+  0.2           82           82           1           0      82689 MPI_Finalize()
+  0.2           82           82           1           0      82689 addr=<0x433060> => MPI_Finalize()
+  0.0            8            8        1000           0          9 MPI_Reduce()
+  0.0            8            8        1000           0          9 addr=<0x433060> => MPI_Reduce()
+  0.0            8            8        1000           0          8 MPI_Send()
+  0.0            8            8        1000           0          8 addr=<0x433060> => MPI_Send()
+  0.0            2            2           2           0       1257 addr=<0x433060> => addr=<0x433c70>
+  0.0            2            2           2           0       1257 addr=<0x433c70>
+  0.0            1            1           1           0       1752 MPI_Scatter()
+  0.0            1            1           1           0       1752 addr=<0x433060> => MPI_Scatter()
+  0.0            1            1           1           0       1090 MPI_Gather()
+  0.0            1            1           1           0       1090 addr=<0x433060> => MPI_Gather()
+  0.0        0.841        0.841           1           0        841 addr=<0x433060> => addr=<0x433aa0>
+  0.0        0.841        0.841           1           0        841 addr=<0x433aa0>
+  0.0        0.047        0.047           1           0         47 MPI_Bcast()
+  0.0        0.047        0.047           1           0         47 addr=<0x433060> => MPI_Bcast()
+  0.0        0.014        0.014           1           0         14 MPI_Comm_rank()
+  0.0        0.014        0.014           1           0         14 addr=<0x433060> => MPI_Comm_rank()
+  0.0        0.009        0.009           1           0          9 MPI_Comm_size()
+  0.0        0.009        0.009           1           0          9 addr=<0x433060> => MPI_Comm_size()
+---------------------------------------------------------------------------------------
+
+USER EVENTS Profile :NODE 1, CONTEXT 0, THREAD 0
+---------------------------------------------------------------------------------------
+NumSamples   MaxValue   MinValue  MeanValue  Std. Dev.  Event Name
+---------------------------------------------------------------------------------------
+         1       2628       2628       2628  3.052E-05  Decrease in Heap Memory (KB)
+         1       2628       2628       2628  3.052E-05  Decrease in Heap Memory (KB) : addr=<0x433060> => MPI_Finalize()
+  2.04E+05  1.459E+04        133  1.458E+04      71.95  Heap Memory Used (KB) at Entry
+         1        133        133        133  1.907E-06  Heap Memory Used (KB) at Entry : .TAU application
+         1      135.7      135.7      135.7  1.907E-06  Heap Memory Used (KB) at Entry : addr=<0x433060>
+         1  1.064E+04  1.064E+04  1.064E+04  0.0001221  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Bcast()
+         1       2820       2820       2820          0  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Comm_rank()
+         1       2823       2823       2823  3.052E-05  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Comm_size()
+         1       2857       2857       2857          0  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Finalize()
+         1  1.459E+04  1.459E+04  1.459E+04          0  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Gather()
+         1      137.9      137.9      137.9          0  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Init_thread()
+      1000  1.459E+04  1.458E+04  1.459E+04     0.3378  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Recv()
+      1000  1.459E+04  1.459E+04  1.459E+04  0.0002441  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Reduce()
+         1  1.456E+04  1.456E+04  1.456E+04  0.0002441  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Scatter()
+      1000  1.459E+04  1.457E+04  1.459E+04     0.4094  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Send()
+         1  1.457E+04  1.457E+04  1.457E+04  0.0001726  Heap Memory Used (KB) at Entry : addr=<0x433060> => addr=<0x433aa0>
+         2  1.456E+04  1.456E+04  1.456E+04          0  Heap Memory Used (KB) at Entry : addr=<0x433060> => addr=<0x433c70>
+      1000  1.459E+04  1.458E+04  1.459E+04     0.2504  Heap Memory Used (KB) at Entry : addr=<0x433060> => addr=<0x433d30>
+     1E+05  1.458E+04  1.458E+04  1.458E+04   0.008738  Heap Memory Used (KB) at Entry : addr=<0x433060> => addr=<0x433d30> => addr=<0x4339d0>
+     1E+05  1.458E+04  1.458E+04  1.458E+04  0.0002441  Heap Memory Used (KB) at Entry : addr=<0x433060> => addr=<0x433d30> => addr=<0x433a40>
+  2.04E+05  1.459E+04      228.8  1.458E+04      71.71  Heap Memory Used (KB) at Exit
+         1      228.8      228.8      228.8  2.697E-06  Heap Memory Used (KB) at Exit : .TAU application
+         1      229.8      229.8      229.8  2.697E-06  Heap Memory Used (KB) at Exit : addr=<0x433060>
+         1  1.064E+04  1.064E+04  1.064E+04  0.0001221  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Bcast()
+         1       2820       2820       2820          0  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Comm_rank()
+         1       2823       2823       2823  3.052E-05  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Comm_size()
+         1      228.8      228.8      228.8  2.697E-06  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Finalize()
+         1  1.459E+04  1.459E+04  1.459E+04          0  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Gather()
+         1       2818       2818       2818          0  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Init_thread()
+      1000  1.459E+04  1.458E+04  1.459E+04     0.3378  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Recv()
+      1000  1.459E+04  1.459E+04  1.459E+04  0.0002441  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Reduce()
+         1  1.456E+04  1.456E+04  1.456E+04  0.0002441  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Scatter()
+      1000  1.459E+04  1.457E+04  1.459E+04     0.4069  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Send()
+         1  1.457E+04  1.457E+04  1.457E+04  0.0001726  Heap Memory Used (KB) at Exit : addr=<0x433060> => addr=<0x433aa0>
+         2  1.456E+04  1.456E+04  1.456E+04          0  Heap Memory Used (KB) at Exit : addr=<0x433060> => addr=<0x433c70>
+      1000  1.459E+04  1.458E+04  1.459E+04    0.06914  Heap Memory Used (KB) at Exit : addr=<0x433060> => addr=<0x433d30>
+     1E+05  1.458E+04  1.458E+04  1.458E+04   0.008738  Heap Memory Used (KB) at Exit : addr=<0x433060> => addr=<0x433d30> => addr=<0x4339d0>
+     1E+05  1.458E+04  1.458E+04  1.458E+04  0.0002441  Heap Memory Used (KB) at Exit : addr=<0x433060> => addr=<0x433d30> => addr=<0x433a40>
+         6       2680    0.07812      479.3        985  Increase in Heap Memory (KB)
+         1      95.81      95.81      95.81          0  Increase in Heap Memory (KB) : .TAU application
+         1      94.12      94.12      94.12          0  Increase in Heap Memory (KB) : addr=<0x433060>
+         1     0.1562     0.1562     0.1562          0  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Bcast()
+         0          0          0          0          0  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Gather()
+         1       2680       2680       2680          0  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Init_thread()
+         0          0          0          0          0  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Reduce()
+         1    0.07812    0.07812    0.07812          0  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Send()
+         1      5.734      5.734      5.734          0  Increase in Heap Memory (KB) : addr=<0x433060> => addr=<0x433d30>
+         1          4          4          4          0  Message size for broadcast
+         0          0          0          0          0  Message size for gather
+      1000          4          4          4          0  Message size for reduce
+         1      2E+06      2E+06      2E+06          0  Message size for scatter
+      1000       4000       4000       4000          0  Message size received from all nodes
+      1000       4000       4000       4000          0  Message size sent to all nodes
+      1000       4000       4000       4000          0  Message size sent to node 0
+      1000       4000       4000       4000          0  Message size sent to node 0 : addr=<0x433060> => MPI_Send()
+         0          0          0          0          0  Message size sent to node 1
+         0          0          0          0          0  Message size sent to node 1 : addr=<0x433060> => MPI_Send()
+---------------------------------------------------------------------------------------
+
+FUNCTION SUMMARY (total):
+---------------------------------------------------------------------------------------
+%Time    Exclusive    Inclusive       #Call      #Subrs  Inclusive Name
+              msec   total msec                          usec/call
+---------------------------------------------------------------------------------------
+100.0         0.26     1:09.505           2           2   34752610 .TAU application
+100.0           62     1:09.504           2        8020   34752480 .TAU application => addr=<0x433060>
+100.0           62     1:09.504           2        8020   34752480 addr=<0x433060>
+ 98.0     1:07.541     1:08.124        2000      400004      34062 addr=<0x433060> => addr=<0x433d30>
+ 98.0     1:07.541     1:08.124        2000      400004      34062 addr=<0x433d30>
+  0.8          575          575           2           0     287768 MPI_Init_thread()
+  0.8          575          575           2           0     287768 addr=<0x433060> => MPI_Init_thread()
+  0.7          454          454        2000           0        227 MPI_Reduce()
+  0.7          454          454        2000           0        227 addr=<0x433060> => MPI_Reduce()
+  0.4          294          294      200002           0          1 addr=<0x433a40> [THROTTLED]
+  0.4          294          294      200002           0          1 addr=<0x433d30> => addr=<0x433a40>
+  0.4          288          288      200002           0          1 addr=<0x4339d0> [THROTTLED]
+  0.4          288          288      200002           0          1 addr=<0x433d30> => addr=<0x4339d0>
+  0.2          165          165           2           0      82616 MPI_Finalize()
+  0.2          165          165           2           0      82616 addr=<0x433060> => MPI_Finalize()
+  0.1           97           97        2000           0         49 MPI_Recv()
+  0.1           97           97        2000           0         49 addr=<0x433060> => MPI_Recv()
+  0.0           13           13        2000           0          7 MPI_Send()
+  0.0           13           13        2000           0          7 addr=<0x433060> => MPI_Send()
+  0.0            5            5           4           0       1263 addr=<0x433060> => addr=<0x433c70>
+  0.0            5            5           4           0       1263 addr=<0x433c70>
+  0.0            3            3           2           0       1780 MPI_Scatter()
+  0.0            3            3           2           0       1780 addr=<0x433060> => MPI_Scatter()
+  0.0            2            2           2           0       1088 MPI_Gather()
+  0.0            2            2           2           0       1088 addr=<0x433060> => MPI_Gather()
+  0.0            1            1           2           0        876 addr=<0x433060> => addr=<0x433aa0>
+  0.0            1            1           2           0        876 addr=<0x433aa0>
+  0.0        0.084        0.084           2           0         42 MPI_Bcast()
+  0.0        0.084        0.084           2           0         42 addr=<0x433060> => MPI_Bcast()
+  0.0        0.034        0.034           2           0         17 MPI_Comm_rank()
+  0.0        0.034        0.034           2           0         17 addr=<0x433060> => MPI_Comm_rank()
+  0.0         0.02         0.02           2           0         10 MPI_Comm_size()
+  0.0         0.02         0.02           2           0         10 addr=<0x433060> => MPI_Comm_size()
+
+FUNCTION SUMMARY (mean):
+---------------------------------------------------------------------------------------
+%Time    Exclusive    Inclusive       #Call      #Subrs  Inclusive Name
+              msec   total msec                          usec/call
+---------------------------------------------------------------------------------------
+100.0         0.13       34,752           1           1   34752610 .TAU application
+100.0           31       34,752           1        4010   34752480 .TAU application => addr=<0x433060>
+100.0           31       34,752           1        4010   34752480 addr=<0x433060>
+ 98.0       33,770       34,062        1000      200002      34062 addr=<0x433060> => addr=<0x433d30>
+ 98.0       33,770       34,062        1000      200002      34062 addr=<0x433d30>
+  0.8          287          287           1           0     287768 MPI_Init_thread()
+  0.8          287          287           1           0     287768 addr=<0x433060> => MPI_Init_thread()
+  0.7          227          227        1000           0        227 MPI_Reduce()
+  0.7          227          227        1000           0        227 addr=<0x433060> => MPI_Reduce()
+  0.4          147          147      100001           0          1 addr=<0x433a40> [THROTTLED]
+  0.4          147          147      100001           0          1 addr=<0x433d30> => addr=<0x433a40>
+  0.4          144          144      100001           0          1 addr=<0x4339d0> [THROTTLED]
+  0.4          144          144      100001           0          1 addr=<0x433d30> => addr=<0x4339d0>
+  0.2           82           82           1           0      82616 MPI_Finalize()
+  0.2           82           82           1           0      82616 addr=<0x433060> => MPI_Finalize()
+  0.1           48           48        1000           0         49 MPI_Recv()
+  0.1           48           48        1000           0         49 addr=<0x433060> => MPI_Recv()
+  0.0            6            6        1000           0          7 MPI_Send()
+  0.0            6            6        1000           0          7 addr=<0x433060> => MPI_Send()
+  0.0            2            2           2           0       1263 addr=<0x433060> => addr=<0x433c70>
+  0.0            2            2           2           0       1263 addr=<0x433c70>
+  0.0            1            1           1           0       1780 MPI_Scatter()
+  0.0            1            1           1           0       1780 addr=<0x433060> => MPI_Scatter()
+  0.0            1            1           1           0       1088 MPI_Gather()
+  0.0            1            1           1           0       1088 addr=<0x433060> => MPI_Gather()
+  0.0        0.876        0.876           1           0        876 addr=<0x433060> => addr=<0x433aa0>
+  0.0        0.876        0.876           1           0        876 addr=<0x433aa0>
+  0.0        0.042        0.042           1           0         42 MPI_Bcast()
+  0.0        0.042        0.042           1           0         42 addr=<0x433060> => MPI_Bcast()
+  0.0        0.017        0.017           1           0         17 MPI_Comm_rank()
+  0.0        0.017        0.017           1           0         17 addr=<0x433060> => MPI_Comm_rank()
+  0.0         0.01         0.01           1           0         10 MPI_Comm_size()
+  0.0         0.01         0.01           1           0         10 addr=<0x433060> => MPI_Comm_size()
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore2_OMPExport$ paraprof
+Exception in thread "AWT-EventQueue-0" java.awt.HeadlessException:
+No X11 DISPLAY variable was set, but this program performed an operation which requires it.
+        at java.awt.GraphicsEnvironment.checkHeadless(GraphicsEnvironment.java:204)
+        at java.awt.Window.<init>(Window.java:536)
+        at java.awt.Frame.<init>(Frame.java:420)
+        at java.awt.Frame.<init>(Frame.java:385)
+        at javax.swing.JFrame.<init>(JFrame.java:189)
+        at edu.uoregon.tau.paraprof.ParaProfErrorDialog.<init>(ParaProfErrorDialog.java:37)
+        at edu.uoregon.tau.paraprof.ParaProfUtils.handleException(ParaProfUtils.java:1719)
+        at edu.uoregon.tau.paraprof.ParaProf$1.run(ParaProf.java:754)
+        at java.awt.event.InvocationEvent.dispatch(InvocationEvent.java:311)
+        at java.awt.EventQueue.dispatchEventImpl(EventQueue.java:756)
+        at java.awt.EventQueue.access$500(EventQueue.java:97)
+        at java.awt.EventQueue$3.run(EventQueue.java:709)
+        at java.awt.EventQueue$3.run(EventQueue.java:703)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:80)
+        at java.awt.EventQueue.dispatchEvent(EventQueue.java:726)
+        at java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:201)
+        at java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:116)
+        at java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:105)
+        at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:101)
+        at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:93)
+        at java.awt.EventDispatchThread.run(EventDispatchThread.java:82)
+
+
+#TAU Tracing....
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore2_OMPExport$ export TAU_OPTIONS=-optCompInst
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore2_OMPExport$ export OMP_NUM_THREADS=4
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore2_OMPExport$ export I_MPI_PIN_DOMAIN=omp
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore2_OMPExport$ export TAU_COMM_MATRIX=1
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore2_OMPExport$ export TAU_TRACK_MESSAGE=1
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore2_OMPExport$ export TAU_CALLPATH=1
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore2_OMPExport$ export TAU_TRACK_HEAP=1
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore2_OMPExport$ export TAU_TRACE=1
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore2_OMPExport$ tau_cc.sh -o lapMPI9_HY -g -Wall -lm -Ofast -fopenmp lapFusionMPI9_hybrid.c
+Debug: Using compiler-based instrumentation
+
+
+Debug: Compiling (Individually) with Instrumented Code
+Executing> /soft/gcc-6.1.0/bin/gcc -g -Wall -lm -Ofast -fopenmp -I. -c lapFusionMPI9_hybrid.c -g -DPROFILING_ON -DTAU_GNU -DTAU_DOT_H_LESS_HEADERS -DTAU_MPI -DTAU_UNIFY -DTAU_MPI_THREADED -DTAU_LINUX_TIMERS -DTAU_MPIGREQUEST -DTAU_MPIDATAREP -DTAU_MPIERRHANDLER -DTAU_MPICONSTCHAR -DTAU_MPIATTRFUNCTION -DTAU_MPITYPEEX -DTAU_MPIADDERROR -DTAU_LARGEFILE -D_LARGEFILE64_SOURCE -DTAU_MPIFILE -DHAVE_TR1_HASH_MAP -DTAU_SS_ALLOC_SUPPORT -DEBS_CLOCK_RES=1 -DTAU_STRSIGNAL_OK -DTAU_TRACK_LD_LOADER -DTAU_MPICH3 -DTAU_MPI_EXTENSIONS -I/home/master/ppM/ppM-1-1/TAU/tau_install//include -I/soft/openmpi-1.8.1/include -I/soft/openmpi-1.8.1/include/openmpi -I/soft/openmpi-1.8.1/include/openmpi/ompi -I/soft/openmpi-1.8.1/lib -o lapFusionMPI9_hybrid.o -g -finstrument-functions -finstrument-functions-exclude-file-list=/usr/include
+
+
+Debug: Linking (Together) object files
+Executing> /soft/gcc-6.1.0/bin/gcc -g -Wall -lm -Ofast -fopenmp lapFusionMPI9_hybrid.o -L/home/master/ppM/ppM-1-1/TAU/tau_install//x86_64/lib -lTauMpi-mpi -L/soft/openmpi-1.8.1/lib -lmpi -lmpi_cxx -Wl,-rpath,/soft/openmpi-1.8.1/lib -L/home/master/ppM/ppM-1-1/TAU/tau_install//x86_64/lib -ltau-mpi -Wl,--export-dynamic -lrt -L/soft/openmpi-1.8.1/lib -lmpi -lmpi_cxx -Wl,-rpath,/soft/openmpi-1.8.1/lib -ldl -lm -L/soft/gcc-6.1.0/lib/gcc/x86_64-pc-linux-gnu/6.1.0/ -lstdc++ -lgcc_s -L/home/master/ppM/ppM-1-1/TAU/tau_install//x86_64/lib/static-mpi -g -o lapMPI9_HY
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore2_OMPExport$ mpirun -np 2 lapMPI9_HY 1000
+TAU Warning: BFD is not available in at least one part of this TAU-instrumented application! Please check to see if BFD is not shared or not present. Expect some missing BFD functionality.
+TAU Warning: Comp_gnu - BFD is not available during TAU build. Symbols may not be resolved!
+TAU Warning: BFD is not available in at least one part of this TAU-instrumented application! Please check to see if BFD is not shared or not present. Expect some missing BFD functionality.
+TAU Warning: Comp_gnu - BFD is not available during TAU build. Symbols may not be resolved!
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.015535, A[7][7]= 0.016615
+ [0]            time: 35.472499
+
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore2_OMPExport$ tau_treemerge.pl
+/home/master/ppM/ppM-1-1/TAU/tau_install/x86_64/bin/tau_merge -m tau.edf -e events.0.edf events.1.edf tautrace.0.0.0.trc tautrace.1.0.0.trc tau.trc
+tautrace.0.0.0.trc: 2873552 records read.
+tautrace.1.0.0.trc: 2873543 records read.
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore2_OMPExport$ tau2slog2 tau.trc tau.edf -o tau.slog2
+5747095 records initialized.  Processing.
+114941 Records read. 1% converted
+229882 Records read. 3% converted
+344823 Records read. 5% converted
+459764 Records read. 7% converted
+574705 Records read. 9% converted
+689646 Records read. 11% converted
+804587 Records read. 13% converted
+919528 Records read. 15% converted
+1034469 Records read. 17% converted
+1149410 Records read. 19% converted
+1264351 Records read. 21% converted
+1379292 Records read. 23% converted
+1494233 Records read. 25% converted
+1609174 Records read. 27% converted
+1724115 Records read. 29% converted
+1839056 Records read. 31% converted
+1953997 Records read. 33% converted
+2068938 Records read. 35% converted
+2183879 Records read. 37% converted
+2298820 Records read. 39% converted
+2413761 Records read. 41% converted
+2528702 Records read. 43% converted
+2643643 Records read. 45% converted
+2758584 Records read. 47% converted
+2873525 Records read. 49% converted
+2988466 Records read. 51% converted
+3103407 Records read. 53% converted
+3218348 Records read. 55% converted
+3333289 Records read. 57% converted
+3448230 Records read. 59% converted
+3563171 Records read. 61% converted
+3678112 Records read. 63% converted
+3793053 Records read. 65% converted
+3907994 Records read. 67% converted
+4022935 Records read. 69% converted
+4137876 Records read. 71% converted
+4252817 Records read. 73% converted
+4367758 Records read. 75% converted
+4482699 Records read. 77% converted
+4597640 Records read. 79% converted
+4712581 Records read. 81% converted
+4827522 Records read. 83% converted
+4942463 Records read. 85% converted
+5057404 Records read. 87% converted
+5172345 Records read. 89% converted
+5287286 Records read. 91% converted
+5402227 Records read. 93% converted
+5517168 Records read. 95% converted
+5632109 Records read. 97% converted
+1521 enters: 0 exits: 0
+5747050 Records read. 99% converted
+1521 enters: 0 exits: 0
+Reached end of trace file.
+         SLOG-2 Header:
+version = SLOG 2.0.6
+NumOfChildrenPerNode = 2
+TreeLeafByteSize = 65536
+MaxTreeDepth = 10
+MaxBufferByteSize = 65536
+Categories  is FBinfo(14195 @ 62448891)
+MethodDefs  is FBinfo(0 @ 0)
+LineIDMaps  is FBinfo(52 @ 62463086)
+TreeRoot    is FBinfo(7513 @ 62441378)
+TreeDir     is FBinfo(63618 @ 62463138)
+Annotations is FBinfo(0 @ 0)
+Postamble   is FBinfo(0 @ 0)
+
+1521 enters: 0 exits: 0
+
+
+Number of Drawables = 2052401
+timeElapsed between 1 & 2 = 114 msec
+timeElapsed between 2 & 3 = 5322 msec
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore2_OMPExport$ jumpshot
+GUI_LIBDIR is set. GUI_LIBDIR = /home/master/ppM/ppM-1-1/TAU/tau_install//x86_64/lib
+Java is version 1.8.0_131.
+Starting the SLOG-2 Display Program .....
+Exception in thread "main" java.awt.HeadlessException:
+No X11 DISPLAY variable was set, but this program performed an operation which requires it.
+        at java.awt.GraphicsEnvironment.checkHeadless(GraphicsEnvironment.java:204)
+        at java.awt.Window.<init>(Window.java:536)
+        at java.awt.Frame.<init>(Frame.java:420)
+        at javax.swing.JFrame.<init>(JFrame.java:233)
+        at viewer.first.FirstFrame.<init>(FirstFrame.java:35)
+        at viewer.first.FirstFrame.main(FirstFrame.java:110)
+
+#TAU Hybrid Core 4.......... 
+With export OMP_NUM_THREADS=4 and export I_MPI_PIN_DOMAIN=omp
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport$ module load gcc/6.1.0 openmpi/1.8.1
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport$ export PATH=/home/master/ppM/ppM-1-1/TAU/tau_install/x86_64/bin:$PATH
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport$ export TAU_MAKEFILE=/home/master/ppM/ppM-1-1/TAU/tau_install/x86_64/lib/Makefile.tau-mpi
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport$ export TAU_OPTIONS=-optCompInst
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport$ export OMP_NUM_THREADS=4
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport$ export I_MPI_PIN_DOMAIN=omp
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport$ export TAU_COMM_MATRIX=1
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport$ export TAU_TRACK_MESSAGE=1
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport$ export TAU_CALLPATH=1
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport$ export TAU_TRACK_HEAP=1
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport$ export TAU_TRACE=0
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport$ tau_cc.sh -o lapMPI9_HY -g -Wall -lm -Ofast -fopenmp lapFusionMPI9_hybrid.c
+Debug: Using compiler-based instrumentation
+
+
+Debug: Compiling (Individually) with Instrumented Code
+Executing> /soft/gcc-6.1.0/bin/gcc -g -Wall -lm -Ofast -fopenmp -I. -c lapFusionMPI9_hybrid.c -g -DPROFILING_ON -DTAU_GNU -DTAU_DOT_H_LESS_HEADERS -DTAU_MPI -DTAU_UNIFY -DTAU_MPI_THREADED -DTAU_LINUX_TIMERS -DTAU_MPIGREQUEST -DTAU_MPIDATAREP -DTAU_MPIERRHANDLER -DTAU_MPICONSTCHAR -DTAU_MPIATTRFUNCTION -DTAU_MPITYPEEX -DTAU_MPIADDERROR -DTAU_LARGEFILE -D_LARGEFILE64_SOURCE -DTAU_MPIFILE -DHAVE_TR1_HASH_MAP -DTAU_SS_ALLOC_SUPPORT -DEBS_CLOCK_RES=1 -DTAU_STRSIGNAL_OK -DTAU_TRACK_LD_LOADER -DTAU_MPICH3 -DTAU_MPI_EXTENSIONS -I/home/master/ppM/ppM-1-1/TAU/tau_install//include -I/soft/openmpi-1.8.1/include -I/soft/openmpi-1.8.1/include/openmpi -I/soft/openmpi-1.8.1/include/openmpi/ompi -I/soft/openmpi-1.8.1/lib -o lapFusionMPI9_hybrid.o -g -finstrument-functions -finstrument-functions-exclude-file-list=/usr/include
+
+
+Debug: Linking (Together) object files
+Executing> /soft/gcc-6.1.0/bin/gcc -g -Wall -lm -Ofast -fopenmp lapFusionMPI9_hybrid.o -L/home/master/ppM/ppM-1-1/TAU/tau_install//x86_64/lib -lTauMpi-mpi -L/soft/openmpi-1.8.1/lib -lmpi -lmpi_cxx -Wl,-rpath,/soft/openmpi-1.8.1/lib -L/home/master/ppM/ppM-1-1/TAU/tau_install//x86_64/lib -ltau-mpi -Wl,--export-dynamic -lrt -L/soft/openmpi-1.8.1/lib -lmpi -lmpi_cxx -Wl,-rpath,/soft/openmpi-1.8.1/lib -ldl -lm -L/soft/gcc-6.1.0/lib/gcc/x86_64-pc-linux-gnu/6.1.0/ -lstdc++ -lgcc_s -L/home/master/ppM/ppM-1-1/TAU/tau_install//x86_64/lib/static-mpi -g -o lapMPI9_HY
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport$ mpirun -np 4 lapMPI9_HY 1000
+TAU Warning: BFD is not available in at least one part of this TAU-instrumented application! Please check to see if BFD is not shared or not present. Expect some missing BFD functionality.
+TAU Warning: Comp_gnu - BFD is not available during TAU build. Symbols may not be resolved!
+TAU Warning: BFD is not available in at least one part of this TAU-instrumented application! Please check to see if BFD is not shared or not present. Expect some missing BFD functionality.
+TAU Warning: Comp_gnu - BFD is not available during TAU build. Symbols may not be resolved!
+TAU Warning: BFD is not available in at least one part of this TAU-instrumented application! Please check to see if BFD is not shared or not present. Expect some missing BFD functionality.
+TAU Warning: Comp_gnu - BFD is not available during TAU build. Symbols may not be resolved!
+TAU Warning: BFD is not available in at least one part of this TAU-instrumented application! Please check to see if BFD is not shared or not present. Expect some missing BFD functionality.
+TAU Warning: Comp_gnu - BFD is not available during TAU build. Symbols may not be resolved!
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.015535, A[7][7]= 0.016615
+ [0]            time: 17.392304
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport$ pprof
+Reading Profile files in profile.*
+
+NODE 0;CONTEXT 0;THREAD 0:
+---------------------------------------------------------------------------------------
+%Time    Exclusive    Inclusive       #Call      #Subrs  Inclusive Name
+              msec   total msec                          usec/call
+---------------------------------------------------------------------------------------
+100.0        0.203       17,759           1           1   17759591 .TAU application
+100.0           30       17,759           1        4010   17759388 .TAU application => addr=<0x433060>
+100.0           30       17,759           1        4010   17759388 addr=<0x433060>
+ 96.3       16,826       17,107        1000      200002      17107 addr=<0x433060> => addr=<0x433d30>
+ 96.3       16,826       17,107        1000      200002      17107 addr=<0x433d30>
+  1.6          285          285           1           0     285085 MPI_Init_thread()
+  1.6          285          285           1           0     285085 addr=<0x433060> => MPI_Init_thread()
+  1.3          233          233        1000           0        233 MPI_Reduce()
+  1.3          233          233        1000           0        233 addr=<0x433060> => MPI_Reduce()
+  0.8          141          141      100001           0          1 addr=<0x433a40> [THROTTLED]
+  0.8          141          141      100001           0          1 addr=<0x433d30> => addr=<0x433a40>
+  0.8          138          138      100001           0          1 addr=<0x4339d0> [THROTTLED]
+  0.8          138          138      100001           0          1 addr=<0x433d30> => addr=<0x4339d0>
+  0.5           81           81           1           0      81806 MPI_Finalize()
+  0.5           81           81           1           0      81806 addr=<0x433060> => MPI_Finalize()
+  0.0            8            8        1000           0          8 MPI_Recv()
+  0.0            8            8        1000           0          8 addr=<0x433060> => MPI_Recv()
+  0.0            4            4        1000           0          5 MPI_Send()
+  0.0            4            4        1000           0          5 addr=<0x433060> => MPI_Send()
+  0.0            4            4           2           0       2232 addr=<0x433060> => addr=<0x433c70>
+  0.0            4            4           2           0       2232 addr=<0x433c70>
+  0.0            2            2           1           0       2080 MPI_Scatter()
+  0.0            2            2           1           0       2080 addr=<0x433060> => MPI_Scatter()
+  0.0            1            1           1           0       1313 MPI_Gather()
+  0.0            1            1           1           0       1313 addr=<0x433060> => MPI_Gather()
+  0.0        0.476        0.476           1           0        476 addr=<0x433060> => addr=<0x433aa0>
+  0.0        0.476        0.476           1           0        476 addr=<0x433aa0>
+  0.0        0.037        0.037           1           0         37 MPI_Bcast()
+  0.0        0.037        0.037           1           0         37 addr=<0x433060> => MPI_Bcast()
+  0.0        0.019        0.019           1           0         19 MPI_Comm_rank()
+  0.0        0.019        0.019           1           0         19 addr=<0x433060> => MPI_Comm_rank()
+  0.0        0.008        0.008           1           0          8 MPI_Comm_size()
+  0.0        0.008        0.008           1           0          8 addr=<0x433060> => MPI_Comm_size()
+---------------------------------------------------------------------------------------
+
+USER EVENTS Profile :NODE 0, CONTEXT 0, THREAD 0
+---------------------------------------------------------------------------------------
+NumSamples   MaxValue   MinValue  MeanValue  Std. Dev.  Event Name
+---------------------------------------------------------------------------------------
+         1       2645       2645       2645          0  Decrease in Heap Memory (KB)
+         1       2645       2645       2645          0  Decrease in Heap Memory (KB) : addr=<0x433060> => MPI_Finalize()
+  2.04E+05  1.266E+04        133  1.265E+04      61.12  Heap Memory Used (KB) at Entry
+         1        133        133        133  1.907E-06  Heap Memory Used (KB) at Entry : .TAU application
+         1      135.7      135.7      135.7  1.907E-06  Heap Memory Used (KB) at Entry : addr=<0x433060>
+         1  1.065E+04  1.065E+04  1.065E+04  0.0002114  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Bcast()
+         1       2837       2837       2837  3.052E-05  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Comm_rank()
+         1       2839       2839       2839          0  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Comm_size()
+         1       2878       2878       2878  3.052E-05  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Finalize()
+         1  1.266E+04  1.266E+04  1.266E+04  0.0002441  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Gather()
+         1      137.9      137.9      137.9          0  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Init_thread()
+      1000  1.265E+04  1.264E+04  1.265E+04     0.4094  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Recv()
+      1000  1.265E+04  1.265E+04  1.265E+04  0.0001726  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Reduce()
+         1  1.263E+04  1.263E+04  1.263E+04  0.0001726  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Scatter()
+      1000  1.265E+04  1.264E+04  1.265E+04     0.3403  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Send()
+         1  1.263E+04  1.263E+04  1.263E+04          0  Heap Memory Used (KB) at Entry : addr=<0x433060> => addr=<0x433aa0>
+         2  1.263E+04  1.263E+04  1.263E+04          0  Heap Memory Used (KB) at Entry : addr=<0x433060> => addr=<0x433c70>
+      1000  1.265E+04  1.265E+04  1.265E+04     0.2504  Heap Memory Used (KB) at Entry : addr=<0x433060> => addr=<0x433d30>
+     1E+05  1.265E+04  1.265E+04  1.265E+04    0.01159  Heap Memory Used (KB) at Entry : addr=<0x433060> => addr=<0x433d30> => addr=<0x4339d0>
+     1E+05  1.265E+04  1.265E+04  1.265E+04    0.01451  Heap Memory Used (KB) at Entry : addr=<0x433060> => addr=<0x433d30> => addr=<0x433a40>
+  2.04E+05  1.266E+04      233.4  1.265E+04      60.86  Heap Memory Used (KB) at Exit
+         1      233.4      233.4      233.4  2.697E-06  Heap Memory Used (KB) at Exit : .TAU application
+         1      233.4      233.4      233.4  2.697E-06  Heap Memory Used (KB) at Exit : addr=<0x433060>
+         1  1.065E+04  1.065E+04  1.065E+04  0.0002114  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Bcast()
+         1       2837       2837       2837  3.052E-05  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Comm_rank()
+         1       2839       2839       2839          0  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Comm_size()
+         1      233.4      233.4      233.4  2.697E-06  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Finalize()
+         1  1.266E+04  1.266E+04  1.266E+04  0.0001726  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Gather()
+         1       2834       2834       2834          0  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Init_thread()
+      1000  1.265E+04  1.264E+04  1.265E+04     0.4094  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Recv()
+      1000  1.265E+04  1.265E+04  1.265E+04  0.0001726  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Reduce()
+         1  1.263E+04  1.263E+04  1.263E+04  0.0001726  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Scatter()
+      1000  1.265E+04  1.264E+04  1.265E+04     0.3378  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Send()
+         1  1.263E+04  1.263E+04  1.263E+04          0  Heap Memory Used (KB) at Exit : addr=<0x433060> => addr=<0x433aa0>
+         2  1.263E+04  1.263E+04  1.263E+04          0  Heap Memory Used (KB) at Exit : addr=<0x433060> => addr=<0x433c70>
+      1000  1.265E+04  1.265E+04  1.265E+04    0.06914  Heap Memory Used (KB) at Exit : addr=<0x433060> => addr=<0x433d30>
+     1E+05  1.265E+04  1.265E+04  1.265E+04    0.01159  Heap Memory Used (KB) at Exit : addr=<0x433060> => addr=<0x433d30> => addr=<0x4339d0>
+     1E+05  1.265E+04  1.265E+04  1.265E+04    0.01451  Heap Memory Used (KB) at Exit : addr=<0x433060> => addr=<0x433d30> => addr=<0x433a40>
+         8       2696    0.07812      363.2      882.8  Increase in Heap Memory (KB)
+         1      100.4      100.4      100.4          0  Increase in Heap Memory (KB) : .TAU application
+         1      97.72      97.72      97.72          0  Increase in Heap Memory (KB) : addr=<0x433060>
+         1     0.1562     0.1562     0.1562          0  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Bcast()
+         1      1.031      1.031      1.031          0  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Gather()
+         1       2696       2696       2696          0  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Init_thread()
+         0          0          0          0          0  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Recv()
+         1      4.031      4.031      4.031          0  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Scatter()
+         1    0.07812    0.07812    0.07812          0  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Send()
+         1      5.734      5.734      5.734          0  Increase in Heap Memory (KB) : addr=<0x433060> => addr=<0x433d30>
+         1          4          4          4          0  Message size for broadcast
+         1      1E+06      1E+06      1E+06          0  Message size for gather
+      1000          4          4          4          0  Message size for reduce
+         1      1E+06      1E+06      1E+06          0  Message size for scatter
+      1000       4000       4000       4000          0  Message size received from all nodes
+      1000       4000       4000       4000          0  Message size sent to all nodes
+         0          0          0          0          0  Message size sent to node 0
+         0          0          0          0          0  Message size sent to node 0 : addr=<0x433060> => MPI_Send()
+      1000       4000       4000       4000          0  Message size sent to node 1
+      1000       4000       4000       4000          0  Message size sent to node 1 : addr=<0x433060> => MPI_Send()
+         0          0          0          0          0  Message size sent to node 2
+         0          0          0          0          0  Message size sent to node 2 : addr=<0x433060> => MPI_Send()
+         0          0          0          0          0  Message size sent to node 3
+         0          0          0          0          0  Message size sent to node 3 : addr=<0x433060> => MPI_Send()
+---------------------------------------------------------------------------------------
+
+NODE 1;CONTEXT 0;THREAD 0:
+---------------------------------------------------------------------------------------
+%Time    Exclusive    Inclusive       #Call      #Subrs  Inclusive Name
+              msec   total msec                          usec/call
+---------------------------------------------------------------------------------------
+100.0        0.091       17,759           1           1   17759060 .TAU application
+100.0           39       17,758           1        6010   17758969 .TAU application => addr=<0x433060>
+100.0           39       17,758           1        6010   17758969 addr=<0x433060>
+ 96.5       16,854       17,136        1000      200002      17137 addr=<0x433060> => addr=<0x433d30>
+ 96.5       16,854       17,136        1000      200002      17137 addr=<0x433d30>
+  1.6          284          284           1           0     284817 MPI_Init_thread()
+  1.6          284          284           1           0     284817 addr=<0x433060> => MPI_Init_thread()
+  1.1          188          188        2000           0         94 MPI_Recv()
+  1.1          188          188        2000           0         94 addr=<0x433060> => MPI_Recv()
+  0.8          141          141      100001           0          1 addr=<0x433a40> [THROTTLED]
+  0.8          141          141      100001           0          1 addr=<0x433d30> => addr=<0x433a40>
+  0.8          140          140      100001           0          1 addr=<0x4339d0> [THROTTLED]
+  0.8          140          140      100001           0          1 addr=<0x433d30> => addr=<0x4339d0>
+  0.5           82           82           1           0      82184 MPI_Finalize()
+  0.5           82           82           1           0      82184 addr=<0x433060> => MPI_Finalize()
+  0.1           12           12        2000           0          6 MPI_Send()
+  0.1           12           12        2000           0          6 addr=<0x433060> => MPI_Send()
+  0.0            8            8        1000           0          8 MPI_Reduce()
+  0.0            8            8        1000           0          8 addr=<0x433060> => MPI_Reduce()
+  0.0            4            4           2           0       2277 addr=<0x433060> => addr=<0x433c70>
+  0.0            4            4           2           0       2277 addr=<0x433c70>
+  0.0            1            1           1           0       1093 MPI_Gather()
+  0.0            1            1           1           0       1093 addr=<0x433060> => MPI_Gather()
+  0.0        0.879        0.879           1           0        879 MPI_Scatter()
+  0.0        0.879        0.879           1           0        879 addr=<0x433060> => MPI_Scatter()
+  0.0        0.428        0.428           1           0        428 addr=<0x433060> => addr=<0x433aa0>
+  0.0        0.428        0.428           1           0        428 addr=<0x433aa0>
+  0.0        0.049        0.049           1           0         49 MPI_Bcast()
+  0.0        0.049        0.049           1           0         49 addr=<0x433060> => MPI_Bcast()
+  0.0         0.02         0.02           1           0         20 MPI_Comm_rank()
+  0.0         0.02         0.02           1           0         20 addr=<0x433060> => MPI_Comm_rank()
+  0.0        0.008        0.008           1           0          8 MPI_Comm_size()
+  0.0        0.008        0.008           1           0          8 addr=<0x433060> => MPI_Comm_size()
+---------------------------------------------------------------------------------------
+
+USER EVENTS Profile :NODE 1, CONTEXT 0, THREAD 0
+---------------------------------------------------------------------------------------
+NumSamples   MaxValue   MinValue  MeanValue  Std. Dev.  Event Name
+---------------------------------------------------------------------------------------
+         1       2645       2645       2645          0  Decrease in Heap Memory (KB)
+         1       2645       2645       2645          0  Decrease in Heap Memory (KB) : addr=<0x433060> => MPI_Finalize()
+  2.06E+05  1.266E+04        133  1.265E+04      60.82  Heap Memory Used (KB) at Entry
+         1        133        133        133  1.907E-06  Heap Memory Used (KB) at Entry : .TAU application
+         1      135.7      135.7      135.7  1.907E-06  Heap Memory Used (KB) at Entry : addr=<0x433060>
+         1  1.065E+04  1.065E+04  1.065E+04  0.0002114  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Bcast()
+         1       2837       2837       2837          0  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Comm_rank()
+         1       2839       2839       2839  3.052E-05  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Comm_size()
+         1       2877       2877       2877  3.052E-05  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Finalize()
+         1  1.266E+04  1.266E+04  1.266E+04  0.0001726  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Gather()
+         1      137.9      137.9      137.9          0  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Init_thread()
+      2000  1.265E+04  1.264E+04  1.265E+04      0.408  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Recv()
+      1000  1.265E+04  1.265E+04  1.265E+04  0.0001726  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Reduce()
+         1  1.263E+04  1.263E+04  1.263E+04          0  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Scatter()
+      2000  1.265E+04  1.264E+04  1.265E+04     0.4499  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Send()
+         1  1.263E+04  1.263E+04  1.263E+04          0  Heap Memory Used (KB) at Entry : addr=<0x433060> => addr=<0x433aa0>
+         2  1.263E+04  1.263E+04  1.263E+04          0  Heap Memory Used (KB) at Entry : addr=<0x433060> => addr=<0x433c70>
+      1000  1.265E+04  1.265E+04  1.265E+04     0.2509  Heap Memory Used (KB) at Entry : addr=<0x433060> => addr=<0x433d30>
+     1E+05  1.265E+04  1.265E+04  1.265E+04    0.01154  Heap Memory Used (KB) at Entry : addr=<0x433060> => addr=<0x433d30> => addr=<0x4339d0>
+     1E+05  1.265E+04  1.265E+04  1.265E+04    0.01451  Heap Memory Used (KB) at Entry : addr=<0x433060> => addr=<0x433d30> => addr=<0x433a40>
+  2.06E+05  1.266E+04      232.5  1.265E+04      60.57  Heap Memory Used (KB) at Exit
+         1      232.5      232.5      232.5          0  Heap Memory Used (KB) at Exit : .TAU application
+         1      233.5      233.5      233.5          0  Heap Memory Used (KB) at Exit : addr=<0x433060>
+         1  1.065E+04  1.065E+04  1.065E+04          0  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Bcast()
+         1       2837       2837       2837          0  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Comm_rank()
+         1       2839       2839       2839  3.052E-05  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Comm_size()
+         1      232.5      232.5      232.5          0  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Finalize()
+         1  1.266E+04  1.266E+04  1.266E+04  0.0001726  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Gather()
+         1       2834       2834       2834          0  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Init_thread()
+      2000  1.265E+04  1.264E+04  1.265E+04     0.3393  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Recv()
+      1000  1.265E+04  1.265E+04  1.265E+04  0.0001726  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Reduce()
+         1  1.263E+04  1.263E+04  1.263E+04          0  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Scatter()
+      2000  1.265E+04  1.264E+04  1.265E+04     0.4481  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Send()
+         1  1.263E+04  1.263E+04  1.263E+04          0  Heap Memory Used (KB) at Exit : addr=<0x433060> => addr=<0x433aa0>
+         2  1.263E+04  1.263E+04  1.263E+04          0  Heap Memory Used (KB) at Exit : addr=<0x433060> => addr=<0x433c70>
+      1000  1.265E+04  1.265E+04  1.265E+04    0.06914  Heap Memory Used (KB) at Exit : addr=<0x433060> => addr=<0x433d30>
+     1E+05  1.265E+04  1.265E+04  1.265E+04    0.01154  Heap Memory Used (KB) at Exit : addr=<0x433060> => addr=<0x433d30> => addr=<0x4339d0>
+     1E+05  1.265E+04  1.265E+04  1.265E+04    0.01451  Heap Memory Used (KB) at Exit : addr=<0x433060> => addr=<0x433d30> => addr=<0x433a40>
+         8       2696    0.03125        363      882.9  Increase in Heap Memory (KB)
+         1      99.48      99.48      99.48          0  Increase in Heap Memory (KB) : .TAU application
+         1       97.8       97.8       97.8          0  Increase in Heap Memory (KB) : addr=<0x433060>
+         1     0.1562     0.1562     0.1562          0  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Bcast()
+         0          0          0          0          0  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Gather()
+         1       2696       2696       2696          0  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Init_thread()
+         1      4.031      4.031      4.031          0  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Recv()
+         0          0          0          0          0  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Scatter()
+         2    0.07812    0.03125    0.05469    0.02344  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Send()
+         1       5.75       5.75       5.75          0  Increase in Heap Memory (KB) : addr=<0x433060> => addr=<0x433d30>
+         1          4          4          4          0  Message size for broadcast
+         0          0          0          0          0  Message size for gather
+      1000          4          4          4          0  Message size for reduce
+         1      1E+06      1E+06      1E+06          0  Message size for scatter
+      2000       4000       4000       4000          0  Message size received from all nodes
+      2000       4000       4000       4000          0  Message size sent to all nodes
+      1000       4000       4000       4000          0  Message size sent to node 0
+      1000       4000       4000       4000          0  Message size sent to node 0 : addr=<0x433060> => MPI_Send()
+         0          0          0          0          0  Message size sent to node 1
+         0          0          0          0          0  Message size sent to node 1 : addr=<0x433060> => MPI_Send()
+      1000       4000       4000       4000          0  Message size sent to node 2
+      1000       4000       4000       4000          0  Message size sent to node 2 : addr=<0x433060> => MPI_Send()
+         0          0          0          0          0  Message size sent to node 3
+         0          0          0          0          0  Message size sent to node 3 : addr=<0x433060> => MPI_Send()
+---------------------------------------------------------------------------------------
+
+NODE 2;CONTEXT 0;THREAD 0:
+---------------------------------------------------------------------------------------
+%Time    Exclusive    Inclusive       #Call      #Subrs  Inclusive Name
+              msec   total msec                          usec/call
+---------------------------------------------------------------------------------------
+100.0        0.094       17,756           1           1   17756899 .TAU application
+100.0           38       17,756           1        6010   17756805 .TAU application => addr=<0x433060>
+100.0           38       17,756           1        6010   17756805 addr=<0x433060>
+ 96.5       16,850       17,129        1000      200002      17129 addr=<0x433060> => addr=<0x433d30>
+ 96.5       16,850       17,129        1000      200002      17129 addr=<0x433d30>
+  1.6          282          282           1           0     282380 MPI_Init_thread()
+  1.6          282          282           1           0     282380 addr=<0x433060> => MPI_Init_thread()
+  1.1          195          195        2000           0         98 MPI_Recv()
+  1.1          195          195        2000           0         98 addr=<0x433060> => MPI_Recv()
+  0.8          139          139      100001           0          1 addr=<0x433a40> [THROTTLED]
+  0.8          139          139      100001           0          1 addr=<0x433d30> => addr=<0x433a40>
+  0.8          138          138      100001           0          1 addr=<0x4339d0> [THROTTLED]
+  0.8          138          138      100001           0          1 addr=<0x433d30> => addr=<0x4339d0>
+  0.5           82           82           1           0      82078 MPI_Finalize()
+  0.5           82           82           1           0      82078 addr=<0x433060> => MPI_Finalize()
+  0.1           13           13        2000           0          7 MPI_Send()
+  0.1           13           13        2000           0          7 addr=<0x433060> => MPI_Send()
+  0.0            7            7        1000           0          8 MPI_Reduce()
+  0.0            7            7        1000           0          8 addr=<0x433060> => MPI_Reduce()
+  0.0            4            4           2           0       2268 addr=<0x433060> => addr=<0x433c70>
+  0.0            4            4           2           0       2268 addr=<0x433c70>
+  0.0            1            1           1           0       1558 MPI_Scatter()
+  0.0            1            1           1           0       1558 addr=<0x433060> => MPI_Scatter()
+  0.0            1            1           1           0       1177 MPI_Gather()
+  0.0            1            1           1           0       1177 addr=<0x433060> => MPI_Gather()
+  0.0        0.432        0.432           1           0        432 addr=<0x433060> => addr=<0x433aa0>
+  0.0        0.432        0.432           1           0        432 addr=<0x433aa0>
+  0.0        0.131        0.131           1           0        131 MPI_Bcast()
+  0.0        0.131        0.131           1           0        131 addr=<0x433060> => MPI_Bcast()
+  0.0        0.021        0.021           1           0         21 MPI_Comm_rank()
+  0.0        0.021        0.021           1           0         21 addr=<0x433060> => MPI_Comm_rank()
+  0.0        0.007        0.007           1           0          7 MPI_Comm_size()
+  0.0        0.007        0.007           1           0          7 addr=<0x433060> => MPI_Comm_size()
+---------------------------------------------------------------------------------------
+
+USER EVENTS Profile :NODE 2, CONTEXT 0, THREAD 0
+---------------------------------------------------------------------------------------
+NumSamples   MaxValue   MinValue  MeanValue  Std. Dev.  Event Name
+---------------------------------------------------------------------------------------
+         1       2645       2645       2645          0  Decrease in Heap Memory (KB)
+         1       2645       2645       2645          0  Decrease in Heap Memory (KB) : addr=<0x433060> => MPI_Finalize()
+  2.06E+05  1.266E+04        133  1.265E+04      60.82  Heap Memory Used (KB) at Entry
+         1        133        133        133  1.907E-06  Heap Memory Used (KB) at Entry : .TAU application
+         1      135.7      135.7      135.7  1.907E-06  Heap Memory Used (KB) at Entry : addr=<0x433060>
+         1  1.065E+04  1.065E+04  1.065E+04  0.0002114  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Bcast()
+         1       2837       2837       2837          0  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Comm_rank()
+         1       2839       2839       2839  3.052E-05  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Comm_size()
+         1       2877       2877       2877  3.052E-05  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Finalize()
+         1  1.266E+04  1.266E+04  1.266E+04  0.0001726  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Gather()
+         1      137.9      137.9      137.9          0  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Init_thread()
+      2000  1.265E+04  1.264E+04  1.265E+04      0.408  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Recv()
+      1000  1.265E+04  1.265E+04  1.265E+04  0.0001726  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Reduce()
+         1  1.263E+04  1.263E+04  1.263E+04          0  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Scatter()
+      2000  1.265E+04  1.264E+04  1.265E+04     0.4499  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Send()
+         1  1.263E+04  1.263E+04  1.263E+04          0  Heap Memory Used (KB) at Entry : addr=<0x433060> => addr=<0x433aa0>
+         2  1.263E+04  1.263E+04  1.263E+04          0  Heap Memory Used (KB) at Entry : addr=<0x433060> => addr=<0x433c70>
+      1000  1.265E+04  1.265E+04  1.265E+04     0.2509  Heap Memory Used (KB) at Entry : addr=<0x433060> => addr=<0x433d30>
+     1E+05  1.265E+04  1.265E+04  1.265E+04    0.01154  Heap Memory Used (KB) at Entry : addr=<0x433060> => addr=<0x433d30> => addr=<0x4339d0>
+     1E+05  1.265E+04  1.265E+04  1.265E+04    0.01451  Heap Memory Used (KB) at Entry : addr=<0x433060> => addr=<0x433d30> => addr=<0x433a40>
+  2.06E+05  1.266E+04      232.5  1.265E+04      60.57  Heap Memory Used (KB) at Exit
+         1      232.5      232.5      232.5          0  Heap Memory Used (KB) at Exit : .TAU application
+         1      233.5      233.5      233.5          0  Heap Memory Used (KB) at Exit : addr=<0x433060>
+         1  1.065E+04  1.065E+04  1.065E+04          0  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Bcast()
+         1       2837       2837       2837          0  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Comm_rank()
+         1       2839       2839       2839  3.052E-05  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Comm_size()
+         1      232.5      232.5      232.5          0  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Finalize()
+         1  1.266E+04  1.266E+04  1.266E+04  0.0001726  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Gather()
+         1       2834       2834       2834          0  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Init_thread()
+      2000  1.265E+04  1.264E+04  1.265E+04     0.3393  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Recv()
+      1000  1.265E+04  1.265E+04  1.265E+04  0.0001726  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Reduce()
+         1  1.263E+04  1.263E+04  1.263E+04          0  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Scatter()
+      2000  1.265E+04  1.264E+04  1.265E+04     0.4481  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Send()
+         1  1.263E+04  1.263E+04  1.263E+04          0  Heap Memory Used (KB) at Exit : addr=<0x433060> => addr=<0x433aa0>
+         2  1.263E+04  1.263E+04  1.263E+04          0  Heap Memory Used (KB) at Exit : addr=<0x433060> => addr=<0x433c70>
+      1000  1.265E+04  1.265E+04  1.265E+04    0.06914  Heap Memory Used (KB) at Exit : addr=<0x433060> => addr=<0x433d30>
+     1E+05  1.265E+04  1.265E+04  1.265E+04    0.01154  Heap Memory Used (KB) at Exit : addr=<0x433060> => addr=<0x433d30> => addr=<0x4339d0>
+     1E+05  1.265E+04  1.265E+04  1.265E+04    0.01451  Heap Memory Used (KB) at Exit : addr=<0x433060> => addr=<0x433d30> => addr=<0x433a40>
+         8       2696    0.03125        363      882.9  Increase in Heap Memory (KB)
+         1      99.48      99.48      99.48          0  Increase in Heap Memory (KB) : .TAU application
+         1       97.8       97.8       97.8          0  Increase in Heap Memory (KB) : addr=<0x433060>
+         1     0.1562     0.1562     0.1562          0  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Bcast()
+         0          0          0          0          0  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Gather()
+         1       2696       2696       2696          0  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Init_thread()
+         1      4.031      4.031      4.031          0  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Recv()
+         0          0          0          0          0  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Scatter()
+         2    0.07812    0.03125    0.05469    0.02344  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Send()
+         1       5.75       5.75       5.75          0  Increase in Heap Memory (KB) : addr=<0x433060> => addr=<0x433d30>
+         1          4          4          4          0  Message size for broadcast
+         0          0          0          0          0  Message size for gather
+      1000          4          4          4          0  Message size for reduce
+         1      1E+06      1E+06      1E+06          0  Message size for scatter
+      2000       4000       4000       4000          0  Message size received from all nodes
+      2000       4000       4000       4000          0  Message size sent to all nodes
+         0          0          0          0          0  Message size sent to node 0
+         0          0          0          0          0  Message size sent to node 0 : addr=<0x433060> => MPI_Send()
+      1000       4000       4000       4000          0  Message size sent to node 1
+      1000       4000       4000       4000          0  Message size sent to node 1 : addr=<0x433060> => MPI_Send()
+         0          0          0          0          0  Message size sent to node 2
+         0          0          0          0          0  Message size sent to node 2 : addr=<0x433060> => MPI_Send()
+      1000       4000       4000       4000          0  Message size sent to node 3
+      1000       4000       4000       4000          0  Message size sent to node 3 : addr=<0x433060> => MPI_Send()
+---------------------------------------------------------------------------------------
+
+NODE 3;CONTEXT 0;THREAD 0:
+---------------------------------------------------------------------------------------
+%Time    Exclusive    Inclusive       #Call      #Subrs  Inclusive Name
+              msec   total msec                          usec/call
+---------------------------------------------------------------------------------------
+100.0        0.084       17,754           1           1   17754905 .TAU application
+100.0           29       17,754           1        4010   17754821 .TAU application => addr=<0x433060>
+100.0           29       17,754           1        4010   17754821 addr=<0x433060>
+ 96.1       16,788       17,067        1000      200002      17068 addr=<0x433060> => addr=<0x433d30>
+ 96.1       16,788       17,067        1000      200002      17068 addr=<0x433d30>
+  1.6          280          280           1           0     280585 MPI_Init_thread()
+  1.6          280          280           1           0     280585 addr=<0x433060> => MPI_Init_thread()
+  1.5          269          269        1000           0        269 MPI_Recv()
+  1.5          269          269        1000           0        269 addr=<0x433060> => MPI_Recv()
+  0.8          141          141      100001           0          1 addr=<0x433a40> [THROTTLED]
+  0.8          141          141      100001           0          1 addr=<0x433d30> => addr=<0x433a40>
+  0.8          137          137      100001           0          1 addr=<0x4339d0> [THROTTLED]
+  0.8          137          137      100001           0          1 addr=<0x433d30> => addr=<0x4339d0>
+  0.5           81           81           1           0      81949 MPI_Finalize()
+  0.5           81           81           1           0      81949 addr=<0x433060> => MPI_Finalize()
+  0.1            8            8        1000           0          9 MPI_Send()
+  0.1            8            8        1000           0          9 addr=<0x433060> => MPI_Send()
+  0.0            8            8        1000           0          9 MPI_Reduce()
+  0.0            8            8        1000           0          9 addr=<0x433060> => MPI_Reduce()
+  0.0            4            4           2           0       2342 addr=<0x433060> => addr=<0x433c70>
+  0.0            4            4           2           0       2342 addr=<0x433c70>
+  0.0            1            1           1           0       1723 MPI_Scatter()
+  0.0            1            1           1           0       1723 addr=<0x433060> => MPI_Scatter()
+  0.0            1            1           1           0       1364 MPI_Gather()
+  0.0            1            1           1           0       1364 addr=<0x433060> => MPI_Gather()
+  0.0        0.392        0.392           1           0        392 addr=<0x433060> => addr=<0x433aa0>
+  0.0        0.392        0.392           1           0        392 addr=<0x433aa0>
+  0.0        0.147        0.147           1           0        147 MPI_Bcast()
+  0.0        0.147        0.147           1           0        147 addr=<0x433060> => MPI_Bcast()
+  0.0        0.018        0.018           1           0         18 MPI_Comm_rank()
+  0.0        0.018        0.018           1           0         18 addr=<0x433060> => MPI_Comm_rank()
+  0.0        0.008        0.008           1           0          8 MPI_Comm_size()
+  0.0        0.008        0.008           1           0          8 addr=<0x433060> => MPI_Comm_size()
+---------------------------------------------------------------------------------------
+
+USER EVENTS Profile :NODE 3, CONTEXT 0, THREAD 0
+---------------------------------------------------------------------------------------
+NumSamples   MaxValue   MinValue  MeanValue  Std. Dev.  Event Name
+---------------------------------------------------------------------------------------
+         1       2641       2641       2641          0  Decrease in Heap Memory (KB)
+         1       2641       2641       2641          0  Decrease in Heap Memory (KB) : addr=<0x433060> => MPI_Finalize()
+  2.04E+05  1.265E+04        133  1.265E+04       61.1  Heap Memory Used (KB) at Entry
+         1        133        133        133  1.907E-06  Heap Memory Used (KB) at Entry : .TAU application
+         1      135.7      135.7      135.7  1.907E-06  Heap Memory Used (KB) at Entry : addr=<0x433060>
+         1  1.065E+04  1.065E+04  1.065E+04  0.0001221  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Bcast()
+         1       2837       2837       2837  3.052E-05  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Comm_rank()
+         1       2839       2839       2839          0  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Comm_size()
+         1       2873       2873       2873  3.052E-05  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Finalize()
+         1  1.265E+04  1.265E+04  1.265E+04  0.0001726  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Gather()
+         1      137.9      137.9      137.9          0  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Init_thread()
+      1000  1.265E+04  1.264E+04  1.265E+04     0.3378  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Recv()
+      1000  1.265E+04  1.265E+04  1.265E+04  0.0001726  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Reduce()
+         1  1.263E+04  1.263E+04  1.263E+04  0.0001726  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Scatter()
+      1000  1.265E+04  1.264E+04  1.265E+04     0.4094  Heap Memory Used (KB) at Entry : addr=<0x433060> => MPI_Send()
+         1  1.263E+04  1.263E+04  1.263E+04  0.0001726  Heap Memory Used (KB) at Entry : addr=<0x433060> => addr=<0x433aa0>
+         2  1.263E+04  1.263E+04  1.263E+04  0.0001726  Heap Memory Used (KB) at Entry : addr=<0x433060> => addr=<0x433c70>
+      1000  1.265E+04  1.264E+04  1.265E+04     0.2504  Heap Memory Used (KB) at Entry : addr=<0x433060> => addr=<0x433d30>
+     1E+05  1.265E+04  1.264E+04  1.265E+04    0.01158  Heap Memory Used (KB) at Entry : addr=<0x433060> => addr=<0x433d30> => addr=<0x4339d0>
+     1E+05  1.265E+04  1.265E+04  1.265E+04    0.01451  Heap Memory Used (KB) at Entry : addr=<0x433060> => addr=<0x433d30> => addr=<0x433a40>
+  2.04E+05  1.265E+04      232.4  1.265E+04      60.84  Heap Memory Used (KB) at Exit
+         1      232.4      232.4      232.4  2.697E-06  Heap Memory Used (KB) at Exit : .TAU application
+         1      233.5      233.5      233.5  2.697E-06  Heap Memory Used (KB) at Exit : addr=<0x433060>
+         1  1.065E+04  1.065E+04  1.065E+04  0.0002114  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Bcast()
+         1       2837       2837       2837  3.052E-05  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Comm_rank()
+         1       2839       2839       2839          0  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Comm_size()
+         1      232.4      232.4      232.4  2.697E-06  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Finalize()
+         1  1.265E+04  1.265E+04  1.265E+04  0.0001726  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Gather()
+         1       2834       2834       2834          0  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Init_thread()
+      1000  1.265E+04  1.264E+04  1.265E+04     0.3378  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Recv()
+      1000  1.265E+04  1.265E+04  1.265E+04  0.0001726  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Reduce()
+         1  1.263E+04  1.263E+04  1.263E+04  0.0001726  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Scatter()
+      1000  1.265E+04  1.264E+04  1.265E+04     0.4069  Heap Memory Used (KB) at Exit : addr=<0x433060> => MPI_Send()
+         1  1.263E+04  1.263E+04  1.263E+04  0.0001726  Heap Memory Used (KB) at Exit : addr=<0x433060> => addr=<0x433aa0>
+         2  1.263E+04  1.263E+04  1.263E+04  0.0001726  Heap Memory Used (KB) at Exit : addr=<0x433060> => addr=<0x433c70>
+      1000  1.265E+04  1.265E+04  1.265E+04    0.06914  Heap Memory Used (KB) at Exit : addr=<0x433060> => addr=<0x433d30>
+     1E+05  1.265E+04  1.264E+04  1.265E+04    0.01158  Heap Memory Used (KB) at Exit : addr=<0x433060> => addr=<0x433d30> => addr=<0x4339d0>
+     1E+05  1.265E+04  1.265E+04  1.265E+04    0.01451  Heap Memory Used (KB) at Exit : addr=<0x433060> => addr=<0x433d30> => addr=<0x433a40>
+         6       2696    0.07812      483.2      990.7  Increase in Heap Memory (KB)
+         1      99.44      99.44      99.44          0  Increase in Heap Memory (KB) : .TAU application
+         1      97.75      97.75      97.75          0  Increase in Heap Memory (KB) : addr=<0x433060>
+         1     0.1562     0.1562     0.1562          0  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Bcast()
+         0          0          0          0          0  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Gather()
+         1       2696       2696       2696          0  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Init_thread()
+         0          0          0          0          0  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Recv()
+         0          0          0          0          0  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Scatter()
+         1    0.07812    0.07812    0.07812          0  Increase in Heap Memory (KB) : addr=<0x433060> => MPI_Send()
+         1      5.734      5.734      5.734          0  Increase in Heap Memory (KB) : addr=<0x433060> => addr=<0x433d30>
+         1          4          4          4          0  Message size for broadcast
+         0          0          0          0          0  Message size for gather
+      1000          4          4          4          0  Message size for reduce
+         1      1E+06      1E+06      1E+06          0  Message size for scatter
+      1000       4000       4000       4000          0  Message size received from all nodes
+      1000       4000       4000       4000          0  Message size sent to all nodes
+         0          0          0          0          0  Message size sent to node 0
+         0          0          0          0          0  Message size sent to node 0 : addr=<0x433060> => MPI_Send()
+         0          0          0          0          0  Message size sent to node 1
+         0          0          0          0          0  Message size sent to node 1 : addr=<0x433060> => MPI_Send()
+      1000       4000       4000       4000          0  Message size sent to node 2
+      1000       4000       4000       4000          0  Message size sent to node 2 : addr=<0x433060> => MPI_Send()
+         0          0          0          0          0  Message size sent to node 3
+         0          0          0          0          0  Message size sent to node 3 : addr=<0x433060> => MPI_Send()
+---------------------------------------------------------------------------------------
+
+FUNCTION SUMMARY (total):
+---------------------------------------------------------------------------------------
+%Time    Exclusive    Inclusive       #Call      #Subrs  Inclusive Name
+              msec   total msec                          usec/call
+---------------------------------------------------------------------------------------
+100.0        0.472     1:11.030           4           4   17757614 .TAU application
+100.0          138     1:11.029           4       20040   17757496 .TAU application => addr=<0x433060>
+100.0          138     1:11.029           4       20040   17757496 addr=<0x433060>
+ 96.4     1:07.320     1:08.440        4000      800008      17110 addr=<0x433060> => addr=<0x433d30>
+ 96.4     1:07.320     1:08.440        4000      800008      17110 addr=<0x433d30>
+  1.6        1,132        1,132           4           0     283217 MPI_Init_thread()
+  1.6        1,132        1,132           4           0     283217 addr=<0x433060> => MPI_Init_thread()
+  0.9          660          660        6000           0        110 MPI_Recv()
+  0.9          660          660        6000           0        110 addr=<0x433060> => MPI_Recv()
+  0.8          564          564      400004           0          1 addr=<0x433a40> [THROTTLED]
+  0.8          564          564      400004           0          1 addr=<0x433d30> => addr=<0x433a40>
+  0.8          556          556      400004           0          1 addr=<0x4339d0> [THROTTLED]
+  0.8          556          556      400004           0          1 addr=<0x433d30> => addr=<0x4339d0>
+  0.5          328          328           4           0      82004 MPI_Finalize()
+  0.5          328          328           4           0      82004 addr=<0x433060> => MPI_Finalize()
+  0.4          257          257        4000           0         64 MPI_Reduce()
+  0.4          257          257        4000           0         64 addr=<0x433060> => MPI_Reduce()
+  0.1           39           39        6000           0          7 MPI_Send()
+  0.1           39           39        6000           0          7 addr=<0x433060> => MPI_Send()
+  0.0           18           18           8           0       2280 addr=<0x433060> => addr=<0x433c70>
+  0.0           18           18           8           0       2280 addr=<0x433c70>
+  0.0            6            6           4           0       1560 MPI_Scatter()
+  0.0            6            6           4           0       1560 addr=<0x433060> => MPI_Scatter()
+  0.0            4            4           4           0       1237 MPI_Gather()
+  0.0            4            4           4           0       1237 addr=<0x433060> => MPI_Gather()
+  0.0            1            1           4           0        432 addr=<0x433060> => addr=<0x433aa0>
+  0.0            1            1           4           0        432 addr=<0x433aa0>
+  0.0        0.364        0.364           4           0         91 MPI_Bcast()
+  0.0        0.364        0.364           4           0         91 addr=<0x433060> => MPI_Bcast()
+  0.0        0.078        0.078           4           0         20 MPI_Comm_rank()
+  0.0        0.078        0.078           4           0         20 addr=<0x433060> => MPI_Comm_rank()
+  0.0        0.031        0.031           4           0          8 MPI_Comm_size()
+  0.0        0.031        0.031           4           0          8 addr=<0x433060> => MPI_Comm_size()
+
+FUNCTION SUMMARY (mean):
+---------------------------------------------------------------------------------------
+%Time    Exclusive    Inclusive       #Call      #Subrs  Inclusive Name
+              msec   total msec                          usec/call
+---------------------------------------------------------------------------------------
+100.0        0.118       17,757           1           1   17757614 .TAU application
+100.0           34       17,757           1        5010   17757496 .TAU application => addr=<0x433060>
+100.0           34       17,757           1        5010   17757496 addr=<0x433060>
+ 96.4       16,830       17,110        1000      200002      17110 addr=<0x433060> => addr=<0x433d30>
+ 96.4       16,830       17,110        1000      200002      17110 addr=<0x433d30>
+  1.6          283          283           1           0     283217 MPI_Init_thread()
+  1.6          283          283           1           0     283217 addr=<0x433060> => MPI_Init_thread()
+  0.9          165          165        1500           0        110 MPI_Recv()
+  0.9          165          165        1500           0        110 addr=<0x433060> => MPI_Recv()
+  0.8          141          141      100001           0          1 addr=<0x433a40> [THROTTLED]
+  0.8          141          141      100001           0          1 addr=<0x433d30> => addr=<0x433a40>
+  0.8          139          139      100001           0          1 addr=<0x4339d0> [THROTTLED]
+  0.8          139          139      100001           0          1 addr=<0x433d30> => addr=<0x4339d0>
+  0.5           82           82           1           0      82004 MPI_Finalize()
+  0.5           82           82           1           0      82004 addr=<0x433060> => MPI_Finalize()
+  0.4           64           64        1000           0         64 MPI_Reduce()
+  0.4           64           64        1000           0         64 addr=<0x433060> => MPI_Reduce()
+  0.1            9            9        1500           0          7 MPI_Send()
+  0.1            9            9        1500           0          7 addr=<0x433060> => MPI_Send()
+  0.0            4            4           2           0       2280 addr=<0x433060> => addr=<0x433c70>
+  0.0            4            4           2           0       2280 addr=<0x433c70>
+  0.0            1            1           1           0       1560 MPI_Scatter()
+  0.0            1            1           1           0       1560 addr=<0x433060> => MPI_Scatter()
+  0.0            1            1           1           0       1237 MPI_Gather()
+  0.0            1            1           1           0       1237 addr=<0x433060> => MPI_Gather()
+  0.0        0.432        0.432           1           0        432 addr=<0x433060> => addr=<0x433aa0>
+  0.0        0.432        0.432           1           0        432 addr=<0x433aa0>
+  0.0        0.091        0.091           1           0         91 MPI_Bcast()
+  0.0        0.091        0.091           1           0         91 addr=<0x433060> => MPI_Bcast()
+  0.0       0.0195       0.0195           1           0         20 MPI_Comm_rank()
+  0.0       0.0195       0.0195           1           0         20 addr=<0x433060> => MPI_Comm_rank()
+  0.0      0.00775      0.00775           1           0          8 MPI_Comm_size()
+  0.0      0.00775      0.00775           1           0          8 addr=<0x433060> => MPI_Comm_size()
+
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport$ paraprof
+Exception in thread "AWT-EventQueue-0" java.awt.HeadlessException:
+No X11 DISPLAY variable was set, but this program performed an operation which requires it.
+        at java.awt.GraphicsEnvironment.checkHeadless(GraphicsEnvironment.java:204)
+        at java.awt.Window.<init>(Window.java:536)
+        at java.awt.Frame.<init>(Frame.java:420)
+        at java.awt.Frame.<init>(Frame.java:385)
+        at javax.swing.JFrame.<init>(JFrame.java:189)
+        at edu.uoregon.tau.paraprof.ParaProfErrorDialog.<init>(ParaProfErrorDialog.java:37)
+        at edu.uoregon.tau.paraprof.ParaProfUtils.handleException(ParaProfUtils.java:1719)
+        at edu.uoregon.tau.paraprof.ParaProf$1.run(ParaProf.java:754)
+        at java.awt.event.InvocationEvent.dispatch(InvocationEvent.java:311)
+        at java.awt.EventQueue.dispatchEventImpl(EventQueue.java:756)
+        at java.awt.EventQueue.access$500(EventQueue.java:97)
+        at java.awt.EventQueue$3.run(EventQueue.java:709)
+        at java.awt.EventQueue$3.run(EventQueue.java:703)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:80)
+        at java.awt.EventQueue.dispatchEvent(EventQueue.java:726)
+        at java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:201)
+        at java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:116)
+        at java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:105)
+        at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:101)
+        at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:93)
+        at java.awt.EventDispatchThread.run(EventDispatchThread.java:82)
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport$ clear
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport$ module load gcc/6.1.0 openmpi/1.8.1
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport$ export OMP_NUM_THREADS=4
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport$ export I_MPI_PIN_DOMAIN=omp
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport$ export TAU_COMM_MATRIX=1
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport$ export TAU_TRACK_MESSAGE=1
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport$ export TAU_CALLPATH=1
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport$ export TAU_TRACK_HEAP=1
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport$ export TAU_TRACE=1
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport$ export PATH=/home/master/ppM/ppM-1-1/TAU/tau_install/x86_64/bin:$PATH
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport$ export TAU_MAKEFILE=/home/master/ppM/ppM-1-1/TAU/tau_install/x86_64/lib/Makefile.tau-mpi
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport$ export TAU_OPTIONS=-optCompInst
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport$ tau_cc.sh -o lapMPI9_HY -g -Wall -lm -Ofast -fopenmp lapFusionMPI9_hybrid.c
+Debug: Using compiler-based instrumentation
+
+
+Debug: Compiling (Individually) with Instrumented Code
+Executing> /soft/gcc-6.1.0/bin/gcc -g -Wall -lm -Ofast -fopenmp -I. -c lapFusionMPI9_hybrid.c -g -DPROFILING_ON -DTAU_GNU -DTAU_DOT_H_LESS_HEADERS -DTAU_MPI -DTAU_UNIFY -DTAU_MPI_THREADED -DTAU_LINUX_TIMERS -DTAU_MPIGREQUEST -DTAU_MPIDATAREP -DTAU_MPIERRHANDLER -DTAU_MPICONSTCHAR -DTAU_MPIATTRFUNCTION -DTAU_MPITYPEEX -DTAU_MPIADDERROR -DTAU_LARGEFILE -D_LARGEFILE64_SOURCE -DTAU_MPIFILE -DHAVE_TR1_HASH_MAP -DTAU_SS_ALLOC_SUPPORT -DEBS_CLOCK_RES=1 -DTAU_STRSIGNAL_OK -DTAU_TRACK_LD_LOADER -DTAU_MPICH3 -DTAU_MPI_EXTENSIONS -I/home/master/ppM/ppM-1-1/TAU/tau_install//include -I/soft/openmpi-1.8.1/include -I/soft/openmpi-1.8.1/include/openmpi -I/soft/openmpi-1.8.1/include/openmpi/ompi -I/soft/openmpi-1.8.1/lib -o lapFusionMPI9_hybrid.o -g -finstrument-functions -finstrument-functions-exclude-file-list=/usr/include
+
+
+Debug: Linking (Together) object files
+Executing> /soft/gcc-6.1.0/bin/gcc -g -Wall -lm -Ofast -fopenmp lapFusionMPI9_hybrid.o -L/home/master/ppM/ppM-1-1/TAU/tau_install//x86_64/lib -lTauMpi-mpi -L/soft/openmpi-1.8.1/lib -lmpi -lmpi_cxx -Wl,-rpath,/soft/openmpi-1.8.1/lib -L/home/master/ppM/ppM-1-1/TAU/tau_install//x86_64/lib -ltau-mpi -Wl,--export-dynamic -lrt -L/soft/openmpi-1.8.1/lib -lmpi -lmpi_cxx -Wl,-rpath,/soft/openmpi-1.8.1/lib -ldl -lm -L/soft/gcc-6.1.0/lib/gcc/x86_64-pc-linux-gnu/6.1.0/ -lstdc++ -lgcc_s -L/home/master/ppM/ppM-1-1/TAU/tau_install//x86_64/lib/static-mpi -g -o lapMPI9_HY
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport$ mpirun -np 4 lapMPI9_HY 1000
+TAU Warning: BFD is not available in at least one part of this TAU-instrumented application! Please check to see if BFD is not shared or not present. Expect some missing BFD functionality.
+TAU Warning: Comp_gnu - BFD is not available during TAU build. Symbols may not be resolved!
+TAU Warning: BFD is not available in at least one part of this TAU-instrumented application! Please check to see if BFD is not shared or not present. Expect some missing BFD functionality.
+TAU Warning: Comp_gnu - BFD is not available during TAU build. Symbols may not be resolved!
+TAU Warning: BFD is not available in at least one part of this TAU-instrumented application! Please check to see if BFD is not shared or not present. Expect some missing BFD functionality.
+TAU Warning: Comp_gnu - BFD is not available during TAU build. Symbols may not be resolved!
+TAU Warning: BFD is not available in at least one part of this TAU-instrumented application! Please check to see if BFD is not shared or not present. Expect some missing BFD functionality.
+TAU Warning: Comp_gnu - BFD is not available during TAU build. Symbols may not be resolved!
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Jacobi relaxation Calculation: 1000 x 1000 mesh, maximum of 1000 iterations
+Total Iterations:  1000, ERROR: 0.015535, A[7][7]= 0.016615
+ [0]            time: 17.944445
+
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport$ tau_treemerge.pl
+/home/master/ppM/ppM-1-1/TAU/tau_install/x86_64/bin/tau_merge -m tau.edf -e events.0.edf events.1.edf events.2.edf events.3.edf tautrace.0.0.0.trc tautrace.1.0.0.trc tautrace.2.0.0.trc tautrace.3.0.0.trc tau.trc
+tautrace.0.0.0.trc: 2873552 records read.
+tautrace.1.0.0.trc: 2915557 records read.
+tautrace.2.0.0.trc: 2915557 records read.
+tautrace.3.0.0.trc: 2873543 records read.
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport$ tau2slog2 tau.trc tau.edf -o tau.slog4
+Warning: The suffix of the output filename is NOT ".slog2".
+11578209 records initialized.  Processing.
+231564 Records read. 1% converted
+463128 Records read. 3% converted
+694692 Records read. 5% converted
+926256 Records read. 7% converted
+1157820 Records read. 9% converted
+1389384 Records read. 11% converted
+1620948 Records read. 13% converted
+1852512 Records read. 15% converted
+2084076 Records read. 17% converted
+2315640 Records read. 19% converted
+2547204 Records read. 21% converted
+2778768 Records read. 23% converted
+3010332 Records read. 25% converted
+3241896 Records read. 27% converted
+3473460 Records read. 29% converted
+3705024 Records read. 31% converted
+3936588 Records read. 33% converted
+4168152 Records read. 35% converted
+4399716 Records read. 37% converted
+4631280 Records read. 39% converted
+4862844 Records read. 41% converted
+5094408 Records read. 43% converted
+5325972 Records read. 45% converted
+5557536 Records read. 47% converted
+5789100 Records read. 49% converted
+6020664 Records read. 51% converted
+6252228 Records read. 53% converted
+6483792 Records read. 55% converted
+6715356 Records read. 57% converted
+6946920 Records read. 59% converted
+7178484 Records read. 61% converted
+7410048 Records read. 63% converted
+7641612 Records read. 65% converted
+7873176 Records read. 67% converted
+8104740 Records read. 69% converted
+8336304 Records read. 71% converted
+8567868 Records read. 73% converted
+8799432 Records read. 75% converted
+9030996 Records read. 77% converted
+9262560 Records read. 79% converted
+9494124 Records read. 81% converted
+9725688 Records read. 83% converted
+9957252 Records read. 85% converted
+10188816 Records read. 87% converted
+10420380 Records read. 89% converted
+10651944 Records read. 91% converted
+10883508 Records read. 93% converted
+11115072 Records read. 95% converted
+11346636 Records read. 97% converted
+1521 enters: 0 exits: 0
+1521 enters: 0 exits: 0
+1521 enters: 0 exits: 0
+11578200 Records read. 99% converted
+1521 enters: 0 exits: 0
+Reached end of trace file.
+         SLOG-2 Header:
+version = SLOG 2.0.6
+NumOfChildrenPerNode = 2
+TreeLeafByteSize = 65536
+MaxTreeDepth = 11
+MaxBufferByteSize = 128048
+Categories  is FBinfo(15515 @ 127893407)
+MethodDefs  is FBinfo(0 @ 0)
+LineIDMaps  is FBinfo(68 @ 127908922)
+TreeRoot    is FBinfo(15409 @ 127877998)
+TreeDir     is FBinfo(128048 @ 127908990)
+Annotations is FBinfo(0 @ 0)
+Postamble   is FBinfo(0 @ 0)
+
+1521 enters: 0 exits: 0
+
+
+Number of Drawables = 4134809
+timeElapsed between 1 & 2 = 108 msec
+timeElapsed between 2 & 3 = 10217 msec
+ppM-1-1@aolin21:~/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport$ jumpshot
+GUI_LIBDIR is set. GUI_LIBDIR = /home/master/ppM/ppM-1-1/TAU/tau_install//x86_64/lib
+Java is version 1.8.0_131.
+Starting the SLOG-2 Display Program .....
+Exception in thread "main" java.awt.HeadlessException:
+No X11 DISPLAY variable was set, but this program performed an operation which requires it.
+        at java.awt.GraphicsEnvironment.checkHeadless(GraphicsEnvironment.java:204)
+        at java.awt.Window.<init>(Window.java:536)
+        at java.awt.Frame.<init>(Frame.java:420)
+        at javax.swing.JFrame.<init>(JFrame.java:233)
+        at viewer.first.FirstFrame.<init>(FirstFrame.java:35)
+        at viewer.first.FirstFrame.main(FirstFrame.java:110)

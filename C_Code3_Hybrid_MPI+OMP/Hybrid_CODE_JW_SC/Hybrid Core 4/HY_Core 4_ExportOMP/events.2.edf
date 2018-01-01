@@ -1,0 +1,154 @@
+153 dynamic_trace_events
+# FunctionId Group Tag "Name Type" Parameters
+0 TAUEVENT 0 ".TAU <unknown event>" TriggerValue
+1 TAU_USER 0 ".TAU application " EntryExit
+4 TAU_DEFAULT 0 "addr=<0x433060> [{(unknown)} {0,0}] " EntryExit
+6 MPI 0 "MPI_Init_thread()  " EntryExit
+13 MPI 0 "MPI_Comm_rank()  " EntryExit
+16 MPI 0 "MPI_Comm_size()  " EntryExit
+19 MPI 0 "MPI_Bcast()  " EntryExit
+24 TAU_DEFAULT 0 "addr=<0x433c70> [{(unknown)} {0,0}] " EntryExit
+27 MPI 0 "MPI_Scatter()  " EntryExit
+31 TAU_DEFAULT 0 "addr=<0x433aa0> [{(unknown)} {0,0}] " EntryExit
+34 MPI 0 "MPI_Send()  " EntryExit
+41 MPI 0 "MPI_Recv()  " EntryExit
+48 TAU_DEFAULT 0 "addr=<0x433d30> [{(unknown)} {0,0}] " EntryExit
+50 TAU_DISABLE 0 "addr=<0x4339d0> [{(unknown)} {0,0}] [THROTTLED]" EntryExit
+53 TAU_DISABLE 0 "addr=<0x433a40> [{(unknown)} {0,0}] [THROTTLED]" EntryExit
+58 MPI 0 "MPI_Reduce()  " EntryExit
+62 MPI 0 "MPI_Gather()  " EntryExit
+65 MPI 0 "MPI_Finalize()  " EntryExit
+2 TAUEVENT 0 "Heap Memory Used (KB) at Entry" TriggerValue
+3 TAUEVENT 0 "Heap Memory Used (KB) at Entry : .TAU application" TriggerValue
+5 TAUEVENT 0 "Heap Memory Used (KB) at Entry : addr=<0x433060> [{(unknown)} {0,0}]" TriggerValue
+7 TAUEVENT 0 "Heap Memory Used (KB) at Entry : addr=<0x433060> [{(unknown)} {0,0}] => MPI_Init_thread()  " TriggerValue
+8 TAUEVENT 0 "Heap Memory Used (KB) at Exit" TriggerValue
+9 TAUEVENT 0 "Heap Memory Used (KB) at Exit : addr=<0x433060> [{(unknown)} {0,0}] => MPI_Init_thread()  " TriggerValue
+10 TAUEVENT 0 "Increase in Heap Memory (KB)" TriggerValue
+11 TAUEVENT 0 "Increase in Heap Memory (KB) : addr=<0x433060> [{(unknown)} {0,0}] => MPI_Init_thread()  " TriggerValue
+12 TAUEVENT 0 "TauTraceClockOffsetStart" TriggerValue
+14 TAUEVENT 0 "Heap Memory Used (KB) at Entry : addr=<0x433060> [{(unknown)} {0,0}] => MPI_Comm_rank()  " TriggerValue
+15 TAUEVENT 0 "Heap Memory Used (KB) at Exit : addr=<0x433060> [{(unknown)} {0,0}] => MPI_Comm_rank()  " TriggerValue
+17 TAUEVENT 0 "Heap Memory Used (KB) at Entry : addr=<0x433060> [{(unknown)} {0,0}] => MPI_Comm_size()  " TriggerValue
+18 TAUEVENT 0 "Heap Memory Used (KB) at Exit : addr=<0x433060> [{(unknown)} {0,0}] => MPI_Comm_size()  " TriggerValue
+20 TAUEVENT 0 "Heap Memory Used (KB) at Entry : addr=<0x433060> [{(unknown)} {0,0}] => MPI_Bcast()  " TriggerValue
+21 TAUEVENT 0 "Message size for broadcast" TriggerValue
+22 TAUEVENT 0 "Heap Memory Used (KB) at Exit : addr=<0x433060> [{(unknown)} {0,0}] => MPI_Bcast()  " TriggerValue
+23 TAUEVENT 0 "Increase in Heap Memory (KB) : addr=<0x433060> [{(unknown)} {0,0}] => MPI_Bcast()  " TriggerValue
+25 TAUEVENT 0 "Heap Memory Used (KB) at Entry : addr=<0x433060> [{(unknown)} {0,0}] => addr=<0x433c70> [{(unknown)} {0,0}]" TriggerValue
+26 TAUEVENT 0 "Heap Memory Used (KB) at Exit : addr=<0x433060> [{(unknown)} {0,0}] => addr=<0x433c70> [{(unknown)} {0,0}]" TriggerValue
+28 TAUEVENT 0 "Heap Memory Used (KB) at Entry : addr=<0x433060> [{(unknown)} {0,0}] => MPI_Scatter()  " TriggerValue
+29 TAUEVENT 0 "Message size for scatter" TriggerValue
+30 TAUEVENT 0 "Heap Memory Used (KB) at Exit : addr=<0x433060> [{(unknown)} {0,0}] => MPI_Scatter()  " TriggerValue
+32 TAUEVENT 0 "Heap Memory Used (KB) at Entry : addr=<0x433060> [{(unknown)} {0,0}] => addr=<0x433aa0> [{(unknown)} {0,0}]" TriggerValue
+33 TAUEVENT 0 "Heap Memory Used (KB) at Exit : addr=<0x433060> [{(unknown)} {0,0}] => addr=<0x433aa0> [{(unknown)} {0,0}]" TriggerValue
+35 TAUEVENT 0 "Heap Memory Used (KB) at Entry : addr=<0x433060> [{(unknown)} {0,0}] => MPI_Send()  " TriggerValue
+36 TAUEVENT 0 "Message size sent to all nodes" TriggerValue
+37 TAUEVENT 0 "Message size sent to node 1" TriggerValue
+38 TAUEVENT 0 "Message size sent to node 1 : addr=<0x433060> [{(unknown)} {0,0}] => MPI_Send()  " TriggerValue
+39 TAUEVENT 0 "Heap Memory Used (KB) at Exit : addr=<0x433060> [{(unknown)} {0,0}] => MPI_Send()  " TriggerValue
+40 TAUEVENT 0 "Increase in Heap Memory (KB) : addr=<0x433060> [{(unknown)} {0,0}] => MPI_Send()  " TriggerValue
+42 TAUEVENT 0 "Heap Memory Used (KB) at Entry : addr=<0x433060> [{(unknown)} {0,0}] => MPI_Recv()  " TriggerValue
+43 TAUEVENT 0 "Message size received from all nodes" TriggerValue
+44 TAUEVENT 0 "Heap Memory Used (KB) at Exit : addr=<0x433060> [{(unknown)} {0,0}] => MPI_Recv()  " TriggerValue
+45 TAUEVENT 0 "Increase in Heap Memory (KB) : addr=<0x433060> [{(unknown)} {0,0}] => MPI_Recv()  " TriggerValue
+46 TAUEVENT 0 "Message size sent to node 3" TriggerValue
+47 TAUEVENT 0 "Message size sent to node 3 : addr=<0x433060> [{(unknown)} {0,0}] => MPI_Send()  " TriggerValue
+49 TAUEVENT 0 "Heap Memory Used (KB) at Entry : addr=<0x433060> [{(unknown)} {0,0}] => addr=<0x433d30> [{(unknown)} {0,0}]" TriggerValue
+51 TAUEVENT 0 "Heap Memory Used (KB) at Entry : addr=<0x433060> [{(unknown)} {0,0}] => addr=<0x433d30> [{(unknown)} {0,0}] => addr=<0x4339d0> [{(unknown)} {0,0}]" TriggerValue
+52 TAUEVENT 0 "Heap Memory Used (KB) at Exit : addr=<0x433060> [{(unknown)} {0,0}] => addr=<0x433d30> [{(unknown)} {0,0}] => addr=<0x4339d0> [{(unknown)} {0,0}]" TriggerValue
+54 TAUEVENT 0 "Heap Memory Used (KB) at Entry : addr=<0x433060> [{(unknown)} {0,0}] => addr=<0x433d30> [{(unknown)} {0,0}] => addr=<0x433a40> [{(unknown)} {0,0}]" TriggerValue
+55 TAUEVENT 0 "Heap Memory Used (KB) at Exit : addr=<0x433060> [{(unknown)} {0,0}] => addr=<0x433d30> [{(unknown)} {0,0}] => addr=<0x433a40> [{(unknown)} {0,0}]" TriggerValue
+56 TAUEVENT 0 "Heap Memory Used (KB) at Exit : addr=<0x433060> [{(unknown)} {0,0}] => addr=<0x433d30> [{(unknown)} {0,0}]" TriggerValue
+57 TAUEVENT 0 "Increase in Heap Memory (KB) : addr=<0x433060> [{(unknown)} {0,0}] => addr=<0x433d30> [{(unknown)} {0,0}]" TriggerValue
+59 TAUEVENT 0 "Heap Memory Used (KB) at Entry : addr=<0x433060> [{(unknown)} {0,0}] => MPI_Reduce()  " TriggerValue
+60 TAUEVENT 0 "Message size for reduce" TriggerValue
+61 TAUEVENT 0 "Heap Memory Used (KB) at Exit : addr=<0x433060> [{(unknown)} {0,0}] => MPI_Reduce()  " TriggerValue
+63 TAUEVENT 0 "Heap Memory Used (KB) at Entry : addr=<0x433060> [{(unknown)} {0,0}] => MPI_Gather()  " TriggerValue
+64 TAUEVENT 0 "Heap Memory Used (KB) at Exit : addr=<0x433060> [{(unknown)} {0,0}] => MPI_Gather()  " TriggerValue
+66 TAUEVENT 0 "Heap Memory Used (KB) at Entry : addr=<0x433060> [{(unknown)} {0,0}] => MPI_Finalize()  " TriggerValue
+67 TAUEVENT 0 "TauTraceClockOffsetEnd" TriggerValue
+68 TAUEVENT 0 "Heap Memory Used (KB) at Exit : addr=<0x433060> [{(unknown)} {0,0}] => MPI_Finalize()  " TriggerValue
+69 TAUEVENT 0 "Decrease in Heap Memory (KB)" TriggerValue
+70 TAUEVENT 0 "Decrease in Heap Memory (KB) : addr=<0x433060> [{(unknown)} {0,0}] => MPI_Finalize()  " TriggerValue
+71 TAUEVENT 0 "Heap Memory Used (KB) at Exit : addr=<0x433060> [{(unknown)} {0,0}]" TriggerValue
+72 TAUEVENT 0 "Increase in Heap Memory (KB) : addr=<0x433060> [{(unknown)} {0,0}]" TriggerValue
+73 TAUEVENT 0 "Heap Memory Used (KB) at Exit : .TAU application" TriggerValue
+74 TAUEVENT 0 "Increase in Heap Memory (KB) : .TAU application" TriggerValue
+75 TAUEVENT 0 "CPU Cores | 4" TriggerValue
+76 TAUEVENT 0 "CPU MHz | 1596.000" TriggerValue
+77 TAUEVENT 0 "CPU Type | Intel(R) Core(TM) i7 CPU 950 @ 3.07GHz" TriggerValue
+78 TAUEVENT 0 "CPU Vendor | GenuineIntel" TriggerValue
+79 TAUEVENT 0 "CRAY_CORE_ID | 6" TriggerValue
+80 TAUEVENT 0 "CWD | /home/master/ppM/ppM-1-1/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport" TriggerValue
+81 TAUEVENT 0 "Cache Size | 8192 KB" TriggerValue
+82 TAUEVENT 0 "Command Line | lapMPI9_HY 1000" TriggerValue
+83 TAUEVENT 0 "Ending Timestamp | 1514635255976988" TriggerValue
+84 TAUEVENT 0 "Executable | /home/master/ppM/ppM-1-1/Escritorio/MPI/Basic_TAU_FINAL/Hybrid_Codes/HYCore4_OMPExport/lapMPI9_HY" TriggerValue
+85 TAUEVENT 0 "Hostname | aolin21.uab.es" TriggerValue
+86 TAUEVENT 0 "Local Time | 2017-12-30T13:00:37+01:00" TriggerValue
+87 TAUEVENT 0 "MPI Processor Name | aolin21.uab.es" TriggerValue
+88 TAUEVENT 0 "Memory Size | 7999984 kB" TriggerValue
+89 TAUEVENT 0 "Node Name | aolin21.uab.es" TriggerValue
+90 TAUEVENT 0 "OS Machine | x86_64" TriggerValue
+91 TAUEVENT 0 "OS Name | Linux" TriggerValue
+92 TAUEVENT 0 "OS Release | 3.10.0-327.13.1.el7.x86_64" TriggerValue
+93 TAUEVENT 0 "OS Version | #1 SMP Thu Mar 31 16:04:38 UTC 2016" TriggerValue
+94 TAUEVENT 0 "Starting Timestamp | 1514635237745352" TriggerValue
+95 TAUEVENT 0 "TAU Architecture | default" TriggerValue
+96 TAUEVENT 0 "TAU Config |  -prefix=/home/master/ppM/ppM-1-1/TAU/tau_install/ -mpi" TriggerValue
+97 TAUEVENT 0 "TAU Makefile | /home/master/ppM/ppM-1-1/TAU/tau_install//x86_64/lib/Makefile.tau-mpi" TriggerValue
+98 TAUEVENT 0 "TAU Version | 2.27-git" TriggerValue
+99 TAUEVENT 0 "TAU_BFD_LOOKUP | on" TriggerValue
+100 TAUEVENT 0 "TAU_CALLPATH_DEPTH | 2" TriggerValue
+101 TAUEVENT 0 "TAU_CALLSITE_DEPTH | 1" TriggerValue
+102 TAUEVENT 0 "TAU_COMM_MATRIX | on" TriggerValue
+103 TAUEVENT 0 "TAU_CUDA_BINARY_EXE | " TriggerValue
+104 TAUEVENT 0 "TAU_CUPTI_API | runtime" TriggerValue
+105 TAUEVENT 0 "TAU_EBS_KEEP_UNRESOLVED_ADDR | off" TriggerValue
+106 TAUEVENT 0 "TAU_IBM_BG_HWP_COUNTERS | off" TriggerValue
+107 TAUEVENT 0 "TAU_MAX_THREADS | 1" TriggerValue
+108 TAUEVENT 0 "TAU_MEASURE_TAU | off" TriggerValue
+109 TAUEVENT 0 "TAU_MEMDBG_PROTECT_ABOVE | off" TriggerValue
+110 TAUEVENT 0 "TAU_MEMDBG_PROTECT_BELOW | off" TriggerValue
+111 TAUEVENT 0 "TAU_MEMDBG_PROTECT_FREE | off" TriggerValue
+112 TAUEVENT 0 "TAU_OPENMP_RUNTIME | on" TriggerValue
+113 TAUEVENT 0 "TAU_OPENMP_RUNTIME_EVENTS | on" TriggerValue
+114 TAUEVENT 0 "TAU_OPENMP_RUNTIME_STATES | off" TriggerValue
+115 TAUEVENT 0 "TAU_OUTPUT_CUDA_CSV | off" TriggerValue
+116 TAUEVENT 0 "TAU_PAPI_MULTIPLEXING | off" TriggerValue
+117 TAUEVENT 0 "TAU_PROFILE | off" TriggerValue
+118 TAUEVENT 0 "TAU_PROFILE_FORMAT | profile" TriggerValue
+119 TAUEVENT 0 "TAU_SAMPLING | off" TriggerValue
+120 TAUEVENT 0 "TAU_SHOW_MEMORY_FUNCTIONS | off" TriggerValue
+121 TAUEVENT 0 "TAU_SIGNALS_GDB | off" TriggerValue
+122 TAUEVENT 0 "TAU_SYNCHRONIZE_CLOCKS | on" TriggerValue
+123 TAUEVENT 0 "TAU_THROTTLE | on" TriggerValue
+124 TAUEVENT 0 "TAU_THROTTLE_NUMCALLS | 100000" TriggerValue
+125 TAUEVENT 0 "TAU_THROTTLE_PERCALL | 10" TriggerValue
+126 TAUEVENT 0 "TAU_TRACE | on" TriggerValue
+127 TAUEVENT 0 "TAU_TRACE_FORMAT | tau" TriggerValue
+128 TAUEVENT 0 "TAU_TRACK_CUDA_CDP | off" TriggerValue
+129 TAUEVENT 0 "TAU_TRACK_CUDA_INSTRUCTIONS | " TriggerValue
+130 TAUEVENT 0 "TAU_TRACK_CUDA_SASS | off" TriggerValue
+131 TAUEVENT 0 "TAU_TRACK_HEADROOM | off" TriggerValue
+132 TAUEVENT 0 "TAU_TRACK_HEAP | on" TriggerValue
+133 TAUEVENT 0 "TAU_TRACK_IO_PARAMS | off" TriggerValue
+134 TAUEVENT 0 "TAU_TRACK_MEMORY_FOOTPRINT | off" TriggerValue
+135 TAUEVENT 0 "TAU_TRACK_MEMORY_LEAKS | off" TriggerValue
+136 TAUEVENT 0 "TAU_TRACK_MESSAGE | on" TriggerValue
+137 TAUEVENT 0 "TAU_TRACK_SIGNALS | off" TriggerValue
+138 TAUEVENT 0 "TAU_TRACK_UNIFIED_MEMORY | off" TriggerValue
+139 TAUEVENT 0 "Timestamp | 1514635237745452" TriggerValue
+140 TAUEVENT 0 "UTC Time | 2017-12-30T12:00:37Z" TriggerValue
+141 TAUEVENT 0 "pid | 8191" TriggerValue
+142 TAUEVENT 0 "tid | 8191" TriggerValue
+143 TAUEVENT 0 "username | ppM-1-1" TriggerValue
+60000 TRACER 0 "EV_INIT" none
+60001 TRACER 0 "FLUSH" EntryExit
+60003 TRACER 0 "FLUSH_CLOSE" none
+60004 TRACER 0 "FLUSH_INITM" none
+60005 TRACER 0 "WALL_CLOCK" none
+60006 TRACER 0 "CONT_EVENT" none
+60007 TAU_MESSAGE -7 "MESSAGE_SEND" par
+60008 TAU_MESSAGE -8 "MESSAGE_RECV" par

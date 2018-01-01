@@ -1,0 +1,646 @@
+﻿1) Original File (laplace2d.c)
+Compiling with GCC
+$ module add gcc/6.1.0
+$ gcc –Ofast –lm laplace2d.c –o L2Dg
+
+Executing & Measuring Performance (laplace2d.c)
+ppM-1-1@aolin21:~/Escritorio$ perf stat ./L2Dg 100
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 100 iterations
+   10, 0.155006
+   20, 0.110024
+   30, 0.089901
+   40, 0.077374
+   50, 0.069623
+   60, 0.063285
+   70, 0.058825
+   80, 0.054946
+   90, 0.051831
+  100, 0.049208
+
+ Performance counter stats for './L2Dg 100':
+
+      79748,119687      task-clock (msec)         #    1,001 CPUs utilized      
+             4.009      context-switches          #    0,050 K/sec              
+                 1      cpu-migrations            #    0,000 K/sec              
+               744      page-faults               #    0,009 K/sec              
+   268.485.915.829      cycles                    #    3,367 GHz                
+   259.014.340.769      stalled-cycles-frontend   #   96,47% frontend cycles idle
+   205.006.505.617      stalled-cycles-backend    #   76,36% backend  cycles idle
+    20.399.975.624      instructions              #    0,08  insns per cycle    
+                                                  #   12,70  stalled cycles per insn
+     2.564.300.220      branches                  #   32,155 M/sec              
+         1.476.270      branch-misses             #    0,06% of all branches    
+
+      79,647555344 seconds time elapsed
+
+2) 1) Loop fusion: 
+compute new cell and error in the same loop
+ppM-1-1@aolin21:~/Escritorio$ perf stat ./L2Dg1 100
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 100 iterations
+   10, 0.155006
+   20, 0.110024
+   30, 0.089901
+   40, 0.077374
+   50, 0.069623
+   60, 0.063285
+   70, 0.058825
+   80, 0.054945
+   90, 0.051831
+  100, 0.049208
+
+ Performance counter stats for './L2Dg1 100':
+
+      86594,104849      task-clock (msec)         #    1,001 CPUs utilized      
+             4.414      context-switches          #    0,051 K/sec              
+                10      cpu-migrations            #    0,000 K/sec              
+               743      page-faults               #    0,009 K/sec              
+   291.117.204.808      cycles                    #    3,362 GHz                
+   278.967.841.319      stalled-cycles-frontend   #   95,83% frontend cycles idle
+   213.840.334.865      stalled-cycles-backend    #   73,46% backend  cycles idle
+    28.388.063.569      instructions              #    0,10  insns per cycle    
+                                                  #    9,83  stalled cycles per insn
+     1.311.985.738      branches                  #   15,151 M/sec              
+         1.589.030      branch-misses             #    0,12% of all branches    
+
+      86,501908274 seconds time elapsed
+
+
+---
+2) Loop interchange (laplace2d2.c)
+ppM-1-1@aolin21:~/Escritorio$ gcc -Ofast -lm laplace2d2.c -o L2Dg2              
+ppM-1-1@aolin21:~/Escritorio$ perf stat ./L2Dg2 100                             
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 100 iterations
+   10, 0.155006
+   20, 0.110024
+   30, 0.089901
+   40, 0.077374
+   50, 0.069623
+   60, 0.063285
+   70, 0.058825
+   80, 0.054945
+   90, 0.051831
+  100, 0.049208
+
+ Performance counter stats for './L2Dg2 100':
+
+       4056,330499      task-clock (msec)         #    1,000 CPUs utilized      
+               233      context-switches          #    0,057 K/sec              
+                 2      cpu-migrations            #    0,000 K/sec              
+               748      page-faults               #    0,184 K/sec              
+    13.464.166.489      cycles                    #    3,319 GHz                
+     9.730.082.922      stalled-cycles-frontend   #   72,27% frontend cycles idle
+     4.807.041.814      stalled-cycles-backend    #   35,70% backend  cycles idle
+    10.335.611.669      instructions              #    0,77  insns per cycle    
+                                                  #    0,94  stalled cycles per insn
+       479.060.511      branches                  #  118,102 M/sec              
+         1.262.787      branch-misses             #    0,26% of all branches    
+
+       4,055051007 seconds time elapsed
+
+3) Strength Reduction: (laplace2d2sr.c)
+
+ppM-1-1@aolin21:~/Escritorio$ gcc -Ofast -lm laplace2d2sr.c -o L2Dg2sr
+ppM-1-1@aolin21:~/Escritorio$ perf stat ./L2Dg2sr 100
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 100 iterations
+   10, 0.155006
+   20, 0.110024
+   30, 0.089901
+   40, 0.077374
+   50, 0.069623
+   60, 0.063285
+   70, 0.058825
+   80, 0.054945
+   90, 0.051831
+  100, 0.049208
+
+ Performance counter stats for './L2Dg2sr 100':
+
+       4068,578111      task-clock (msec)         #    1,000 CPUs utilized      
+               239      context-switches          #    0,059 K/sec              
+                 6      cpu-migrations            #    0,001 K/sec              
+               748      page-faults               #    0,184 K/sec              
+    13.467.384.002      cycles                    #    3,310 GHz                
+     9.727.527.573      stalled-cycles-frontend   #   72,23% frontend cycles idle
+     4.848.135.779      stalled-cycles-backend    #   36,00% backend  cycles idle
+    10.335.802.331      instructions              #    0,77  insns per cycle    
+                                                  #    0,94  stalled cycles per insn
+       479.097.169      branches                  #  117,755 M/sec              
+         1.263.564      branch-misses             #    0,26% of all branches    
+
+       4,067153493 seconds time elapsed
+
+4) Code Motion: remove sqrtf() from inner loop and move outside	   
+ppM-1-1@aolin21:~/Escritorio$ gcc -Ofast -lm laplace2d2srcm.c -o L2Dg2srcm
+ppM-1-1@aolin21:~/Escritorio$ perf stat ./L2Dg2srcm 100
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 100 iterations
+   10, 0.155006
+   20, 0.110024
+   30, 0.089901
+   40, 0.077374
+   50, 0.069623
+   60, 0.063285
+   70, 0.058825
+   80, 0.054945
+   90, 0.051831
+  100, 0.049208
+
+ Performance counter stats for './L2Dg2srcm 100':
+
+       3881,028469      task-clock (msec)         #    1,000 CPUs utilized
+               228      context-switches          #    0,059 K/sec
+                 2      cpu-migrations            #    0,001 K/sec
+               748      page-faults               #    0,193 K/sec
+    12.673.386.635      cycles                    #    3,265 GHz
+    10.350.612.481      stalled-cycles-frontend   #   81,67% frontend cycles idle
+     5.368.092.104      stalled-cycles-backend    #   42,36% backend  cycles idle
+     6.569.338.421      instructions              #    0,52  insns per cycle
+                                                  #    1,58  stalled cycles per insn
+       478.956.029      branches                  #  123,410 M/sec
+         1.251.006      branch-misses             #    0,26% of all branches
+
+       3,881353225 seconds time elapsed
+
+5) Double Buffer: avoid copying from Anew to A by reversing roles of
+A and Anew on every iteration
+
+5ppM-1-1@aolin21:~/Escritorio$ perf stat ./L2Dg2srcmdb1 100
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 100 iterations
+   10, 0.405117
+   20, 0.410726
+   30, 0.412261
+   40, 0.412927
+   50, 0.413285
+   60, 0.413503
+   70, 0.413647
+   80, 0.413748
+   90, 0.413823
+  100, 0.413879
+
+ Performance counter stats for './L2Dg2srcmdb1 100':
+
+       2004,097092      task-clock (msec)         #    1,000 CPUs utilized
+               124      context-switches          #    0,062 K/sec
+                 0      cpu-migrations            #    0,000 K/sec
+               748      page-faults               #    0,373 K/sec
+     6.689.630.168      cycles                    #    3,338 GHz
+     3.923.676.785      stalled-cycles-frontend   #   58,65% frontend cycles idle
+     2.682.633.069      stalled-cycles-backend    #   40,10% backend  cycles idle
+     5.915.034.220      instructions              #    0,88  insns per cycle
+                                                  #    0,66  stalled cycles per insn
+       422.070.398      branches                  #  210,604 M/sec
+           627.696      branch-misses             #    0,15% of all branches
+
+       2,003427321 seconds time elapsed
+
+----
+
+##### (Additional WorK with Matrix)
+6) Modify size of matrix and total iterations and check performance
+ppM-1-1@aolin21:~/Escritorio$ gcc -Ofast -lm -Dn=4096 -Dm=4096 laplace2d2srcmdb1.c -o L2Dg2srcmdb1
+ppM-1-1@aolin21:~/Escritorio$ perf stat ./L2Dg2srcmdb1 100
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 100 iterations
+   10, 0.405117
+   20, 0.410726
+   30, 0.412261
+   40, 0.412927
+   50, 0.413285
+   60, 0.413503
+   70, 0.413647
+   80, 0.413748
+   90, 0.413823
+  100, 0.413879
+
+ Performance counter stats for './L2Dg2srcmdb1 100':
+
+       2035,792610      task-clock (msec)         #    1,000 CPUs utilized
+               130      context-switches          #    0,064 K/sec
+                 3      cpu-migrations            #    0,001 K/sec
+               748      page-faults               #    0,367 K/sec
+     6.663.520.769      cycles                    #    3,273 GHz
+     3.896.411.477      stalled-cycles-frontend   #   58,47% frontend cycles idle
+     2.132.947.483      stalled-cycles-backend    #   32,01% backend  cycles idle
+     5.915.528.378      instructions              #    0,89  insns per cycle
+                                                  #    0,66  stalled cycles per insn
+       422.149.731      branches                  #  207,364 M/sec
+           637.533      branch-misses             #    0,15% of all branches
+
+       2,035903166 seconds time elapsed
+
+Problem Size (n,m,iter) = wall-clock time
+a-(4096, 4096, 100)  = 2,035903166 seconds time elapsed (with gcc/6.1.0)
+
+Now try with intel....
+ppM-1-1@aolin21:~/Escritorio$ module add intel/18.0.0
+ppM-1-1@aolin21:~/Escritorio$ icc -O3 -lm -Dn=4096 -Dm=4096 laplace2d2srcmdb1.c -o L2Dg2srcmdb1
+ppM-1-1@aolin21:~/Escritorio$ perf stat ./L2Dg2srcmdb1 100
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 100 iterations
+   10, 0.405117
+   20, 0.410726
+   30, 0.412261
+   40, 0.412927
+   50, 0.413285
+   60, 0.413503
+   70, 0.413647
+   80, 0.413748
+   90, 0.413823
+  100, 0.413879
+
+ Performance counter stats for './L2Dg2srcmdb1 100':
+
+       6383,552593      task-clock (msec)         #    1,000 CPUs utilized
+               357      context-switches          #    0,056 K/sec
+                 4      cpu-migrations            #    0,001 K/sec
+               748      page-faults               #    0,117 K/sec
+    21.280.890.885      cycles                    #    3,334 GHz
+     2.670.939.626      stalled-cycles-frontend   #   12,55% frontend cycles idle
+     1.391.049.070      stalled-cycles-backend    #    6,54% backend  cycles idle
+    35.245.100.844      instructions              #    1,66  insns per cycle
+                                                  #    0,08  stalled cycles per insn
+     8.946.159.066      branches                  # 1401,439 M/sec
+         1.823.070      branch-misses             #    0,02% of all branches
+
+       6,380628538 seconds time elapsed
+	   
+Problem Size (n,m,iter) = wall-clock time
+a-(4096, 4096, 100) = 6,380628538 seconds time elapsed (with intel/16.0.0)
+
+It is best to use... gcc/6.1.0
+-----
+ppM-1-1@aolin21:~/Escritorio$ module add gcc/6.1.0
+ppM-1-1@aolin21:~/Escritorio$ gcc -O3 -lm -Dn=4096 -Dm=4096 laplace2d2srcmdb1.c -o L2Dg2srcmdb1
+ppM-1-1@aolin21:~/Escritorio$ perf stat ./L2Dg2srcmdb1 1000
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 1000 iterations
+  100, 0.413879
+  200, 0.414094
+  300, 0.414148
+  400, 0.414171
+  500, 0.414183
+  600, 0.414190
+  700, 0.414195
+  800, 0.414199
+  900, 0.414201
+ 1000, 0.414203
+
+ Performance counter stats for './L2Dg2srcmdb1 1000':
+
+     105782,337614      task-clock (msec)         #    1,001 CPUs utilized
+             5.312      context-switches          #    0,050 K/sec
+                 0      cpu-migrations            #    0,000 K/sec
+               749      page-faults               #    0,007 K/sec
+   355.577.460.394      cycles                    #    3,361 GHz
+   126.110.739.309      stalled-cycles-frontend   #   35,47% frontend cycles idle
+   118.854.369.964      stalled-cycles-backend    #   33,43% backend  cycles idle
+   352.455.376.641      instructions              #    0,99  insns per cycle
+                                                  #    0,36  stalled cycles per insn
+    89.464.425.025      branches                  #  845,741 M/sec
+        38.258.901      branch-misses             #    0,04% of all branches
+
+     105,704487161 seconds time elapsed
+
+
+Problem Size (n,m,iter) = wall-clock time
+b-(4096, 4096, 1000) = 105,704487161 seconds time elapsed (with gcc/6.1.0)
+   
+----
+ppM-1-1@aolin21:~/Escritorio$ gcc -Ofast -lm -Dn=512 -Dm=1024 laplace2d2srcmdb1.c -o L2Dg2srcmdb1
+ppM-1-1@aolin21:~/Escritorio$ perf stat ./L2Dg2srcmdb1 100
+Jacobi relaxation Calculation: 512 x 1024 mesh, maximum of 100 iterations
+   10, 0.405118
+   20, 0.410727
+   30, 0.412261
+   40, 0.412927
+   50, 0.413285
+   60, 0.413503
+   70, 0.413648
+   80, 0.413749
+   90, 0.413823
+  100, 0.413880
+
+ Performance counter stats for './L2Dg2srcmdb1 100':
+
+         58,451175      task-clock (msec)         #    0,977 CPUs utilized
+                26      context-switches          #    0,445 K/sec
+                 0      cpu-migrations            #    0,000 K/sec
+               681      page-faults               #    0,012 M/sec
+       104.003.914      cycles                    #    1,779 GHz
+        17.213.161      stalled-cycles-frontend   #   16,55% frontend cycles idle
+         7.540.180      stalled-cycles-backend    #    7,25% backend  cycles idle
+       189.258.832      instructions              #    1,82  insns per cycle
+                                                  #    0,09  stalled cycles per insn
+        13.573.458      branches                  #  232,219 M/sec
+            65.252      branch-misses             #    0,48% of all branches
+
+       0,059829563 seconds time elapsed
+	   
+Problem Size (n,m,iter) = wall-clock time	   
+c-(512, 1024, 100) = 0,059829563 seconds time elapse (with gcc/6.1.0)
+   
+----
+ppM-1-1@aolin21:~/Escritorio$ gcc -Ofast -lm -Dn=512 -Dm=1024 laplace2d2srcmdb1.c -o L2Dg2srcmdb1
+ppM-1-1@aolin21:~/Escritorio$ perf stat ./L2Dg2srcmdb1 1000
+Jacobi relaxation Calculation: 512 x 1024 mesh, maximum of 1000 iterations
+  100, 0.413880
+  200, 0.414095
+  300, 0.414149
+  400, 0.414172
+  500, 0.414184
+  600, 0.414191
+  700, 0.414196
+  800, 0.414199
+  900, 0.414201
+ 1000, 0.414203
+
+ Performance counter stats for './L2Dg2srcmdb1 1000':
+
+        363,498149      task-clock (msec)         #    0,998 CPUs utilized
+                41      context-switches          #    0,113 K/sec
+                 1      cpu-migrations            #    0,003 K/sec
+               682      page-faults               #    0,002 M/sec
+     1.014.793.966      cycles                    #    2,792 GHz
+       160.774.301      stalled-cycles-frontend   #   15,84% frontend cycles idle
+        65.354.606      stalled-cycles-backend    #    6,44% backend  cycles idle
+     1.864.729.366      instructions              #    1,84  insns per cycle
+                                                  #    0,09  stalled cycles per insn
+       130.804.674      branches                  #  359,850 M/sec
+           528.516      branch-misses             #    0,40% of all branches
+
+       0,364318199 seconds time elapsed
+
+Problem Size (n,m,iter) = wall-clock time 
+d-(512, 1024, 1000) = 0,364318199 seconds time elapsed (with gcc/6.1.0)
+
+----
+ppM-1-1@aolin21:~/Escritorio$ gcc -Ofast -lm -Dn=512 -Dm=1024 laplace2d2srcmdb1.c -o L2Dg2srcmdb1
+ppM-1-1@aolin21:~/Escritorio$ perf stat ./L2Dg2srcmdb1 10000
+Jacobi relaxation Calculation: 512 x 1024 mesh, maximum of 10000 iterations
+ 1000, 0.414203
+ 2000, 0.414210
+ 3000, 0.414212
+ 4000, 0.414213
+ 5000, 0.414213
+ 6000, 0.414213
+ 7000, 0.414213
+ 8000, 0.414214
+ 9000, 0.414214
+10000, 0.414214
+
+ Performance counter stats for './L2Dg2srcmdb1 10000':
+
+       3129,719062      task-clock (msec)         #    1,000 CPUs utilized
+               185      context-switches          #    0,059 K/sec
+                 3      cpu-migrations            #    0,001 K/sec
+               682      page-faults               #    0,218 K/sec
+    10.134.154.166      cycles                    #    3,238 GHz
+     1.607.187.387      stalled-cycles-frontend   #   15,86% frontend cycles idle
+       903.487.395      stalled-cycles-backend    #    8,92% backend  cycles idle
+    18.618.578.554      instructions              #    1,84  insns per cycle
+                                                  #    0,09  stalled cycles per insn
+     1.302.956.291      branches                  #  416,317 M/sec
+         5.155.362      branch-misses             #    0,40% of all branches
+
+       3,129167664 seconds time elapsed
+
+
+Problem Size (n,m,iter) = wall-clock time
+e-(512, 1024, 10000) = 3,129167664 seconds time elapsed (with gcc/6.1.0)
+
+---
+ppM-1-1@aolin21:~/Escritorio$ gcc -Ofast -lm -Dn=512 -Dm=1024 laplace2d2srcmdb1.c -o L2Dg2srcmdb1
+ppM-1-1@aolin21:~/Escritorio$ perf stat ./L2Dg2srcmdb1 100000
+Jacobi relaxation Calculation: 512 x 1024 mesh, maximum of 100000 iterations
+10000, 0.414214
+20000, 0.414214
+30000, 0.414214
+40000, 0.414214
+50000, 0.414214
+60000, 0.414214
+70000, 0.414214
+80000, 0.414214
+90000, 0.414214
+100000, 0.414214
+
+ Performance counter stats for './L2Dg2srcmdb1 100000':
+
+      30180,660971      task-clock (msec)         #    1,001 CPUs utilized
+             1.631      context-switches          #    0,054 K/sec
+                 5      cpu-migrations            #    0,000 K/sec
+               680      page-faults               #    0,023 K/sec
+   101.319.332.145      cycles                    #    3,357 GHz
+    16.064.813.375      stalled-cycles-frontend   #   15,86% frontend cycles idle
+     7.430.080.365      stalled-cycles-backend    #    7,33% backend  cycles idle
+   186.157.438.462      instructions              #    1,84  insns per cycle
+                                                  #    0,09  stalled cycles per insn
+    13.024.525.135      branches                  #  431,552 M/sec
+        51.399.317      branch-misses             #    0,39% of all branches
+
+      30,154146606 seconds time elapsed
+
+
+Problem Size (n,m,iter) = wall-clock time
+f-(512, 1024, 100000) = 30,1541466060,068243262 seconds time elapsed (with gcc/6.1.0) 
+
+----
+ppM-1-1@aolin21:~/Escritorio$ gcc -Ofast -lm -Dn=512 -Dm=512 laplace2d2srcmdb1.c -o L2Dg2srcmdb1
+ppM-1-1@aolin21:~/Escritorio$ perf stat ./L2Dg2srcmdb1 100
+Jacobi relaxation Calculation: 512 x 512 mesh, maximum of 100 iterations
+   10, 0.405118
+   20, 0.410727
+   30, 0.412261
+   40, 0.412927
+   50, 0.413285
+   60, 0.413503
+   70, 0.413648
+   80, 0.413749
+   90, 0.413823
+  100, 0.413880
+
+ Performance counter stats for './L2Dg2srcmdb1 100':
+
+         32,714311      task-clock (msec)         #    0,961 CPUs utilized
+                24      context-switches          #    0,734 K/sec
+                 0      cpu-migrations            #    0,000 K/sec
+               681      page-faults               #    0,021 M/sec
+        55.350.824      cycles                    #    1,692 GHz
+        11.181.991      stalled-cycles-frontend   #   20,20% frontend cycles idle
+         4.653.126      stalled-cycles-backend    #    8,41% backend  cycles idle
+        97.662.249      instructions              #    1,76  insns per cycle
+                                                  #    0,11  stalled cycles per insn
+         7.010.546      branches                  #  214,296 M/sec
+            64.470      branch-misses             #    0,92% of all branches
+
+       0,034034040 seconds time elapsed
+
+
+Problem Size (n,m,iter) = wall-clock time
+g-(512, 512, 100) =  0,034034040 seconds time elapsed (with gcc/6.1.0)
+
+----
+ppM-1-1@aolin21:~/Escritorio$ gcc -Ofast -lm -Dn=512 -Dm=512 laplace2d2srcmdb1.c -o L2Dg2srcmdb1
+ppM-1-1@aolin21:~/Escritorio$ perf stat ./L2Dg2srcmdb1 1000
+Jacobi relaxation Calculation: 512 x 512 mesh, maximum of 1000 iterations
+  100, 0.413880
+  200, 0.414095
+  300, 0.414149
+  400, 0.414172
+  500, 0.414184
+  600, 0.414191
+  700, 0.414196
+  800, 0.414199
+  900, 0.414201
+ 1000, 0.414203
+
+ Performance counter stats for './L2Dg2srcmdb1 1000':
+
+        218,695207      task-clock (msec)         #    0,994 CPUs utilized
+                35      context-switches          #    0,160 K/sec
+                 1      cpu-migrations            #    0,005 K/sec
+               681      page-faults               #    0,003 M/sec
+       527.328.915      cycles                    #    2,411 GHz
+        98.570.637      stalled-cycles-frontend   #   18,69% frontend cycles idle
+        34.889.281      stalled-cycles-backend    #    6,62% backend  cycles idle
+       950.237.998      instructions              #    1,80  insns per cycle
+                                                  #    0,10  stalled cycles per insn
+        65.424.246      branches                  #  299,157 M/sec
+           527.010      branch-misses             #    0,81% of all branches
+
+       0,220040422 seconds time elapsed
+
+Problem Size (n,m,iter) = wall-clock time
+h-(512, 512, 1000) =  0,220040422 seconds time elapsed (with gcc/6.1.0)
+
+----	   
+Problem Size (n,m,iter) = wall-clock time
+a-(4096, 4096, 100)  = 2,035903166 seconds time elapsed (with gcc/6.1.0)
+
+Problem Size (n,m,iter) = wall-clock time
+b-(4096, 4096, 1000) = 105,704487161 seconds time elapsed (with gcc/6.1.0)
+
+Problem Size (n,m,iter) = wall-clock time	   
+c-(512, 1024, 100) = 0,059829563 seconds time elapse (with gcc/6.1.0)
+
+Problem Size (n,m,iter) = wall-clock time 
+d-(512, 1024, 1000) = 0,364318199 seconds time elapsed (with gcc/6.1.0)
+
+Problem Size (n,m,iter) = wall-clock time
+e-(512, 1024, 10000) = 3,129167664 seconds time elapsed (with gcc/6.1.0)
+
+Problem Size (n,m,iter) = wall-clock time
+f-(512, 1024, 100000) = 30,154146606 seconds time elapsed (with gcc/6.1.0)
+
+Problem Size (n,m,iter) = wall-clock time
+g-(512, 512, 100) =  0,034034040 seconds time elapsed (with gcc/6.1.0)
+
+Problem Size (n,m,iter) = wall-clock time
+h-(512, 512, 1000) =  0,220040422 seconds time elapsed (with gcc/6.1.0)
+
+---	   
+Profile & Assembly Inspection
+
+ppM-1-1@aolin21:~/Escritorio$ perf record ./L2Dg2srcmdb1 100
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 100 iterations
+   10, 0.405117
+   20, 0.410726
+   30, 0.412261
+   40, 0.412927
+   50, 0.413285
+   60, 0.413503
+   70, 0.413647
+   80, 0.413748
+   90, 0.413823
+  100, 0.413879
+[ perf record: Woken up 2 times to write data ]
+[ perf record: Captured and wrote 0.343 MB perf.data (8607 samples) ]
+ppM-1-1@aolin21:~/Escritorio$ perf report
+Samples: 8K of event 'cycles', Event count (approx.): 6923889882
+Overhead  Command       Shared Object     Symbol
+  98,26%  L2Dg2srcmdb1  L2Dg2srcmdb1      [.] main
+   0,68%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] clear_page_c
+   0,12%  L2Dg2srcmdb1  libc-2.17.so      [.] __memset_sse2
+   0,06%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] apic_timer_interrupt
+   0,05%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] vma_interval_tree_insert
+   0,05%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] error_entry
+   0,05%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] task_tick_fair
+   0,05%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] rcu_check_callbacks
+   0,03%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] __update_cpu_load
+   0,03%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] pgtable_trans_huge_deposit
+   0,03%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] __hrtimer_run_queues
+   0,02%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] get_page_from_freelist
+   0,02%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] timerqueue_del
+   0,02%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] rb_next
+   0,02%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] tick_sched_timer
+   0,02%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] trigger_load_balance
+   0,02%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] perf_pmu_disable
+   0,01%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] native_write_msr_safe
+   0,01%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] do_huge_pmd_anonymous_page
+   0,01%  L2Dg2srcmdb1  [e1000e]          [k] e1000_clean_rx_irq
+   0,01%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] __perf_event_task_sched_out
+   0,01%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] resched_task
+   0,01%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] _raw_spin_lock_irq
+   0,01%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] enqueue_hrtimer
+   0,01%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] account_process_tick
+   0,01%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] __do_softirq
+   0,01%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] account_user_time
+   0,01%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] put_prev_task_fair
+   0,01%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] sched_clock_cpu
+   0,01%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] update_cfs_rq_blocked_load
+   0,01%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] _raw_spin_lock
+   0,01%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] update_cfs_shares
+   0,01%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] cpuacct_account_field
+   0,01%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] perf_event_context_sched_in
+   0,01%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] tcp_v4_early_demux
+   0,01%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] __acct_update_integrals
+   0,01%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] _raw_spin_unlock
+   0,01%  L2Dg2srcmdb1  [e1000e]          [k] e1000e_poll
+   0,01%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] get_work_pool
+   0,01%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] scheduler_tick
+   0,01%  L2Dg2srcmdb1  [kernel.vmlinux]  [k] timerqueue_add
+
+Enter gives:
+
+Annotate main                                                                                                                                                          ◆
+Zoom out of L2Dg2srcmdb1(27179) thread                                                                                                                                 ▒
+Zoom out of L2Dg2srcmdb1 DSO                                                                                                                                           ▒
+Browse map details                                                                                                                                                     ▒
+Run scripts for samples of thread [L2Dg2srcmdb1]                                                                                                                       ▒
+Run scripts for samples of symbol [main]                                                                                                                               ▒
+Run scripts for all samples                                                                                                                                            ▒
+Switch to another data file in PWD                                                                                                                                     ▒
+Exit                                                                                                                                                                   ▒
+          
+Samples: 8K of event 'cycles', Event count (approx.): 6923889882, Thread: L2Dg2srcmdb1(27179), DSO: L2Dg2srcmdb1
+Overhead  Command       Symbol                                                                                                                                         ◆
+  98,26%  L2Dg2srcmdb1  [.] main    
+----
+
+note:  list on Desktop
+
+ppM-1-1@aolin21:~/Escritorio$ ls -l
+total 324
+lrwxrwxrwx 1 ppM-1-1 ppM    24 sep 18 09:55 alumnos -> /home/master/ppM/alumnos
+-rwxr-xr-x 1 ppM-1-1 ppM 98184 oct  8 09:18 a.out
+drwxr-xr-x 2 ppM-1-1 ppM  4096 oct 21 18:05 body
+-rwxr-xr-x 1 ppM-1-1 ppM 14824 oct 19 21:35 dif0
+-rw-r--r-- 1 ppM-1-1 ppM  3789 oct 19 21:45 diff1.c
+-rw-r--r-- 1 ppM-1-1 ppM  3789 dic 14  2016 diff.c
+drwxr-xr-x 2 ppM-1-1 ppM  4096 oct 22 06:24 exercise1
+-rwxr-xr-x 1 ppM-1-1 ppM 10096 oct 12 11:59 L2Dg
+-rwxr-xr-x 1 ppM-1-1 ppM 10096 oct  8 09:35 L2Dg1
+-rwxr-xr-x 1 ppM-1-1 ppM 14240 oct  8 09:47 L2Dg2
+-rwxr-xr-x 1 ppM-1-1 ppM 14248 oct  8 09:54 L2Dg2sr
+-rwxr-xr-x 1 ppM-1-1 ppM 14248 oct 22 08:49 L2Dg2srcm
+-rwxr-xr-x 1 ppM-1-1 ppM 10104 oct 12 13:17 L2Dg2srcmdb
+-rwxr-xr-x 1 ppM-1-1 ppM 14200 oct 22 09:29 L2Dg2srcmdb1
+-rwxr-xr-x 1 ppM-1-1 ppM 10096 oct  4 19:35 L2Dg3
+-rwxr-xr-x 1 ppM-1-1 ppM 14248 oct  4 19:48 L2Dg3sr
+-rwxr-xr-x 1 ppM-1-1 ppM 10096 oct  8 09:13 L2Di
+-rwxr-xr-x 1 ppM-1-1 ppM 10096 oct 12 10:31 L2Dlaplace2d2srcmdb.c
+-rw-r--r-- 1 ppM-1-1 ppM  2199 oct 18 10:20 lap.c
+-rw-r--r-- 1 ppM-1-1 ppM  3078 oct  8 08:54 laplace2d1.c
+-rw-r--r-- 1 ppM-1-1 ppM  3072 oct  8 09:45 laplace2d2.c
+-rw-r--r-- 1 ppM-1-1 ppM  3074 oct  8 09:54 laplace2d2sr.c
+-rw-r--r-- 1 ppM-1-1 ppM  3079 oct 22 08:48 laplace2d2srcm.c
+-rw-r--r-- 1 ppM-1-1 ppM  3295 oct 22 08:32 laplace2d2srcmdb1.c
+-rw-r--r-- 1 ppM-1-1 ppM  3076 oct 12 11:18 laplace2d2srcmdb.c
+-rw-r--r-- 1 ppM-1-1 ppM  3130 oct  8 08:46 laplace2d3.c
+-rw-r--r-- 1 ppM-1-1 ppM  3132 oct  4 19:48 laplace2d3sr.c
+-rw-r--r-- 1 ppM-1-1 ppM  3130 oct  4 00:42 laplace2d.c

@@ -1,0 +1,236 @@
+
+LapFusionMPI9_hybrid.c (Hybrid FILE)
+
+module load gcc/6.1.0 openmpi/1.8.1 
+
+MPI - Core 2 and 4 (Hybrid Code) ---------------------
+
+mpicc -g -Wall -lm -Ofast -fopenmp -o lapMPI9_HY LapFusionMPI9_hybrid.c
+
+mpirun -np 2 lapMPI9_HY 1000  
+mpirun -np 2 lapMPI9_HY 2000  
+mpirun -np 2 lapMPI9_HY 3000  
+mpirun -np 2 lapMPI9_HY 4000  
+
+mpirun -np 4 lapMPI9_HY 1000  
+mpirun -np 4 lapMPI9_HY 2000  
+mpirun -np 4 lapMPI9_HY 3000  
+mpirun -np 4 lapMPI9_HY 4000  
+
+MPI - Core 2 and 4 (Hybrid Code with Exported OMP) ---------------------
+##### With export OMP_NUM_THREADS=4 and export I_MPI_PIN_DOMAIN=omp 
+
+Note: 
+ -Set the number of OpenMP threads per MPI process:
+    export OMP_NUM_THREADS=4
+
+  - Pin the MPI processes:
+     export I_MPI_PIN_DOMAIN=omp 
+
+module load gcc/6.1.0 openmpi/1.8.1 
+export OMP_NUM_THREADS=4
+export I_MPI_PIN_DOMAIN=omp
+mpicc -g -Wall -lm -Ofast -fopenmp -o lapMPI9_HY LapFusionMPI9_hybrid.c
+
+mpirun -np 2 lapMPI9_HY 1000  
+mpirun -np 2 lapMPI9_HY 2000  
+mpirun -np 2 lapMPI9_HY 3000  
+mpirun -np 2 lapMPI9_HY 4000  
+
+mpirun -np 4 lapMPI9_HY 1000  
+mpirun -np 4 lapMPI9_HY 2000  
+mpirun -np 4 lapMPI9_HY 3000  
+mpirun -np 4 lapMPI9_HY 4000  
+ 
+
+MPI - Core 2 ---------------------TAU - (Hybrid TAU FILE - Core2)
+
+module load gcc/6.1.0 openmpi/1.8.1 
+
+export PATH=/home/master/ppM/ppM-1-1/TAU/tau_install/x86_64/bin:$PATH
+
+export TAU_MAKEFILE=/home/master/ppM/ppM-1-1/TAU/tau_install/x86_64/lib/Makefile.tau-mpi
+
+export TAU_OPTIONS=-optCompInst
+
+tau_cc.sh -o lapMPI9_HY -g -Wall -lm -Ofast -fopenmp LapFusionMPI9_hybrid.c
+
+mpirun -np 2 lapMPI9_HY 1000
+pprof
+paraprof
+
+TAU TRACING----Core 2
+
+export TAU_TRACE=1
+tau_cc.sh -o lapMPI9_HY -g -Wall -lm -Ofast -fopenmp LapFusionMPI9_hybrid.c
+tau_treemerge.pl
+tau2slog2 tau.trc tau.edf -o tau.slog2
+jumpshot
+
+
+Now.....
+####With export OMP_NUM_THREADS=4 and export I_MPI_PIN_DOMAIN=omp 
+
+Note: 
+ -Set the number of OpenMP threads per MPI process:
+    export OMP_NUM_THREADS=4
+
+  - Pin the MPI processes:
+     export I_MPI_PIN_DOMAIN=omp 
+
+
+module load gcc/6.1.0 openmpi/1.8.1  
+
+export PATH=/home/master/ppM/ppM-1-1/TAU/tau_install/x86_64/bin:$PATH
+
+export TAU_MAKEFILE=/home/master/ppM/ppM-1-1/TAU/tau_install/x86_64/lib/Makefile.tau-mpi
+
+export TAU_OPTIONS=-optCompInst
+
+export OMP_NUM_THREADS=4
+export I_MPI_PIN_DOMAIN=omp
+
+*For 3D Visualization
+*TAU_COMM_MATRIX=1 
+
+**Collects detailed information about message sizes.
+**TAU_TRACK_MESSAGE=1
+
+***Generates a call path information for profiles.
+***TAU_CALLPATH=1
+
+****Measures heap on function entry and exit.
+****TAU_TRACK_HEAP=1
+
+export TAU_COMM_MATRIX=1
+export TAU_TRACK_MESSAGE=1
+export TAU_CALLPATH=1
+export TAU_TRACK_HEAP=1
+
+tau_cc.sh -o lapMPI9_HY -g -Wall -lm -Ofast -fopenmp lapFusionMPI9_hybrid.c
+
+mpirun -np 2 lapMPI9_HY 1000
+pprof
+paraprof
+
+TAU TRACING----Core 2
+
++ Collects tracing information instead of profile information.
++ TAU_TRACE=1
+
+module load gcc/6.1.0 openmpi/1.8.1 
+
+export OMP_NUM_THREADS=4
+export I_MPI_PIN_DOMAIN=omp
+export TAU_COMM_MATRIX=1
+export TAU_TRACK_MESSAGE=1
+export TAU_CALLPATH=1
+export TAU_TRACK_HEAP=1
+
+export TAU_TRACE=1
+
+tau_cc.sh -o lapMPI9_HY -g -Wall -lm -Ofast -fopenmp lapFusionMPI9_hybrid.c
+mpirun -np 2 lapMPI9_HY 1000
+
+tau_treemerge.pl
+tau2slog2 tau.trc tau.edf -o tau.slog2
+jumpshot
+
+MPI - Core 4 ---------------------TAU - (Hybrid TAU FILE- Core4)
+
+module load gcc/6.1.0 openmpi/1.8.1 
+
+export OMP_NUM_THREADS=4
+export I_MPI_PIN_DOMAIN=omp
+
+export PATH=/home/master/ppM/ppM-1-1/TAU/tau_install/x86_64/bin:$PATH
+
+export TAU_MAKEFILE=/home/master/ppM/ppM-1-1/TAU/tau_install/x86_64/lib/Makefile.tau-mpi
+
+export TAU_OPTIONS=-optCompInst
+
+tau_cc.sh -o lapMPI9_HY -g -Wall -lm -Ofast -fopenmp LapFusionMPI9_hybrid.c
+mpirun -np 4 lapMPI9_HY 1000
+
+pprof
+paraprof
+
+TAU TRACING----Core 4
+
+export TAU_TRACE=1
+tau_cc.sh -o lapMPI9_HY -g -Wall -lm -Ofast -fopenmp LapFusionMPI9_hybrid.c
+mpirun -np 4 lapMPI9_HY 1000
+tau_treemerge.pl
+tau2slog2 tau.trc tau.edf -o tau.slog4
+jumpshot
+
+Now.....
+####With export OMP_NUM_THREADS=4 and export I_MPI_PIN_DOMAIN=omp 
+
+Note: 
+ -Set the number of OpenMP threads per MPI process:
+    export OMP_NUM_THREADS=4
+
+  - Pin the MPI processes:
+     export I_MPI_PIN_DOMAIN=omp 
+
+
+module load gcc/6.1.0 openmpi/1.8.1  
+
+export PATH=/home/master/ppM/ppM-1-1/TAU/tau_install/x86_64/bin:$PATH
+
+export TAU_MAKEFILE=/home/master/ppM/ppM-1-1/TAU/tau_install/x86_64/lib/Makefile.tau-mpi
+
+export TAU_OPTIONS=-optCompInst
+
+export OMP_NUM_THREADS=4
+export I_MPI_PIN_DOMAIN=omp
+
+*For 3D Visualization
+*TAU_COMM_MATRIX=1 
+
+**Collects detailed information about message sizes.
+**TAU_TRACK_MESSAGE=1
+
+***Generates a call path information for profiles.
+***TAU_CALLPATH=1
+
+****Measures heap on function entry and exit.
+****TAU_TRACK_HEAP=1
+
+export TAU_COMM_MATRIX=1
+export TAU_TRACK_MESSAGE=1
+export TAU_CALLPATH=1
+export TAU_TRACK_HEAP=1
+
+export TAU_TRACE=0 <--- for profile information and not tracing information
+
+tau_cc.sh -o lapMPI9_HY -g -Wall -lm -Ofast -fopenmp lapFusionMPI9_hybrid.c
+
+mpirun -np 4 lapMPI9_HY 1000
+pprof
+paraprof
+
+TAU TRACING----Core 4
+
++ Collects tracing information instead of profile information.
++ TAU_TRACE=1
+
+module load gcc/6.1.0 openmpi/1.8.1 
+
+export OMP_NUM_THREADS=4
+export I_MPI_PIN_DOMAIN=omp
+
+export TAU_COMM_MATRIX=1
+export TAU_TRACK_MESSAGE=1
+export TAU_CALLPATH=1
+export TAU_TRACK_HEAP=1
+
+export TAU_TRACE=1
+
+tau_cc.sh -o lapMPI9_HY -g -Wall -lm -Ofast -fopenmp lapFusionMPI9_hybrid.c
+mpirun -np 4 lapMPI9_HY 1000
+
+tau_treemerge.pl
+tau2slog2 tau.trc tau.edf -o tau.slog4
+jumpshot
