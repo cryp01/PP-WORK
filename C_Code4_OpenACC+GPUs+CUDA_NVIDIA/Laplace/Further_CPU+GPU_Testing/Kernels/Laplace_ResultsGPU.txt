@@ -1,0 +1,2079 @@
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ module add pgi64/17.4
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ module add cuda/7.5
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ nvidia-smi
+Sun Jan 21 22:53:18 2018
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 384.81                 Driver Version: 384.81                    |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|===============================+======================+======================|
+|   0  GeForce GTX 680     Off  | 00000000:02:00.0 N/A |                  N/A |
+| 39%   41C    P0    N/A /  N/A |      0MiB /  1996MiB |     N/A      Default |
++-------------------------------+----------------------+----------------------+
+|   1  GeForce GTX 108...  Off  | 00000000:03:00.0 Off |                  N/A |
+|  0%   43C    P5    28W / 250W |      0MiB / 11172MiB |      0%      Default |
++-------------------------------+----------------------+----------------------+
+
++-----------------------------------------------------------------------------+
+| Processes:                                                       GPU Memory |
+|  GPU       PID   Type   Process name                             Usage      |
+|=============================================================================|
+|    0                    Not Supported                                       |
++-----------------------------------------------------------------------------+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ pgaccelinfo
+
+CUDA Driver Version:           9000
+NVRM version:                  NVIDIA UNIX x86_64 Kernel Module  384.81  Sat Sep  2 02:43:11 PDT 2017
+
+Device Number:                 0
+Device Name:                   GeForce GTX 680
+Device Revision Number:        3.0
+Global Memory Size:            2093023232
+Number of Multiprocessors:     8
+Number of SP Cores:            1536
+Number of DP Cores:            512
+Concurrent Copy and Execution: Yes
+Total Constant Memory:         65536
+Total Shared Memory per Block: 49152
+Registers per Block:           65536
+Warp Size:                     32
+Maximum Threads per Block:     1024
+Maximum Block Dimensions:      1024, 1024, 64
+Maximum Grid Dimensions:       2147483647 x 65535 x 65535
+Maximum Memory Pitch:          2147483647B
+Texture Alignment:             512B
+Clock Rate:                    1137 MHz
+Execution Timeout:             No
+Integrated Device:             No
+Can Map Host Memory:           Yes
+Compute Mode:                  default
+Concurrent Kernels:            Yes
+ECC Enabled:                   No
+Memory Clock Rate:             3004 MHz
+Memory Bus Width:              256 bits
+L2 Cache Size:                 524288 bytes
+Max Threads Per SMP:           2048
+Async Engines:                 1
+Unified Addressing:            Yes
+Managed Memory:                Yes
+PGI Compiler Option:           -ta=tesla:cc30
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ export CUDA_VISIBLE_DEVICES=0,1
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ pgaccelinfo
+
+CUDA Driver Version:           9000
+NVRM version:                  NVIDIA UNIX x86_64 Kernel Module  384.81  Sat Sep  2 02:43:11 PDT 2017
+
+Device Number:                 0
+Device Name:                   GeForce GTX 1080 Ti
+Device Revision Number:        6.1
+Global Memory Size:            11715084288
+Number of Multiprocessors:     28
+Concurrent Copy and Execution: Yes
+Total Constant Memory:         65536
+Total Shared Memory per Block: 49152
+Registers per Block:           65536
+Warp Size:                     32
+Maximum Threads per Block:     1024
+Maximum Block Dimensions:      1024, 1024, 64
+Maximum Grid Dimensions:       2147483647 x 65535 x 65535
+Maximum Memory Pitch:          2147483647B
+Texture Alignment:             512B
+Clock Rate:                    1620 MHz
+Execution Timeout:             No
+Integrated Device:             No
+Can Map Host Memory:           Yes
+Compute Mode:                  default
+Concurrent Kernels:            Yes
+ECC Enabled:                   No
+Memory Clock Rate:             5505 MHz
+Memory Bus Width:              352 bits
+L2 Cache Size:                 2883584 bytes
+Max Threads Per SMP:           2048
+Async Engines:                 2
+Unified Addressing:            Yes
+Managed Memory:                Yes
+PGI Compiler Option:           -ta=tesla:cc60
+
+Device Number:                 1
+Device Name:                   GeForce GTX 680
+Device Revision Number:        3.0
+Global Memory Size:            2093023232
+Number of Multiprocessors:     8
+Number of SP Cores:            1536
+Number of DP Cores:            512
+Concurrent Copy and Execution: Yes
+Total Constant Memory:         65536
+Total Shared Memory per Block: 49152
+Registers per Block:           65536
+Warp Size:                     32
+Maximum Threads per Block:     1024
+Maximum Block Dimensions:      1024, 1024, 64
+Maximum Grid Dimensions:       2147483647 x 65535 x 65535
+Maximum Memory Pitch:          2147483647B
+Texture Alignment:             512B
+Clock Rate:                    1137 MHz
+Execution Timeout:             No
+Integrated Device:             No
+Can Map Host Memory:           Yes
+Compute Mode:                  default
+Concurrent Kernels:            Yes
+ECC Enabled:                   No
+Memory Clock Rate:             3004 MHz
+Memory Bus Width:              256 bits
+L2 Cache Size:                 524288 bytes
+Max Threads Per SMP:           2048
+Async Engines:                 1
+Unified Addressing:            Yes
+Managed Memory:                Yes
+PGI Compiler Option:           -ta=tesla:cc30
+
+-----------------------------------GPU
+
+---#laplace1_baseline.c (GPU)
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel laplace1_baseline.c -o lp1GPU
+main:
+     77, Generating copyin(Anew[:][:],A[:][:])
+     81, Loop is parallelizable
+     82, Loop is parallelizable
+         Accelerator kernel generated
+         Generating Tesla code
+         81, #pragma acc loop gang, vector(128) /* blockIdx.x threadIdx.x */
+         82, #pragma acc loop gang /* blockIdx.y */
+     87, Loop is parallelizable
+     88, Loop is parallelizable
+         Accelerator kernel generated
+         Generating Tesla code
+         87, #pragma acc loop gang, vector(128) /* blockIdx.x threadIdx.x */
+         88, #pragma acc loop gang /* blockIdx.y */
+         89, Generating implicit reduction(max:error)
+     92, Loop is parallelizable
+     93, Loop is parallelizable
+         Accelerator kernel generated
+         Generating Tesla code
+         92, #pragma acc loop gang, vector(128) /* blockIdx.x threadIdx.x */
+         93, #pragma acc loop gang /* blockIdx.y */
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ perf stat ./lp1GPU 1000
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 1000 iterations
+  100, 0.049208
+  200, 0.034790
+  300, 0.028398
+  400, 0.024596
+  500, 0.022000
+  600, 0.020080
+  700, 0.018592
+  800, 0.017392
+  900, 0.016397
+ 1000, 0.015554
+
+ Performance counter stats for './lp1GPU 1000':
+
+       5728,929624      task-clock (msec)         #    0,974 CPUs utilized
+               516      context-switches          #    0,090 K/sec
+                14      cpu-migrations            #    0,002 K/sec
+             2.802      page-faults               #    0,489 K/sec
+    17.470.765.899      cycles                    #    3,050 GHz
+     6.906.608.971      stalled-cycles-frontend   #   39,53% frontend cycles idle
+     3.050.842.706      stalled-cycles-backend    #   17,46% backend  cycles idle
+    22.573.729.468      instructions              #    1,29  insns per cycle
+                                                  #    0,31  stalled cycles per insn
+     4.930.265.776      branches                  #  860,591 M/sec
+         3.535.855      branch-misses             #    0,07% of all branches
+
+       5,881185335 seconds time elapsed
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ pgprof ./lp1GPU 1000
+pgprof-Warning-Installed CUDA driver version is not supported for GPU profiling.
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 1000 iterations
+==27909== PGPROF is profiling process 27909, command: ./lp1GPU 1000
+  100, 0.049208
+  200, 0.034790
+  300, 0.028398
+  400, 0.024596
+  500, 0.022000
+  600, 0.020080
+  700, 0.018592
+  800, 0.017392
+  900, 0.016397
+ 1000, 0.015554
+==27909== Profiling application: ./lp1GPU 1000
+==27909== Profiling result:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 46.26%  2.17641s      1000  2.1764ms  2.1549ms  2.4731ms  main_88_gpu
+ 26.43%  1.24358s      1000  1.2436ms  1.2360ms  1.3222ms  main_82_gpu
+ 22.98%  1.08131s      1000  1.0813ms  1.0751ms  1.1417ms  main_93_gpu
+  3.74%  175.75ms      1000  175.75us  174.37us  185.66us  main_89_gpu_red
+  0.54%  25.574ms      1008  25.371us     959ns  3.3127ms  [CUDA memcpy HtoD]
+  0.04%  1.9189ms      1000  1.9180us  1.8870us  3.1360us  [CUDA memcpy DtoH]
+
+==27909== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 47.64%  2.35893s      1000  2.3589ms  2.1751ms  2.6545ms  cuMemcpyDtoHAsync
+ 47.24%  2.33936s      4001  584.69us     629ns  3.1186ms  cuStreamSynchronize
+  1.69%  83.595ms         3  27.865ms     309ns  83.595ms  cuDevicePrimaryCtxRetain
+  1.25%  61.687ms         1  61.687ms  61.687ms  61.687ms  cuDevicePrimaryCtxRelease
+  0.95%  47.016ms      4000  11.753us  7.1170us  197.43us  cuLaunchKernel
+  0.45%  22.079ms         1  22.079ms  22.079ms  22.079ms  cuMemHostAlloc
+  0.43%  21.166ms         1  21.166ms  21.166ms  21.166ms  cuMemFreeHost
+  0.22%  11.087ms      1008  10.999us  6.9890us  249.79us  cuMemcpyHtoDAsync
+  0.08%  3.8323ms         5  766.45us  174.42us  2.9889ms  cuMemAlloc
+  0.03%  1.6458ms         6  274.31us  1.7050us  885.26us  cuEventSynchronize
+  0.02%  746.02us         1  746.02us  746.02us  746.02us  cuMemAllocHost
+  0.01%  398.62us         1  398.62us  398.62us  398.62us  cuModuleLoadData
+  0.00%  28.977us         1  28.977us  28.977us  28.977us  cuStreamCreate
+  0.00%  23.788us         7  3.3980us  2.0740us  4.7670us  cuEventRecord
+  0.00%  9.1600us         3  3.0530us     338ns  6.8650us  cuCtxSetCurrent
+  0.00%  4.5480us         3  1.5160us     276ns  3.6350us  cuDeviceGetCount
+  0.00%  4.4580us         1  4.4580us  4.4580us  4.4580us  cuEventCreate
+  0.00%  3.6460us         6     607ns     301ns     933ns  cuDeviceGet
+  0.00%  2.8040us         8     350ns     221ns     518ns  cuDeviceGetAttribute
+  0.00%  2.6010us         4     650ns     227ns  1.8590us  cuModuleGetFunction
+  0.00%  2.3750us         1  2.3750us  2.3750us  2.3750us  cuMemFree
+  0.00%     906ns         2     453ns     288ns     618ns  cuCtxGetCurrent
+  0.00%     844ns         2     422ns     279ns     565ns  cuDeviceComputeCapability
+
+==27909== OpenACC (excl):
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 48.77%  2.36071s      1000  2.3607ms  2.2210ms  2.6561ms  acc_enqueue_download@laplace1_baseline.c:88
+ 25.82%  1.24996s      1000  1.2500ms  1.1709ms  1.4824ms  acc_wait@laplace1_baseline.c:82
+ 22.45%  1.08653s      1000  1.0865ms  992.46us  1.1694ms  acc_wait@laplace1_baseline.c:93
+  1.06%  51.361ms         1  51.361ms  51.361ms  51.361ms  acc_enter_data@laplace1_baseline.c:77
+  0.33%  15.790ms      1000  15.790us  11.054us  199.98us  acc_enqueue_launch@laplace1_baseline.c:93 (main_93_gpu)
+  0.31%  15.051ms      1000  15.050us  10.062us  145.20us  acc_enqueue_launch@laplace1_baseline.c:82 (main_82_gpu)
+  0.29%  14.121ms      1000  14.120us  10.622us  190.84us  acc_enqueue_launch@laplace1_baseline.c:88 (main_88_gpu)
+  0.25%  12.283ms      1000  12.282us  7.9320us  252.22us  acc_enqueue_upload@laplace1_baseline.c:86
+  0.22%  10.858ms      1000  10.858us  8.5990us  122.00us  acc_enqueue_launch@laplace1_baseline.c:88 (main_89_gpu_red)
+  0.14%  6.7981ms      2000  3.3990us  1.4450us  303.89us  acc_wait@laplace1_baseline.c:88
+  0.14%  6.6973ms      1000  6.6970us  4.5720us  420.54us  acc_compute_construct@laplace1_baseline.c:86
+  0.07%  3.3065ms      1000  3.3060us  2.0770us  38.438us  acc_compute_construct@laplace1_baseline.c:80
+  0.06%  3.1208ms         1  3.1208ms  3.1208ms  3.1208ms  acc_wait@laplace1_baseline.c:77
+  0.06%  3.0937ms      1000  3.0930us  2.1530us  92.583us  acc_compute_construct@laplace1_baseline.c:91
+  0.01%  423.68us         1  423.68us  423.68us  423.68us  acc_device_init@laplace1_baseline.c:77
+  0.01%  276.10us         8  34.512us  15.372us  59.734us  acc_enqueue_upload@laplace1_baseline.c:77
+  0.00%  38.179us         1  38.179us  38.179us  38.179us  acc_exit_data@laplace1_baseline.c:77
+  0.00%       0ns         2       0ns       0ns       0ns  acc_alloc@laplace1_baseline.c:77
+  0.00%       0ns         2       0ns       0ns       0ns  acc_delete@laplace1_baseline.c:99
+  0.00%       0ns         2       0ns       0ns       0ns  acc_create@laplace1_baseline.c:77
+
+======== CPU profiling result (bottom up):
+Time(%)      Time  Name
+ 75.62%  15.4886s  ???
+ 75.62%  15.4886s  | start_thread
+ 75.62%  15.4886s  |   clone
+ 11.70%  2.39597s  cuMemcpyDtoHAsync_v2
+ 11.70%  2.39597s  | __pgi_uacc_cuda_downloads
+ 11.70%  2.39597s  |   __pgi_uacc_downloads
+ 11.70%  2.39597s  |     main
+ 10.77%  2.20549s  cuStreamSynchronize
+ 10.77%  2.20549s  | __pgi_uacc_cuda_wait
+ 10.77%  2.20549s  |   __pgi_uacc_computedone
+ 10.77%  2.20549s  |     main
+  0.39%    80.2ms  cuDevicePrimaryCtxRetain
+  0.39%    80.2ms  | __pgi_uacc_cuda_init_device
+  0.39%    80.2ms  |   __pgi_uacc_cuda_select_valid
+  0.39%    80.2ms  |     __pgi_uacc_select_devid
+  0.39%    80.2ms  |       __pgi_uacc_dataenterstart
+  0.39%    80.2ms  |         main
+  0.34%  70.175ms  cuLaunchKernel
+  0.34%  70.175ms  | __pgi_uacc_cuda_launch
+  0.34%  70.175ms  |   __pgi_uacc_launch
+  0.34%  70.175ms  |     main
+  0.29%   60.15ms  cuDevicePrimaryCtxRelease
+  0.29%   60.15ms  | __pgi_uacc_cuda_release_buffer
+  0.29%   60.15ms  |   __run_exit_handlers
+  0.29%   60.15ms  |     ???
+  0.29%   60.15ms  |       ???
+  0.29%   60.15ms  cuMemcpyHtoDAsync_v2
+  0.29%   60.15ms  | __pgi_uacc_cuda_uploads
+  0.29%   60.15ms  |   __pgi_uacc_uploads
+  0.29%   60.15ms  |     main
+  0.10%   20.05ms  __pgi_uacc_computestart
+  0.10%   20.05ms  | main
+  0.05%  10.025ms  cuMemAlloc_v2
+  0.05%  10.025ms  | __pgi_uacc_cuda_alloc
+  0.05%  10.025ms  |   __pgi_uacc_alloc
+  0.05%  10.025ms  |     do_create
+  0.05%  10.025ms  |       __pgi_uacc_excontig_search
+  0.05%  10.025ms  |         __pgi_uacc_create
+  0.05%  10.025ms  |           __pgi_uacc_dataonb
+  0.05%  10.025ms  |             main
+  0.05%  10.025ms  cuMemAllocHost_v2
+  0.05%  10.025ms  | __pgi_uacc_cuda_stream
+  0.05%  10.025ms  |   __pgi_uacc_cuda_init_device
+  0.05%  10.025ms  |     __pgi_uacc_cuda_select_valid
+  0.05%  10.025ms  |       __pgi_uacc_select_devid
+  0.05%  10.025ms  |         __pgi_uacc_dataenterstart
+  0.05%  10.025ms  |           main
+  0.05%  10.025ms  ???
+  0.05%  10.025ms  | __pgi_uacc_computedone
+  0.05%  10.025ms  |   main
+  0.05%  10.025ms  cuMemHostAlloc
+  0.05%  10.025ms  | __pgi_uacc_cuda_get_buffer
+  0.05%  10.025ms  |   __pgi_uacc_cuda_dataup1
+  0.05%  10.025ms  |     __pgi_uacc_dataup1
+  0.05%  10.025ms  |       __pgi_uacc_dataupx
+  0.05%  10.025ms  |         __pgi_uacc_dataonb
+  0.05%  10.025ms  |           main
+  0.05%  10.025ms  __pgi_uacc_cuda_launch
+  0.05%  10.025ms  | __pgi_uacc_launch
+  0.05%  10.025ms  |   main
+  0.05%  10.025ms  cuInit
+  0.05%  10.025ms  | __pgi_uacc_cuda_init
+  0.05%  10.025ms  |   __pgi_uacc_enumerate
+  0.05%  10.025ms  |     __pgi_uacc_initialize
+  0.05%  10.025ms  |       __pgi_uacc_dataenterstart
+  0.05%  10.025ms  |         main
+  0.05%  10.025ms  __c_mcopy4
+  0.05%  10.025ms  | __pgi_uacc_cuda_dataup1
+  0.05%  10.025ms  |   __pgi_uacc_dataup1
+  0.05%  10.025ms  |     __pgi_uacc_dataupx
+  0.05%  10.025ms  |       __pgi_uacc_dataonb
+  0.05%  10.025ms  |         main
+  0.05%  10.025ms  cuEventSynchronize
+  0.05%  10.025ms  | __pgi_uacc_cuda_get_buffer
+  0.05%  10.025ms  |   __pgi_uacc_cuda_dataup1
+  0.05%  10.025ms  |     __pgi_uacc_dataup1
+  0.05%  10.025ms  |       __pgi_uacc_dataupx
+  0.05%  10.025ms  |         __pgi_uacc_dataonb
+  0.05%  10.025ms  |           main
+  0.05%  10.025ms  cuMemFreeHost
+  0.05%  10.025ms  | __pgi_uacc_cuda_free_device_buffers
+  0.05%  10.025ms  |   __pgi_uacc_cuda_release_buffer
+  0.05%  10.025ms  |     __run_exit_handlers
+  0.05%  10.025ms  |       ???
+  0.05%  10.025ms  |         ???
+  0.05%  10.025ms  __GI_memset
+  0.05%  10.025ms    main
+
+======== Data collected at 100Hz frequency
+
+---#laplace2_lf.c (GPU)
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel laplace2_lf.c -o lp2GPU
+main:
+     77, Generating copyin(Anew[:][:],A[:][:])
+     82, Loop is parallelizable
+     83, Loop is parallelizable
+         Accelerator kernel generated
+         Generating Tesla code
+         82, #pragma acc loop gang, vector(128) /* blockIdx.x threadIdx.x */
+         83, #pragma acc loop gang /* blockIdx.y */
+         85, Generating implicit reduction(max:error)
+     89, Loop is parallelizable
+     90, Loop is parallelizable
+         Accelerator kernel generated
+         Generating Tesla code
+         89, #pragma acc loop gang, vector(128) /* blockIdx.x threadIdx.x */
+         90, #pragma acc loop gang /* blockIdx.y */
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ perf stat ./lp2GPU 1000
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 1000 iterations
+  100, 0.049208
+  200, 0.034790
+  300, 0.028398
+  400, 0.024596
+  500, 0.022000
+  600, 0.020080
+  700, 0.018592
+  800, 0.017392
+  900, 0.016397
+ 1000, 0.015554
+
+ Performance counter stats for './lp2GPU 1000':
+
+       5132,739641      task-clock (msec)         #    0,964 CPUs utilized
+             1.861      context-switches          #    0,363 K/sec
+                27      cpu-migrations            #    0,005 K/sec
+             2.800      page-faults               #    0,546 K/sec
+    15.022.907.071      cycles                    #    2,927 GHz
+     6.331.405.303      stalled-cycles-frontend   #   42,15% frontend cycles idle
+     3.228.243.263      stalled-cycles-backend    #   21,49% backend  cycles idle
+    18.645.709.458      instructions              #    1,24  insns per cycle
+                                                  #    0,34  stalled cycles per insn
+     4.074.387.640      branches                  #  793,804 M/sec
+         4.333.683      branch-misses             #    0,11% of all branches
+
+       5,323919293 seconds time elapsed
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ pgprof ./lp2GPU 1000
+pgprof-Warning-Installed CUDA driver version is not supported for GPU profiling.
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 1000 iterations
+==27998== PGPROF is profiling process 27998, command: ./lp2GPU 1000
+  100, 0.049208
+  200, 0.034790
+  300, 0.028398
+  400, 0.024596
+  500, 0.022000
+  600, 0.020080
+  700, 0.018592
+  800, 0.017392
+  900, 0.016397
+ 1000, 0.015554
+==27998== Profiling application: ./lp2GPU 1000
+==27998== Profiling result:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 67.37%  2.65137s      1000  2.6514ms  2.6295ms  3.1365ms  main_83_gpu
+ 27.47%  1.08111s      1000  1.0811ms  1.0751ms  1.1412ms  main_90_gpu
+  4.47%  175.78ms      1000  175.78us  174.56us  185.60us  main_85_gpu_red
+  0.65%  25.392ms      1008  25.190us     960ns  3.2782ms  [CUDA memcpy HtoD]
+  0.05%  1.9181ms      1000  1.9180us  1.8870us  3.5200us  [CUDA memcpy DtoH]
+
+==27998== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 68.20%  2.83503s      1000  2.8350ms  2.6340ms  3.3245ms  cuMemcpyDtoHAsync
+ 26.28%  1.09232s      3001  363.99us     730ns  3.2710ms  cuStreamSynchronize
+  2.13%  88.459ms         3  29.486ms     264ns  88.459ms  cuDevicePrimaryCtxRetain
+  1.22%  50.786ms         1  50.786ms  50.786ms  50.786ms  cuDevicePrimaryCtxRelease
+  0.87%  36.283ms      3000  12.094us  6.9390us  342.18us  cuLaunchKernel
+  0.60%  25.068ms         1  25.068ms  25.068ms  25.068ms  cuMemHostAlloc
+  0.28%  11.596ms         1  11.596ms  11.596ms  11.596ms  cuMemFreeHost
+  0.27%  11.095ms      1008  11.006us  6.8080us  153.41us  cuMemcpyHtoDAsync
+  0.10%  4.0118ms         5  802.36us  206.95us  2.8490ms  cuMemAlloc
+  0.02%  905.98us         6  151.00us  3.3180us  561.50us  cuEventSynchronize
+  0.02%  779.82us         1  779.82us  779.82us  779.82us  cuMemAllocHost
+  0.01%  496.24us         1  496.24us  496.24us  496.24us  cuModuleLoadData
+  0.00%  33.990us         7  4.8550us  3.3190us  7.0480us  cuEventRecord
+  0.00%  32.047us         1  32.047us  32.047us  32.047us  cuStreamCreate
+  0.00%  11.760us         1  11.760us  11.760us  11.760us  cuEventCreate
+  0.00%  4.7910us         3  1.5970us     361ns  3.8480us  cuDeviceGetCount
+  0.00%  3.3910us         6     565ns     246ns  1.0690us  cuDeviceGet
+  0.00%  3.2090us         8     401ns     279ns     583ns  cuDeviceGetAttribute
+  0.00%  2.9550us         3     985ns     358ns  1.9000us  cuCtxSetCurrent
+  0.00%  2.4280us         3     809ns     363ns  1.7000us  cuModuleGetFunction
+  0.00%  2.3170us         1  2.3170us  2.3170us  2.3170us  cuMemFree
+  0.00%     713ns         2     356ns     243ns     470ns  cuDeviceComputeCapability
+  0.00%     698ns         2     349ns     239ns     459ns  cuCtxGetCurrent
+
+==27998== OpenACC (excl):
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 69.92%  2.83699s      1000  2.8370ms  2.6363ms  3.3263ms  acc_enqueue_download@laplace2_lf.c:83
+ 26.80%  1.08728s      1000  1.0873ms  757.44us  1.3703ms  acc_wait@laplace2_lf.c:90
+  1.36%  55.130ms         1  55.130ms  55.130ms  55.130ms  acc_enter_data@laplace2_lf.c:77
+  0.42%  17.105ms      1000  17.104us  10.930us  345.36us  acc_enqueue_launch@laplace2_lf.c:90 (main_90_gpu)
+  0.38%  15.260ms      1000  15.260us  10.601us  243.51us  acc_enqueue_launch@laplace2_lf.c:83 (main_83_gpu)
+  0.30%  12.262ms      1000  12.261us  7.7860us  155.44us  acc_enqueue_upload@laplace2_lf.c:81
+  0.28%  11.551ms      1000  11.550us  8.4190us  220.16us  acc_enqueue_launch@laplace2_lf.c:83 (main_85_gpu_red)
+  0.18%  7.3684ms      1000  7.3680us  4.4620us  717.83us  acc_compute_construct@laplace2_lf.c:81
+  0.17%  6.7433ms      2000  3.3710us  1.4900us  180.45us  acc_wait@laplace2_lf.c:83
+  0.08%  3.3900ms      1000  3.3890us  2.0780us  141.01us  acc_compute_construct@laplace2_lf.c:88
+  0.08%  3.2734ms         1  3.2734ms  3.2734ms  3.2734ms  acc_wait@laplace2_lf.c:77
+  0.01%  514.50us         1  514.50us  514.50us  514.50us  acc_device_init@laplace2_lf.c:77
+  0.01%  292.27us         8  36.534us  18.135us  57.316us  acc_enqueue_upload@laplace2_lf.c:77
+  0.00%  30.947us         1  30.947us  30.947us  30.947us  acc_exit_data@laplace2_lf.c:77
+  0.00%       0ns         2       0ns       0ns       0ns  acc_delete@laplace2_lf.c:96
+  0.00%       0ns         2       0ns       0ns       0ns  acc_create@laplace2_lf.c:77
+  0.00%       0ns         2       0ns       0ns       0ns  acc_alloc@laplace2_lf.c:77
+
+======== CPU profiling result (bottom up):
+Time(%)      Time  Name
+ 75.63%  13.0247s  ???
+ 75.63%  13.0247s  | start_thread
+ 75.63%  13.0247s  |   clone
+ 15.76%  2.71515s  cuMemcpyDtoHAsync_v2
+ 15.76%  2.71515s  | __pgi_uacc_cuda_downloads
+ 15.76%  2.71515s  |   __pgi_uacc_downloads
+ 15.76%  2.71515s  |     main
+  5.82%   1.0019s  cuStreamSynchronize
+  5.70%  981.86ms  | __pgi_uacc_cuda_wait
+  5.70%  981.86ms  | | __pgi_uacc_computedone
+  5.70%  981.86ms  | |   main
+  0.12%  20.038ms  | __pgi_uacc_cuda_downloads
+  0.12%  20.038ms  |   __pgi_uacc_downloads
+  0.12%  20.038ms  |     main
+  0.52%  90.171ms  cuLaunchKernel
+  0.52%  90.171ms  | __pgi_uacc_cuda_launch
+  0.52%  90.171ms  |   __pgi_uacc_launch
+  0.52%  90.171ms  |     main
+  0.47%  80.152ms  cuDevicePrimaryCtxRetain
+  0.47%  80.152ms  | __pgi_uacc_cuda_init_device
+  0.47%  80.152ms  |   __pgi_uacc_cuda_select_valid
+  0.47%  80.152ms  |     __pgi_uacc_select_devid
+  0.47%  80.152ms  |       __pgi_uacc_dataenterstart
+  0.47%  80.152ms  |         main
+  0.29%  50.095ms  cuMemcpyHtoDAsync_v2
+  0.29%  50.095ms  | __pgi_uacc_cuda_uploads
+  0.29%  50.095ms  |   __pgi_uacc_uploads
+  0.29%  50.095ms  |     main
+  0.29%  50.095ms  cuDevicePrimaryCtxRelease
+  0.29%  50.095ms  | __pgi_uacc_cuda_release_buffer
+  0.29%  50.095ms  |   __run_exit_handlers
+  0.29%  50.095ms  |     ???
+  0.29%  50.095ms  |       ???
+  0.17%  30.057ms  __c_mcopy4
+  0.17%  30.057ms  | __pgi_uacc_cuda_dataup1
+  0.17%  30.057ms  |   __pgi_uacc_dataup1
+  0.17%  30.057ms  |     __pgi_uacc_dataupx
+  0.17%  30.057ms  |       __pgi_uacc_dataonb
+  0.17%  30.057ms  |         main
+  0.12%  20.038ms  ???
+  0.12%  20.038ms  __pgiu_qnum
+  0.06%  10.019ms  | __pgi_uacc_cuda_launch
+  0.06%  10.019ms  | | __pgi_uacc_launch
+  0.06%  10.019ms  | |   main
+  0.06%  10.019ms  | __pgi_uacc_cuda_uploads
+  0.06%  10.019ms  |   __pgi_uacc_uploads
+  0.06%  10.019ms  |     main
+  0.12%  20.038ms  cuInit
+  0.12%  20.038ms  | __pgi_uacc_cuda_init
+  0.12%  20.038ms  |   __pgi_uacc_enumerate
+  0.12%  20.038ms  |     __pgi_uacc_initialize
+  0.12%  20.038ms  |       __pgi_uacc_dataenterstart
+  0.12%  20.038ms  |         main
+  0.12%  20.038ms  __pgi_uacc_prof_chain
+  0.06%  10.019ms  | __pgi_uacc_cuda_wait
+  0.06%  10.019ms  | | __pgi_uacc_computedone
+  0.06%  10.019ms  | |   main
+  0.06%  10.019ms  | __pgi_uacc_cuda_downloads
+  0.06%  10.019ms  |   __pgi_uacc_downloads
+  0.06%  10.019ms  |     main
+  0.06%  10.019ms  __pgi_uacc_computestart
+  0.06%  10.019ms  | main
+  0.06%  10.019ms  cuMemFreeHost
+  0.06%  10.019ms  | __pgi_uacc_cuda_free_device_buffers
+  0.06%  10.019ms  |   __pgi_uacc_cuda_release_buffer
+  0.06%  10.019ms  |     __run_exit_handlers
+  0.06%  10.019ms  |       ???
+  0.06%  10.019ms  |         ???
+  0.06%  10.019ms  ???
+  0.06%  10.019ms  | main
+  0.06%  10.019ms  _dl_relocate_object
+  0.06%  10.019ms  | dl_open_worker
+  0.06%  10.019ms  |   _dl_catch_error
+  0.06%  10.019ms  |     _dl_open
+  0.06%  10.019ms  |       dlopen_doit
+  0.06%  10.019ms  |         _dl_catch_error
+  0.06%  10.019ms  |           _dlerror_run
+  0.06%  10.019ms  |             dlopen@@GLIBC_2.2.5
+  0.06%  10.019ms  |               __pgi_uacc_add_profile_library
+  0.06%  10.019ms  |                 __pgi_uacc_add_profile_libraries
+  0.06%  10.019ms  |                   __pgi_uacc_globalinit
+  0.06%  10.019ms  |                     __pgi_uacc_enumerate
+  0.06%  10.019ms  |                       __pgi_uacc_initialize
+  0.06%  10.019ms  |                         __pgi_uacc_dataenterstart
+  0.06%  10.019ms  |                           main
+  0.06%  10.019ms  cuMemHostAlloc
+  0.06%  10.019ms  | __pgi_uacc_cuda_get_buffer
+  0.06%  10.019ms  |   __pgi_uacc_cuda_dataup1
+  0.06%  10.019ms  |     __pgi_uacc_dataup1
+  0.06%  10.019ms  |       __pgi_uacc_dataupx
+  0.06%  10.019ms  |         __pgi_uacc_dataonb
+  0.06%  10.019ms  |           main
+  0.06%  10.019ms  __write
+  0.06%  10.019ms  | _IO_file_write@@GLIBC_2.2.5
+  0.06%  10.019ms  |   _IO_do_write@@GLIBC_2.2.5
+  0.06%  10.019ms  |     _IO_file_xsputn@@GLIBC_2.2.5
+  0.06%  10.019ms  |       _IO_vfprintf
+  0.06%  10.019ms  |         printf
+  0.06%  10.019ms  |           main
+  0.06%  10.019ms  cuMemAllocHost_v2
+  0.06%  10.019ms  | __pgi_uacc_cuda_stream
+  0.06%  10.019ms  |   __pgi_uacc_cuda_init_device
+  0.06%  10.019ms  |     __pgi_uacc_cuda_select_valid
+  0.06%  10.019ms  |       __pgi_uacc_select_devid
+  0.06%  10.019ms  |         __pgi_uacc_dataenterstart
+  0.06%  10.019ms  |           main
+  0.06%  10.019ms  cuMemAlloc_v2
+  0.06%  10.019ms  | __pgi_uacc_cuda_launch
+  0.06%  10.019ms  |   __pgi_uacc_launch
+  0.06%  10.019ms  |     main
+  0.06%  10.019ms  __pgi_uacc_computedone
+  0.06%  10.019ms  | main
+  0.06%  10.019ms  __GI_memset
+  0.06%  10.019ms    main
+
+======== Data collected at 100Hz frequency
+
+---#laplace3_li.c (GPU)
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel laplace3_li.c -o lp3GPU
+main:
+     77, Generating copyin(Anew[:][:],A[:][:])
+     82, Loop is parallelizable
+     83, Loop is parallelizable
+         Accelerator kernel generated
+         Generating Tesla code
+         82, #pragma acc loop gang, vector(4) /* blockIdx.y threadIdx.y */
+         83, #pragma acc loop gang, vector(32) /* blockIdx.x threadIdx.x */
+         86, Generating implicit reduction(max:error)
+     89, Loop is parallelizable
+     90, Loop is parallelizable
+         Accelerator kernel generated
+         Generating Tesla code
+         89, #pragma acc loop gang, vector(4) /* blockIdx.y threadIdx.y */
+         90, #pragma acc loop gang, vector(32) /* blockIdx.x threadIdx.x */
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ perf stat ./lp3GPU 1000
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 1000 iterations
+  100, 0.049208
+  200, 0.034790
+  300, 0.028398
+  400, 0.024596
+  500, 0.022000
+  600, 0.020080
+  700, 0.018592
+  800, 0.017392
+  900, 0.016397
+ 1000, 0.015554
+
+ Performance counter stats for './lp3GPU 1000':
+
+       5249,099214      task-clock (msec)         #    0,969 CPUs utilized
+               522      context-switches          #    0,099 K/sec
+                18      cpu-migrations            #    0,003 K/sec
+             2.800      page-faults               #    0,533 K/sec
+    16.240.988.874      cycles                    #    3,094 GHz
+     6.580.972.831      stalled-cycles-frontend   #   40,52% frontend cycles idle
+     3.240.892.131      stalled-cycles-backend    #   19,96% backend  cycles idle
+    20.617.690.517      instructions              #    1,27  insns per cycle
+                                                  #    0,32  stalled cycles per insn
+     4.509.412.145      branches                  #  859,083 M/sec
+         4.678.909      branch-misses             #    0,10% of all branches
+
+       5,419686795 seconds time elapsed
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ pgprof ./lp3GPU 1000
+pgprof-Warning-Installed CUDA driver version is not supported for GPU profiling.
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 1000 iterations
+==28399== PGPROF is profiling process 28399, command: ./lp3GPU 1000
+  100, 0.049208
+  200, 0.034790
+  300, 0.028398
+  400, 0.024596
+  500, 0.022000
+  600, 0.020080
+  700, 0.018592
+  800, 0.017392
+  900, 0.016397
+ 1000, 0.015554
+==28399== Profiling application: ./lp3GPU 1000
+==28399== Profiling result:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 67.62%  2.83148s      1000  2.8315ms  2.8186ms  3.1451ms  main_83_gpu
+ 27.53%  1.15297s      1000  1.1530ms  1.1488ms  1.2295ms  main_90_gpu
+  4.19%  175.44ms      1000  175.44us  174.40us  186.17us  main_86_gpu_red
+  0.61%  25.496ms      1008  25.293us     960ns  3.3006ms  [CUDA memcpy HtoD]
+  0.05%  1.9245ms      1000  1.9240us  1.8870us  4.0640us  [CUDA memcpy DtoH]
+
+==28399== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 68.31%  3.01237s      1000  3.0124ms  2.9046ms  3.3117ms  cuMemcpyDtoHAsync
+ 26.38%  1.16343s      3001  387.68us     759ns  3.3934ms  cuStreamSynchronize
+  2.16%  95.132ms         3  31.711ms     214ns  95.132ms  cuDevicePrimaryCtxRetain
+  1.06%  46.755ms         1  46.755ms  46.755ms  46.755ms  cuDevicePrimaryCtxRelease
+  0.86%  37.817ms      3000  12.605us  7.2930us  309.16us  cuLaunchKernel
+  0.63%  27.661ms         1  27.661ms  27.661ms  27.661ms  cuMemHostAlloc
+  0.25%  11.111ms      1008  11.023us  6.9620us  178.71us  cuMemcpyHtoDAsync
+  0.22%  9.7716ms         1  9.7716ms  9.7716ms  9.7716ms  cuMemFreeHost
+  0.08%  3.6140ms         5  722.81us  172.32us  2.8191ms  cuMemAlloc
+  0.03%  1.5212ms         6  253.53us  1.7900us  757.74us  cuEventSynchronize
+  0.01%  550.73us         1  550.73us  550.73us  550.73us  cuMemAllocHost
+  0.01%  350.93us         1  350.93us  350.93us  350.93us  cuModuleLoadData
+  0.00%  26.494us         1  26.494us  26.494us  26.494us  cuStreamCreate
+  0.00%  20.933us         7  2.9900us  2.0790us  4.6130us  cuEventRecord
+  0.00%  4.0370us         3  1.3450us     294ns  3.2420us  cuDeviceGetCount
+  0.00%  3.9360us         1  3.9360us  3.9360us  3.9360us  cuEventCreate
+  0.00%  3.1270us         3  1.0420us     399ns  2.0110us  cuCtxSetCurrent
+  0.00%  2.8880us         8     361ns     248ns     518ns  cuDeviceGetAttribute
+  0.00%  2.6770us         6     446ns     208ns     588ns  cuDeviceGet
+  0.00%  2.6210us         1  2.6210us  2.6210us  2.6210us  cuMemFree
+  0.00%  2.2750us         3     758ns     332ns  1.4140us  cuModuleGetFunction
+  0.00%     726ns         2     363ns     206ns     520ns  cuDeviceComputeCapability
+  0.00%     553ns         2     276ns     205ns     348ns  cuCtxGetCurrent
+
+==28399== OpenACC (excl):
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 69.96%  3.01422s      1000  3.0142ms  2.9069ms  3.3147ms  acc_enqueue_download@laplace3_li.c:83
+ 26.89%  1.15859s      1000  1.1586ms  855.95us  1.5457ms  acc_wait@laplace3_li.c:90
+  1.34%  57.794ms         1  57.794ms  57.794ms  57.794ms  acc_enter_data@laplace3_li.c:77
+  0.40%  17.342ms      1000  17.341us  11.601us  312.00us  acc_enqueue_launch@laplace3_li.c:90 (main_90_gpu)
+  0.35%  15.288ms      1000  15.288us  10.850us  121.81us  acc_enqueue_launch@laplace3_li.c:83 (main_83_gpu)
+  0.29%  12.346ms      1000  12.345us  7.8880us  180.89us  acc_enqueue_upload@laplace3_li.c:81
+  0.28%  12.050ms      1000  12.050us  8.7890us  105.17us  acc_enqueue_launch@laplace3_li.c:83 (main_86_gpu_red)
+  0.17%  7.1759ms      1000  7.1750us  4.5170us  392.19us  acc_compute_construct@laplace3_li.c:81
+  0.15%  6.3776ms      2000  3.1880us  1.5830us  175.37us  acc_wait@laplace3_li.c:83
+  0.08%  3.3956ms         1  3.3956ms  3.3956ms  3.3956ms  acc_wait@laplace3_li.c:77
+  0.08%  3.3147ms      1000  3.3140us  2.1530us  106.79us  acc_compute_construct@laplace3_li.c:88
+  0.01%  368.77us         1  368.77us  368.77us  368.77us  acc_device_init@laplace3_li.c:77
+  0.01%  263.28us         8  32.910us  15.805us  60.269us  acc_enqueue_upload@laplace3_li.c:77
+  0.00%  27.455us         1  27.455us  27.455us  27.455us  acc_exit_data@laplace3_li.c:77
+  0.00%       0ns         2       0ns       0ns       0ns  acc_alloc@laplace3_li.c:77
+  0.00%       0ns         2       0ns       0ns       0ns  acc_delete@laplace3_li.c:95
+  0.00%       0ns         2       0ns       0ns       0ns  acc_create@laplace3_li.c:77
+
+======== CPU profiling result (bottom up):
+Time(%)      Time  Name
+ 75.52%  13.8254s  ???
+ 75.52%  13.8254s  | start_thread
+ 75.52%  13.8254s  |   clone
+ 16.54%  3.02776s  cuMemcpyDtoHAsync_v2
+ 16.54%  3.02776s  | __pgi_uacc_cuda_downloads
+ 16.54%  3.02776s  |   __pgi_uacc_downloads
+ 16.54%  3.02776s  |     main
+  6.46%  1.18303s  cuStreamSynchronize
+  6.41%  1.17301s  | __pgi_uacc_cuda_wait
+  6.41%  1.17301s  | | __pgi_uacc_computedone
+  6.41%  1.17301s  | |   main
+  0.05%  10.026ms  | __pgi_uacc_cuda_downloads
+  0.05%  10.026ms  |   __pgi_uacc_downloads
+  0.05%  10.026ms  |     main
+  0.55%  100.26ms  cuDevicePrimaryCtxRetain
+  0.55%  100.26ms  | __pgi_uacc_cuda_init_device
+  0.55%  100.26ms  |   __pgi_uacc_cuda_select_valid
+  0.55%  100.26ms  |     __pgi_uacc_select_devid
+  0.55%  100.26ms  |       __pgi_uacc_dataenterstart
+  0.55%  100.26ms  |         main
+  0.22%  40.103ms  cuLaunchKernel
+  0.22%  40.103ms  | __pgi_uacc_cuda_launch
+  0.22%  40.103ms  |   __pgi_uacc_launch
+  0.22%  40.103ms  |     main
+  0.22%  40.103ms  cuDevicePrimaryCtxRelease
+  0.22%  40.103ms  | __pgi_uacc_cuda_release_buffer
+  0.22%  40.103ms  |   __run_exit_handlers
+  0.22%  40.103ms  |     ???
+  0.22%  40.103ms  |       ???
+  0.16%  30.077ms  __c_mcopy4
+  0.16%  30.077ms  | __pgi_uacc_cuda_dataup1
+  0.16%  30.077ms  |   __pgi_uacc_dataup1
+  0.16%  30.077ms  |     __pgi_uacc_dataupx
+  0.16%  30.077ms  |       __pgi_uacc_dataonb
+  0.16%  30.077ms  |         main
+  0.11%  20.051ms  cuMemHostAlloc
+  0.11%  20.051ms  | __pgi_uacc_cuda_get_buffer
+  0.11%  20.051ms  |   __pgi_uacc_cuda_dataup1
+  0.11%  20.051ms  |     __pgi_uacc_dataup1
+  0.11%  20.051ms  |       __pgi_uacc_dataupx
+  0.11%  20.051ms  |         __pgi_uacc_dataonb
+  0.11%  20.051ms  |           main
+  0.05%  10.026ms  cuInit
+  0.05%  10.026ms  | __pgi_uacc_cuda_init
+  0.05%  10.026ms  |   __pgi_uacc_enumerate
+  0.05%  10.026ms  |     __pgi_uacc_initialize
+  0.05%  10.026ms  |       __pgi_uacc_dataenterstart
+  0.05%  10.026ms  |         main
+  0.05%  10.026ms  __GI_memset
+  0.05%  10.026ms  | main
+  0.05%  10.026ms  _dl_relocate_object
+  0.05%  10.026ms  | dl_open_worker
+  0.05%  10.026ms  |   _dl_catch_error
+  0.05%  10.026ms  |     _dl_open
+  0.05%  10.026ms  |       dlopen_doit
+  0.05%  10.026ms  |         _dl_catch_error
+  0.05%  10.026ms  |           _dlerror_run
+  0.05%  10.026ms  |             dlopen@@GLIBC_2.2.5
+  0.05%  10.026ms  |               __pgi_uacc_add_profile_library
+  0.05%  10.026ms  |                 __pgi_uacc_add_profile_libraries
+  0.05%  10.026ms  |                   __pgi_uacc_globalinit
+  0.05%  10.026ms  |                     __pgi_uacc_enumerate
+  0.05%  10.026ms  |                       __pgi_uacc_initialize
+  0.05%  10.026ms  |                         __pgi_uacc_dataenterstart
+  0.05%  10.026ms  |                           main
+  0.05%  10.026ms  cuMemFreeHost
+  0.05%  10.026ms    __pgi_uacc_cuda_free_device_buffers
+  0.05%  10.026ms      __pgi_uacc_cuda_release_buffer
+  0.05%  10.026ms        __run_exit_handlers
+  0.05%  10.026ms          ???
+  0.05%  10.026ms            ???
+
+======== Data collected at 100Hz frequency
+
+---#laplace4_cm.c (GPU)
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel laplace4_cm.c -o lp4GPU
+main:
+     77, Generating copyin(Anew[:][:],A[:][:])
+     82, Loop is parallelizable
+     83, Loop is parallelizable
+         Accelerator kernel generated
+         Generating Tesla code
+         82, #pragma acc loop gang, vector(4) /* blockIdx.y threadIdx.y */
+         83, #pragma acc loop gang, vector(32) /* blockIdx.x threadIdx.x */
+         86, Generating implicit reduction(max:error)
+     89, Loop is parallelizable
+     90, Loop is parallelizable
+         Accelerator kernel generated
+         Generating Tesla code
+         89, #pragma acc loop gang, vector(4) /* blockIdx.y threadIdx.y */
+         90, #pragma acc loop gang, vector(32) /* blockIdx.x threadIdx.x */
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ perf stat ./lp4GPU 1000
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 1000 iterations
+  100, 0.049208
+  200, 0.034790
+  300, 0.028398
+  400, 0.024596
+  500, 0.022000
+  600, 0.020080
+  700, 0.018592
+  800, 0.017392
+  900, 0.016397
+ 1000, 0.015554
+
+ Performance counter stats for './lp4GPU 1000':
+
+       4990,856869      task-clock (msec)         #    0,970 CPUs utilized
+               566      context-switches          #    0,113 K/sec
+                17      cpu-migrations            #    0,003 K/sec
+             2.796      page-faults               #    0,560 K/sec
+    14.814.099.574      cycles                    #    2,968 GHz
+     6.630.007.210      stalled-cycles-frontend   #   44,75% frontend cycles idle
+     3.672.352.656      stalled-cycles-backend    #   24,79% backend  cycles idle
+    17.475.493.066      instructions              #    1,18  insns per cycle
+                                                  #    0,38  stalled cycles per insn
+     3.820.373.591      branches                  #  765,474 M/sec
+        12.426.050      branch-misses             #    0,33% of all branches
+
+       5,143703182 seconds time elapsed
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ pgprof ./lp4GPU 1000
+pgprof-Warning-Installed CUDA driver version is not supported for GPU profiling.
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 1000 iterations
+==28579== PGPROF is profiling process 28579, command: ./lp4GPU 1000
+  100, 0.049208
+  200, 0.034790
+  300, 0.028398
+  400, 0.024596
+  500, 0.022000
+  600, 0.020080
+  700, 0.018592
+  800, 0.017392
+  900, 0.016397
+ 1000, 0.015554
+==28579== Profiling application: ./lp4GPU 1000
+==28579== Profiling result:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 64.16%  2.43055s      1000  2.4305ms  2.4106ms  2.9347ms  main_83_gpu
+ 30.48%  1.15474s      1000  1.1547ms  1.1486ms  1.2295ms  main_90_gpu
+  4.64%  175.59ms      1000  175.59us  174.43us  186.08us  main_86_gpu_red
+  0.67%  25.276ms      1008  25.075us     959ns  3.3342ms  [CUDA memcpy HtoD]
+  0.05%  1.9223ms      1000  1.9220us  1.8870us  2.4960us  [CUDA memcpy DtoH]
+
+==28579== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 65.61%  2.61158s      1000  2.6116ms  2.1451ms  3.1244ms  cuMemcpyDtoHAsync
+ 29.22%  1.16329s      3001  387.63us     744ns  3.0872ms  cuStreamSynchronize
+  1.96%  78.100ms         3  26.033ms     215ns  78.099ms  cuDevicePrimaryCtxRetain
+  1.17%  46.462ms         1  46.462ms  46.462ms  46.462ms  cuDevicePrimaryCtxRelease
+  0.84%  33.323ms      3000  11.107us  6.9880us  479.82us  cuLaunchKernel
+  0.57%  22.641ms         1  22.641ms  22.641ms  22.641ms  cuMemHostAlloc
+  0.24%  9.6684ms      1008  9.5910us  6.9210us  202.21us  cuMemcpyHtoDAsync
+  0.23%  9.3236ms         1  9.3236ms  9.3236ms  9.3236ms  cuMemFreeHost
+  0.10%  3.9821ms         5  796.42us  197.21us  3.0609ms  cuMemAlloc
+  0.03%  1.1434ms         6  190.57us  2.4790us  607.16us  cuEventSynchronize
+  0.02%  650.94us         1  650.94us  650.94us  650.94us  cuMemAllocHost
+  0.01%  269.52us         1  269.52us  269.52us  269.52us  cuModuleLoadData
+  0.00%  32.019us         1  32.019us  32.019us  32.019us  cuStreamCreate
+  0.00%  25.962us         7  3.7080us  2.3980us  6.9110us  cuEventRecord
+  0.00%  4.5510us         1  4.5510us  4.5510us  4.5510us  cuEventCreate
+  0.00%  4.3090us         3  1.4360us     308ns  3.4190us  cuDeviceGetCount
+  0.00%  3.4840us         3  1.1610us     448ns  2.1640us  cuCtxSetCurrent
+  0.00%  2.8500us         6     475ns     289ns     651ns  cuDeviceGet
+  0.00%  2.8230us         3     941ns     401ns  1.7900us  cuModuleGetFunction
+  0.00%  2.7500us         8     343ns     245ns     483ns  cuDeviceGetAttribute
+  0.00%  2.6870us         1  2.6870us  2.6870us  2.6870us  cuMemFree
+  0.00%     654ns         2     327ns     205ns     449ns  cuDeviceComputeCapability
+  0.00%     512ns         2     256ns     203ns     309ns  cuCtxGetCurrent
+
+==28579== OpenACC (excl):
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 67.12%  2.61326s      1000  2.6133ms  2.1478ms  3.1265ms  acc_enqueue_download@laplace4_cm.c:83
+ 29.76%  1.15883s      1000  1.1588ms  693.34us  1.4371ms  acc_wait@laplace4_cm.c:90
+  1.35%  52.604ms         1  52.604ms  52.604ms  52.604ms  acc_enter_data@laplace4_cm.c:77
+  0.39%  15.113ms      1000  15.112us  10.861us  484.59us  acc_enqueue_launch@laplace4_cm.c:90 (main_90_gpu)
+  0.36%  13.978ms      1000  13.977us  10.615us  442.80us  acc_enqueue_launch@laplace4_cm.c:83 (main_83_gpu)
+  0.28%  10.864ms      1000  10.864us  7.9340us  204.81us  acc_enqueue_upload@laplace4_cm.c:81
+  0.27%  10.600ms      1000  10.599us  8.5040us  123.21us  acc_enqueue_launch@laplace4_cm.c:83 (main_86_gpu_red)
+  0.16%  6.2286ms      1000  6.2280us  4.3930us  458.20us  acc_compute_construct@laplace4_cm.c:81
+  0.14%  5.6139ms      2000  2.8060us  1.5340us  13.934us  acc_wait@laplace4_cm.c:83
+  0.08%  3.0895ms         1  3.0895ms  3.0895ms  3.0895ms  acc_wait@laplace4_cm.c:77
+  0.07%  2.7656ms      1000  2.7650us  2.0620us  7.6050us  acc_compute_construct@laplace4_cm.c:88
+  0.01%  290.37us         1  290.37us  290.37us  290.37us  acc_device_init@laplace4_cm.c:77
+  0.01%  284.78us         8  35.596us  14.373us  65.029us  acc_enqueue_upload@laplace4_cm.c:77
+  0.00%  34.348us         1  34.348us  34.348us  34.348us  acc_exit_data@laplace4_cm.c:77
+  0.00%       0ns         2       0ns       0ns       0ns  acc_alloc@laplace4_cm.c:77
+  0.00%       0ns         2       0ns       0ns       0ns  acc_delete@laplace4_cm.c:95
+  0.00%       0ns         2       0ns       0ns       0ns  acc_create@laplace4_cm.c:77
+
+======== CPU profiling result (bottom up):
+Time(%)      Time  Name
+ 75.41%  12.4258s  ???
+ 75.41%  12.4258s  | start_thread
+ 75.41%  12.4258s  |   clone
+ 16.13%  2.65766s  cuMemcpyDtoHAsync_v2
+ 16.13%  2.65766s  | __pgi_uacc_cuda_downloads
+ 16.13%  2.65766s  |   __pgi_uacc_downloads
+ 16.13%  2.65766s  |     main
+  6.94%   1.1433s  cuStreamSynchronize
+  6.94%   1.1433s  | __pgi_uacc_cuda_wait
+  6.94%   1.1433s  |   __pgi_uacc_computedone
+  6.94%   1.1433s  |     main
+  0.49%  80.231ms  cuDevicePrimaryCtxRetain
+  0.49%  80.231ms  | __pgi_uacc_cuda_init_device
+  0.49%  80.231ms  |   __pgi_uacc_cuda_select_valid
+  0.49%  80.231ms  |     __pgi_uacc_select_devid
+  0.49%  80.231ms  |       __pgi_uacc_dataenterstart
+  0.49%  80.231ms  |         main
+  0.24%  40.116ms  cuDevicePrimaryCtxRelease
+  0.24%  40.116ms  | __pgi_uacc_cuda_release_buffer
+  0.24%  40.116ms  |   __run_exit_handlers
+  0.24%  40.116ms  |     ???
+  0.24%  40.116ms  |       ???
+  0.12%  20.058ms  __c_mcopy4
+  0.12%  20.058ms  | __pgi_uacc_cuda_dataup1
+  0.12%  20.058ms  |   __pgi_uacc_dataup1
+  0.12%  20.058ms  |     __pgi_uacc_dataupx
+  0.12%  20.058ms  |       __pgi_uacc_dataonb
+  0.12%  20.058ms  |         main
+  0.12%  20.058ms  ???
+  0.12%  20.058ms  cuLaunchKernel
+  0.12%  20.058ms  | __pgi_uacc_cuda_launch
+  0.12%  20.058ms  |   __pgi_uacc_launch
+  0.12%  20.058ms  |     main
+  0.12%  20.058ms  cuMemcpyHtoDAsync_v2
+  0.12%  20.058ms  | __pgi_uacc_cuda_uploads
+  0.12%  20.058ms  |   __pgi_uacc_uploads
+  0.12%  20.058ms  |     main
+  0.06%  10.029ms  cuMemFreeHost
+  0.06%  10.029ms  | __pgi_uacc_cuda_free_device_buffers
+  0.06%  10.029ms  |   __pgi_uacc_cuda_release_buffer
+  0.06%  10.029ms  |     __run_exit_handlers
+  0.06%  10.029ms  |       ???
+  0.06%  10.029ms  |         ???
+  0.06%  10.029ms  cuInit
+  0.06%  10.029ms  | __pgi_uacc_cuda_init
+  0.06%  10.029ms  |   __pgi_uacc_enumerate
+  0.06%  10.029ms  |     __pgi_uacc_initialize
+  0.06%  10.029ms  |       __pgi_uacc_dataenterstart
+  0.06%  10.029ms  |         main
+  0.06%  10.029ms  cuMemAlloc_v2
+  0.06%  10.029ms  | __pgi_uacc_cuda_alloc
+  0.06%  10.029ms  |   __pgi_uacc_alloc
+  0.06%  10.029ms  |     do_create
+  0.06%  10.029ms  |       __pgi_uacc_excontig_search
+  0.06%  10.029ms  |         __pgi_uacc_create
+  0.06%  10.029ms  |           __pgi_uacc_dataonb
+  0.06%  10.029ms  |             main
+  0.06%  10.029ms  cuMemHostAlloc
+  0.06%  10.029ms  | __pgi_uacc_cuda_get_buffer
+  0.06%  10.029ms  |   __pgi_uacc_cuda_dataup1
+  0.06%  10.029ms  |     __pgi_uacc_dataup1
+  0.06%  10.029ms  |       __pgi_uacc_dataupx
+  0.06%  10.029ms  |         __pgi_uacc_dataonb
+  0.06%  10.029ms  |           main
+  0.06%  10.029ms  __GI_memset
+  0.06%  10.029ms    main
+
+======== Data collected at 100Hz frequency
+
+---#laplace5_db.c (GPU)
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel laplace5_db.c -o lp5GPU
+main:
+     77, Generating copyin(Anew[:][:],A[:][:])
+     83, Loop is parallelizable
+     84, Loop is parallelizable
+         Accelerator kernel generated
+         Generating Tesla code
+         83, #pragma acc loop gang, vector(4) /* blockIdx.y threadIdx.y */
+         84, #pragma acc loop gang, vector(32) /* blockIdx.x threadIdx.x */
+         87, Generating implicit reduction(max:error)
+     90, Loop is parallelizable
+     91, Loop is parallelizable
+         Accelerator kernel generated
+         Generating Tesla code
+         90, #pragma acc loop gang, vector(4) /* blockIdx.y threadIdx.y */
+         91, #pragma acc loop gang, vector(32) /* blockIdx.x threadIdx.x */
+         94, Generating implicit reduction(max:error)
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ perf stat ./lp5GPU 1000
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 1000 iterations
+  100, 0.413879
+  200, 0.414094
+  300, 0.414148
+  400, 0.414171
+  500, 0.414183
+  600, 0.414190
+  700, 0.414195
+  800, 0.414199
+  900, 0.414201
+ 1000, 0.414203
+
+ Performance counter stats for './lp5GPU 1000':
+
+       3790,282331      task-clock (msec)         #    0,961 CPUs utilized
+               444      context-switches          #    0,117 K/sec
+                17      cpu-migrations            #    0,004 K/sec
+             2.799      page-faults               #    0,738 K/sec
+    11.484.030.401      cycles                    #    3,030 GHz
+     5.563.179.121      stalled-cycles-frontend   #   48,44% frontend cycles idle
+     3.444.688.700      stalled-cycles-backend    #   30,00% backend  cycles idle
+    12.528.304.188      instructions              #    1,09  insns per cycle
+                                                  #    0,44  stalled cycles per insn
+     2.743.844.335      branches                  #  723,916 M/sec
+         3.843.054      branch-misses             #    0,14% of all branches
+
+       3,944838417 seconds time elapsed
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ pgprof ./lp5GPU 1000
+pgprof-Warning-Installed CUDA driver version is not supported for GPU profiling.
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 1000 iterations
+==28741== PGPROF is profiling process 28741, command: ./lp5GPU 1000
+  100, 0.413879
+  200, 0.414094
+  300, 0.414148
+  400, 0.414171
+  500, 0.414183
+  600, 0.414190
+  700, 0.414195
+  800, 0.414199
+  900, 0.414201
+ 1000, 0.414203
+==28741== Profiling application: ./lp5GPU 1000
+==28741== Profiling result:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 46.20%  1.21997s       500  2.4399ms  2.4130ms  2.7564ms  main_84_gpu
+ 46.09%  1.21730s       500  2.4346ms  2.4070ms  2.6305ms  main_91_gpu
+  3.34%  88.213ms       500  176.43us  174.88us  186.08us  main_94_gpu_red
+  3.34%  88.172ms       500  176.34us  174.81us  186.01us  main_87_gpu_red
+  0.96%  25.318ms      1008  25.116us     960ns  3.2834ms  [CUDA memcpy HtoD]
+  0.07%  1.9166ms      1000  1.9160us  1.8560us  2.5600us  [CUDA memcpy DtoH]
+
+==28741== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 92.05%  2.62224s      1000  2.6222ms  2.4322ms  3.6058ms  cuMemcpyDtoHAsync
+  3.38%  96.285ms         3  32.095ms     273ns  96.284ms  cuDevicePrimaryCtxRetain
+  1.73%  49.190ms         1  49.190ms  49.190ms  49.190ms  cuDevicePrimaryCtxRelease
+  0.90%  25.518ms         1  25.518ms  25.518ms  25.518ms  cuMemHostAlloc
+  0.82%  23.337ms      2000  11.668us  7.6580us  268.33us  cuLaunchKernel
+  0.35%  9.8696ms      1008  9.7910us  5.8380us  231.85us  cuMemcpyHtoDAsync
+  0.34%  9.6354ms         1  9.6354ms  9.6354ms  9.6354ms  cuMemFreeHost
+  0.24%  6.8165ms      2001  3.4060us     717ns  3.2256ms  cuStreamSynchronize
+  0.15%  4.1366ms         5  827.31us  205.76us  3.0946ms  cuMemAlloc
+  0.02%  690.77us         1  690.77us  690.77us  690.77us  cuMemAllocHost
+  0.02%  583.10us         6  97.183us  3.1230us  342.71us  cuEventSynchronize
+  0.01%  360.35us         1  360.35us  360.35us  360.35us  cuModuleLoadData
+  0.00%  39.679us         7  5.6680us  3.3340us  11.161us  cuEventRecord
+  0.00%  37.815us         1  37.815us  37.815us  37.815us  cuStreamCreate
+  0.00%  5.5660us         1  5.5660us  5.5660us  5.5660us  cuEventCreate
+  0.00%  4.0900us         3  1.3630us     320ns  3.2490us  cuDeviceGetCount
+  0.00%  3.2770us         8     409ns     301ns     587ns  cuDeviceGetAttribute
+  0.00%  3.1750us         3  1.0580us     388ns  2.0260us  cuCtxSetCurrent
+  0.00%  2.8110us         6     468ns     232ns     742ns  cuDeviceGet
+  0.00%  2.6420us         4     660ns     263ns  1.7530us  cuModuleGetFunction
+  0.00%  2.3150us         1  2.3150us  2.3150us  2.3150us  cuMemFree
+  0.00%     816ns         2     408ns     277ns     539ns  cuDeviceComputeCapability
+  0.00%     584ns         2     292ns     229ns     355ns  cuCtxGetCurrent
+
+==28741== OpenACC (excl):
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 47.98%  1.31262s       500  2.6252ms  2.4981ms  3.1459ms  acc_enqueue_download@laplace5_db.c:84
+ 47.93%  1.31143s       500  2.6229ms  2.4350ms  3.6087ms  acc_enqueue_download@laplace5_db.c:91
+  2.04%  55.753ms         1  55.753ms  55.753ms  55.753ms  acc_enter_data@laplace5_db.c:77
+  0.39%  10.543ms      1000  10.542us  6.7350us  145.55us  acc_enqueue_upload@laplace5_db.c:81
+  0.29%  7.8515ms       500  15.703us  11.559us  117.27us  acc_enqueue_launch@laplace5_db.c:84 (main_84_gpu)
+  0.28%  7.7925ms       500  15.585us  11.600us  272.44us  acc_enqueue_launch@laplace5_db.c:91 (main_91_gpu)
+  0.24%  6.5728ms      1000  6.5720us  4.2350us  566.79us  acc_compute_construct@laplace5_db.c:81
+  0.23%  6.2777ms       500  12.555us  9.3590us  170.50us  acc_enqueue_launch@laplace5_db.c:91 (main_94_gpu_red)
+  0.22%  5.8878ms       500  11.775us  9.1310us  114.56us  acc_enqueue_launch@laplace5_db.c:84 (main_87_gpu_red)
+  0.13%  3.5993ms      1000  3.5990us  1.5680us  279.06us  acc_wait@laplace5_db.c:91
+  0.13%  3.5173ms      1000  3.5170us  1.5660us  387.30us  acc_wait@laplace5_db.c:84
+  0.12%  3.2284ms         1  3.2284ms  3.2284ms  3.2284ms  acc_wait@laplace5_db.c:77
+  0.02%  510.59us         8  63.823us  18.878us  236.86us  acc_enqueue_upload@laplace5_db.c:77
+  0.01%  380.72us         1  380.72us  380.72us  380.72us  acc_device_init@laplace5_db.c:77
+  0.00%  25.810us         1  25.810us  25.810us  25.810us  acc_exit_data@laplace5_db.c:77
+  0.00%       0ns         2       0ns       0ns       0ns  acc_delete@laplace5_db.c:100
+  0.00%       0ns         2       0ns       0ns       0ns  acc_create@laplace5_db.c:77
+  0.00%       0ns         2       0ns       0ns       0ns  acc_alloc@laplace5_db.c:77
+
+======== CPU profiling result (bottom up):
+Time(%)      Time  Name
+ 75.36%    8.962s  ???
+ 75.36%    8.962s  | start_thread
+ 75.36%    8.962s  |   clone
+ 21.94%  2.60932s  cuMemcpyDtoHAsync_v2
+ 21.94%  2.60932s  | __pgi_uacc_cuda_downloads
+ 21.94%  2.60932s  |   __pgi_uacc_downloads
+ 21.94%  2.60932s  |     main
+  0.84%  100.36ms  cuDevicePrimaryCtxRetain
+  0.84%  100.36ms  | __pgi_uacc_cuda_init_device
+  0.84%  100.36ms  |   __pgi_uacc_cuda_select_valid
+  0.84%  100.36ms  |     __pgi_uacc_select_devid
+  0.84%  100.36ms  |       __pgi_uacc_dataenterstart
+  0.84%  100.36ms  |         main
+  0.42%  50.179ms  cuDevicePrimaryCtxRelease
+  0.42%  50.179ms  | __pgi_uacc_cuda_release_buffer
+  0.42%  50.179ms  |   __run_exit_handlers
+  0.42%  50.179ms  |     ???
+  0.42%  50.179ms  |       ???
+  0.34%  40.143ms  cuStreamSynchronize
+  0.34%  40.143ms  | __pgi_uacc_cuda_downloads
+  0.34%  40.143ms  |   __pgi_uacc_downloads
+  0.34%  40.143ms  |     main
+  0.25%  30.108ms  cuMemcpyHtoDAsync_v2
+  0.17%  20.072ms  | __pgi_uacc_cuda_uploads
+  0.17%  20.072ms  | | __pgi_uacc_uploads
+  0.17%  20.072ms  | |   main
+  0.08%  10.036ms  | __pgi_uacc_cuda_dataup1
+  0.08%  10.036ms  |   __pgi_uacc_dataup1
+  0.08%  10.036ms  |     __pgi_uacc_dataupx
+  0.08%  10.036ms  |       __pgi_uacc_dataonb
+  0.08%  10.036ms  |         main
+  0.17%  20.072ms  cuLaunchKernel
+  0.17%  20.072ms  | __pgi_uacc_cuda_launch
+  0.17%  20.072ms  |   __pgi_uacc_launch
+  0.17%  20.072ms  |     main
+  0.17%  20.072ms  __GI_memset
+  0.17%  20.072ms  | main
+  0.08%  10.036ms  cuMemAlloc_v2
+  0.08%  10.036ms  | __pgi_uacc_cuda_alloc
+  0.08%  10.036ms  |   __pgi_uacc_alloc
+  0.08%  10.036ms  |     do_create
+  0.08%  10.036ms  |       __pgi_uacc_excontig_search
+  0.08%  10.036ms  |         __pgi_uacc_create
+  0.08%  10.036ms  |           __pgi_uacc_dataonb
+  0.08%  10.036ms  |             main
+  0.08%  10.036ms  cuMemHostAlloc
+  0.08%  10.036ms  | __pgi_uacc_cuda_get_buffer
+  0.08%  10.036ms  |   __pgi_uacc_cuda_dataup1
+  0.08%  10.036ms  |     __pgi_uacc_dataup1
+  0.08%  10.036ms  |       __pgi_uacc_dataupx
+  0.08%  10.036ms  |         __pgi_uacc_dataonb
+  0.08%  10.036ms  |           main
+  0.08%  10.036ms  __pgi_uacc_add_profile_library
+  0.08%  10.036ms  | __pgi_uacc_add_profile_libraries
+  0.08%  10.036ms  |   __pgi_uacc_globalinit
+  0.08%  10.036ms  |     __pgi_uacc_enumerate
+  0.08%  10.036ms  |       __pgi_uacc_initialize
+  0.08%  10.036ms  |         __pgi_uacc_dataenterstart
+  0.08%  10.036ms  |           main
+  0.08%  10.036ms  __c_mcopy4
+  0.08%  10.036ms  | __pgi_uacc_cuda_dataup1
+  0.08%  10.036ms  |   __pgi_uacc_dataup1
+  0.08%  10.036ms  |     __pgi_uacc_dataupx
+  0.08%  10.036ms  |       __pgi_uacc_dataonb
+  0.08%  10.036ms  |         main
+  0.08%  10.036ms  cuInit
+  0.08%  10.036ms  | __pgi_uacc_cuda_init
+  0.08%  10.036ms  |   __pgi_uacc_enumerate
+  0.08%  10.036ms  |     __pgi_uacc_initialize
+  0.08%  10.036ms  |       __pgi_uacc_dataenterstart
+  0.08%  10.036ms  |         main
+  0.08%  10.036ms  cuMemFreeHost
+  0.08%  10.036ms    __pgi_uacc_cuda_free_device_buffers
+  0.08%  10.036ms      __pgi_uacc_cuda_release_buffer
+  0.08%  10.036ms        __run_exit_handlers
+  0.08%  10.036ms          ???
+  0.08%  10.036ms            ???
+
+======== Data collected at 100Hz frequency
+
+---#laplace6_db_improve.c (GPU)
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel laplace6_db_improve.c -o lp6GPU
+main:
+     77, Generating create(A[:][:],Anew[:][:])
+     83, Loop is parallelizable
+     84, Loop is parallelizable
+         Accelerator kernel generated
+         Generating Tesla code
+         83, #pragma acc loop gang, vector(4) /* blockIdx.y threadIdx.y */
+         84, #pragma acc loop gang, vector(32) /* blockIdx.x threadIdx.x */
+         87, Generating implicit reduction(max:error)
+     90, Loop is parallelizable
+     91, Loop is parallelizable
+         Accelerator kernel generated
+         Generating Tesla code
+         90, #pragma acc loop gang, vector(4) /* blockIdx.y threadIdx.y */
+         91, #pragma acc loop gang, vector(32) /* blockIdx.x threadIdx.x */
+         94, Generating implicit reduction(max:error)
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ perf stat ./lp6GPU 1000
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 1000 iterations
+  100, 0.414534
+  200, 0.414317
+  300, 0.414265
+  400, 0.414243
+  500, 0.414232
+  600, 0.414226
+  700, 0.414222
+  800, 0.414220
+  900, 0.414218
+ 1000, 0.414217
+
+ Performance counter stats for './lp6GPU 1000':
+
+       2693,024727      task-clock (msec)         #    0,989 CPUs utilized
+               418      context-switches          #    0,155 K/sec
+                11      cpu-migrations            #    0,004 K/sec
+             2.749      page-faults               #    0,001 M/sec
+     8.680.643.877      cycles                    #    3,223 GHz
+     3.074.488.264      stalled-cycles-frontend   #   35,42% frontend cycles idle
+     1.222.136.981      stalled-cycles-backend    #   14,08% backend  cycles idle
+    11.879.868.151      instructions              #    1,37  insns per cycle
+                                                  #    0,26  stalled cycles per insn
+     2.604.513.875      branches                  #  967,133 M/sec
+         2.335.566      branch-misses             #    0,09% of all branches
+
+       2,724158866 seconds time elapsed
+
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ pgprof ./lp6GPU 1000
+pgprof-Warning-Installed CUDA driver version is not supported for GPU profiling.
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 1000 iterations
+==30791== PGPROF is profiling process 30791, command: ./lp6GPU 1000
+  100, 0.414216
+  200, 0.414215
+  300, 0.414215
+  400, 0.414214
+  500, 0.414214
+  600, 0.414214
+  700, 0.414214
+  800, 0.414213
+  900, 0.414213
+ 1000, 0.414213
+==30791== Profiling application: ./lp6GPU 1000
+==30791== Profiling result:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 46.63%  1.22008s       500  2.4402ms  2.4112ms  3.0961ms  main_84_gpu
+ 46.52%  1.21702s       500  2.4340ms  2.4062ms  2.9135ms  main_91_gpu
+  3.37%  88.235ms       500  176.47us  175.04us  197.76us  main_87_gpu_red
+  3.37%  88.048ms       500  176.10us  174.49us  197.15us  main_94_gpu_red
+  0.07%  1.9398ms      1000  1.9390us  1.8870us  2.5600us  [CUDA memcpy DtoH]
+  0.04%  1.0218ms      1000  1.0210us     960ns  1.3760us  [CUDA memcpy HtoD]
+
+==30791== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 91.16%  2.62459s      1000  2.6246ms  2.3867ms  3.3099ms  cuMemcpyDtoHAsync
+  4.34%  125.02ms         3  41.672ms     185ns  125.02ms  cuDevicePrimaryCtxRetain
+  1.87%  53.867ms         1  53.867ms  53.867ms  53.867ms  cuDevicePrimaryCtxRelease
+  1.50%  43.114ms      2000  21.556us  8.0290us  264.87us  cuLaunchKernel
+  0.80%  23.010ms      1000  23.009us  5.9320us  420.11us  cuMemcpyHtoDAsync
+  0.20%  5.7300ms      2000  2.8640us     756ns  385.75us  cuStreamSynchronize
+  0.07%  1.9671ms         5  393.42us  258.03us  610.95us  cuMemAlloc
+  0.05%  1.3639ms         1  1.3639ms  1.3639ms  1.3639ms  cuMemAllocHost
+  0.02%  474.08us         1  474.08us  474.08us  474.08us  cuModuleLoadData
+  0.00%  70.557us         1  70.557us  70.557us  70.557us  cuStreamCreate
+  0.00%  5.7610us         3  1.9200us     747ns  2.7490us  cuCtxSetCurrent
+  0.00%  5.2110us         4  1.3020us     295ns  4.1260us  cuModuleGetFunction
+  0.00%  5.0650us         3  1.6880us     254ns  4.5230us  cuDeviceGetCount
+  0.00%  3.3150us         1  3.3150us  3.3150us  3.3150us  cuMemFree
+  0.00%  2.4140us         8     301ns     209ns     467ns  cuDeviceGetAttribute
+  0.00%  2.4000us         6     400ns     177ns     723ns  cuDeviceGet
+  0.00%     567ns         2     283ns     227ns     340ns  cuDeviceComputeCapability
+  0.00%     499ns         2     249ns     173ns     326ns  cuCtxGetCurrent
+
+==30791== OpenACC (excl):
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 48.15%  1.31560s       500  2.6312ms  2.5278ms  3.3146ms  acc_enqueue_download@laplace6_db_improve.c:84
+ 48.05%  1.31268s       500  2.6254ms  2.3902ms  3.1035ms  acc_enqueue_download@laplace6_db_improve.c:91
+  0.89%  24.384ms      1000  24.383us  6.8940us  422.34us  acc_enqueue_upload@laplace6_db_improve.c:81
+  0.66%  17.961ms       500  35.921us  11.818us  271.19us  acc_enqueue_launch@laplace6_db_improve.c:84 (main_84_gpu)
+  0.65%  17.779ms       500  35.557us  11.946us  245.96us  acc_enqueue_launch@laplace6_db_improve.c:91 (main_91_gpu)
+  0.55%  14.921ms      1000  14.921us  4.5920us  576.05us  acc_compute_construct@laplace6_db_improve.c:81
+  0.26%  7.0504ms       500  14.100us  9.6070us  154.65us  acc_enqueue_launch@laplace6_db_improve.c:91 (main_94_gpu_red)
+  0.26%  6.9840ms       500  13.967us  9.6650us  92.771us  acc_enqueue_launch@laplace6_db_improve.c:84 (main_87_gpu_red)
+  0.24%  6.6311ms      1000  6.6310us  1.6330us  388.30us  acc_wait@laplace6_db_improve.c:91
+  0.23%  6.3400ms      1000  6.3400us  1.6090us  235.45us  acc_wait@laplace6_db_improve.c:84
+  0.04%  1.1904ms         1  1.1904ms  1.1904ms  1.1904ms  acc_enter_data@laplace6_db_improve.c:77
+  0.02%  506.40us         1  506.40us  506.40us  506.40us  acc_device_init@laplace6_db_improve.c:77
+  0.00%  41.596us         1  41.596us  41.596us  41.596us  acc_exit_data@laplace6_db_improve.c:77
+  0.00%       0ns         2       0ns       0ns       0ns  acc_alloc@laplace6_db_improve.c:77
+  0.00%       0ns         2       0ns       0ns       0ns  acc_delete@laplace6_db_improve.c:100
+  0.00%       0ns         2       0ns       0ns       0ns  acc_create@laplace6_db_improve.c:77
+
+======== CPU profiling result (bottom up):
+Time(%)      Time  Name
+ 75.27%  8.98513s  ???
+ 75.27%  8.98513s  | start_thread
+ 75.27%  8.98513s  |   clone
+ 22.04%  2.63028s  cuMemcpyDtoHAsync_v2
+ 22.04%  2.63028s  | __pgi_uacc_cuda_downloads
+ 22.04%  2.63028s  |   __pgi_uacc_downloads
+ 22.04%  2.63028s  |     main
+  0.93%  110.43ms  cuDevicePrimaryCtxRetain
+  0.93%  110.43ms  | __pgi_uacc_cuda_init_device
+  0.93%  110.43ms  |   __pgi_uacc_cuda_select_valid
+  0.93%  110.43ms  |     __pgi_uacc_select_devid
+  0.93%  110.43ms  |       __pgi_uacc_dataenterstart
+  0.93%  110.43ms  |         main
+  0.42%  50.196ms  cuDevicePrimaryCtxRelease
+  0.42%  50.196ms  | __pgi_uacc_cuda_release_buffer
+  0.42%  50.196ms  |   __run_exit_handlers
+  0.42%  50.196ms  |     ???
+  0.42%  50.196ms  |       ???
+  0.25%  30.118ms  ???
+  0.25%  30.118ms  cuLaunchKernel
+  0.25%  30.118ms  | __pgi_uacc_cuda_launch
+  0.25%  30.118ms  |   __pgi_uacc_launch
+  0.25%  30.118ms  |     main
+  0.17%  20.078ms  cuInit
+  0.17%  20.078ms  | __pgi_uacc_cuda_init
+  0.17%  20.078ms  |   __pgi_uacc_enumerate
+  0.17%  20.078ms  |     __pgi_uacc_initialize
+  0.17%  20.078ms  |       __pgi_uacc_dataenterstart
+  0.17%  20.078ms  |         main
+  0.17%  20.078ms  cuMemcpyHtoDAsync_v2
+  0.17%  20.078ms  | __pgi_uacc_cuda_uploads
+  0.17%  20.078ms  |   __pgi_uacc_uploads
+  0.17%  20.078ms  |     main
+  0.08%  10.039ms  __pgi_uacc_cuda_downloads
+  0.08%  10.039ms  | __pgi_uacc_downloads
+  0.08%  10.039ms  |   main
+  0.08%  10.039ms  __pgi_uacc_enter
+  0.08%  10.039ms  | main
+  0.08%  10.039ms  __open64
+  0.08%  10.039ms  | open_verify
+  0.08%  10.039ms  |   open_path
+  0.08%  10.039ms  |     _dl_map_object
+  0.08%  10.039ms  |       dl_open_worker
+  0.08%  10.039ms  |         _dl_catch_error
+  0.08%  10.039ms  |           _dl_open
+  0.08%  10.039ms  |             dlopen_doit
+  0.08%  10.039ms  |               _dl_catch_error
+  0.08%  10.039ms  |                 _dlerror_run
+  0.08%  10.039ms  |                   dlopen@@GLIBC_2.2.5
+  0.08%  10.039ms  |                     __pgi_uacc_add_profile_library
+  0.08%  10.039ms  |                       __pgi_uacc_add_profile_libraries
+  0.08%  10.039ms  |                         __pgi_uacc_globalinit
+  0.08%  10.039ms  |                           __pgi_uacc_enumerate
+  0.08%  10.039ms  |                             __pgi_uacc_initialize
+  0.08%  10.039ms  |                               __pgi_uacc_dataenterstart
+  0.08%  10.039ms  |                                 main
+  0.08%  10.039ms  cuMemAllocHost_v2
+  0.08%  10.039ms  | __pgi_uacc_cuda_stream
+  0.08%  10.039ms  |   __pgi_uacc_cuda_init_device
+  0.08%  10.039ms  |     __pgi_uacc_cuda_select_valid
+  0.08%  10.039ms  |       __pgi_uacc_select_devid
+  0.08%  10.039ms  |         __pgi_uacc_dataenterstart
+  0.08%  10.039ms  |           main
+  0.08%  10.039ms  main
+  0.08%  10.039ms  __GI_memset
+  0.08%  10.039ms    main
+
+======== Data collected at 100Hz frequency
+
+
+---#laplace6_db_improve.c (GPU) - Large Amounts.... 
+
+----x10000
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ perf stat ./lp6GPU 10000
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 10000 iterations
+ 1000, 0.414206
+ 2000, 0.414210
+ 3000, 0.414212
+ 4000, 0.414212
+ 5000, 0.414213
+ 6000, 0.414213
+ 7000, 0.414213
+ 8000, 0.414213
+ 9000, 0.414213
+10000, 0.414213
+
+ Performance counter stats for './lp6GPU 10000':
+
+      25688,840529      task-clock (msec)         #    0,998 CPUs utilized
+             1.730      context-switches          #    0,067 K/sec
+                14      cpu-migrations            #    0,001 K/sec
+             2.749      page-faults               #    0,107 K/sec
+    84.956.922.057      cycles                    #    3,307 GHz
+    26.957.923.613      stalled-cycles-frontend   #   31,73% frontend cycles idle
+     9.128.152.671      stalled-cycles-backend    #   10,74% backend  cycles idle
+   122.088.409.384      instructions              #    1,44  insns per cycle
+                                                  #    0,22  stalled cycles per insn
+    26.764.281.138      branches                  # 1041,864 M/sec
+         3.983.156      branch-misses             #    0,01% of all branches
+
+      25,741225807 seconds time elapsed
+
+
+----x100000
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ perf stat ./lp6GPU 100000
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 100000 iterations
+10000, 0.414213
+20000, 0.414213
+30000, 0.414214
+40000, 0.414214
+50000, 0.414214
+60000, 0.414214
+70000, 0.414214
+80000, 0.414214
+90000, 0.414214
+100000, 0.414214
+
+ Performance counter stats for './lp6GPU 100000':
+
+     259533,392660      task-clock (msec)         #    0,996 CPUs utilized
+            65.548      context-switches          #    0,253 K/sec
+               128      cpu-migrations            #    0,000 K/sec
+             2.749      page-faults               #    0,011 K/sec
+   846.873.173.674      cycles                    #    3,263 GHz
+   302.822.786.269      stalled-cycles-frontend   #   35,76% frontend cycles idle
+   112.730.155.158      stalled-cycles-backend    #   13,31% backend  cycles idle
+ 1.158.704.467.318      instructions              #    1,37  insns per cycle
+                                                  #    0,26  stalled cycles per insn
+   253.912.962.546      branches                  #  978,344 M/sec
+        76.423.881      branch-misses             #    0,03% of all branches
+
+     260,681583611 seconds time elapsed
+
+
+---#laplace7.c (GPU)
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel laplace7.c -o lp7GPU
+main:
+     90, Generating copyin(A[:][:],Anew[:][:])
+     97, Loop is parallelizable
+     98, Loop is parallelizable
+         Accelerator kernel generated
+         Generating Tesla code
+         97, #pragma acc loop gang, vector(4) /* blockIdx.y threadIdx.y */
+         98, #pragma acc loop gang, vector(32) /* blockIdx.x threadIdx.x */
+        102, Generating implicit reduction(max:error)
+    107, Loop is parallelizable
+    108, Loop is parallelizable
+         Accelerator kernel generated
+         Generating Tesla code
+        107, #pragma acc loop gang, vector(4) /* blockIdx.y threadIdx.y */
+        108, #pragma acc loop gang, vector(32) /* blockIdx.x threadIdx.x */
+        112, Generating implicit reduction(max:error)
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ perf stat ./lp7GPU 100
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 100 iterations
+   10, 0.155006
+   20, 0.110024
+   30, 0.089901
+   40, 0.077374
+   50, 0.069623
+   60, 0.063285
+   70, 0.058825
+   80, 0.054946
+   90, 0.051831
+  100, 0.049208
+
+ Performance counter stats for './lp7GPU 100':
+
+       1604,317611      task-clock (msec)         #    0,914 CPUs utilized
+               270      context-switches          #    0,168 K/sec
+                14      cpu-migrations            #    0,009 K/sec
+             6.377      page-faults               #    0,004 M/sec
+     3.401.392.507      cycles                    #    2,120 GHz
+     2.271.119.891      stalled-cycles-frontend   #   66,77% frontend cycles idle
+     1.507.410.363      stalled-cycles-backend    #   44,32% backend  cycles idle
+     2.382.632.045      instructions              #    0,70  insns per cycle
+                                                  #    0,95  stalled cycles per insn
+       516.443.817      branches                  #  321,909 M/sec
+         3.402.157      branch-misses             #    0,66% of all branches
+
+       1,755330053 seconds time elapsed
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ pgprof ./lp7GPU 100
+pgprof-Warning-Installed CUDA driver version is not supported for GPU profiling.
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 100 iterations
+==27230== PGPROF is profiling process 27230, command: ./lp7GPU 100
+   10, 0.155006
+   20, 0.110024
+   30, 0.089901
+   40, 0.077374
+   50, 0.069623
+   60, 0.063285
+   70, 0.058825
+   80, 0.054946
+   90, 0.051831
+  100, 0.049208
+==27230== Profiling application: ./lp7GPU 100
+==27230== Profiling result:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 42.80%  128.18ms        50  2.5635ms  2.4397ms  2.8270ms  main_98_gpu
+ 42.60%  127.57ms        50  2.5514ms  2.4346ms  2.6267ms  main_108_gpu
+  8.45%  25.298ms       108  234.24us     960ns  3.3644ms  [CUDA memcpy HtoD]
+  3.04%  9.1143ms        50  182.29us  176.64us  186.14us  main_102_gpu_red
+  3.04%  9.0981ms        50  181.96us  176.35us  186.11us  main_112_gpu_red
+  0.06%  194.56us       100  1.9450us  1.8880us  2.5280us  [CUDA memcpy DtoH]
+
+==27230== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 58.35%  274.90ms       100  2.7490ms  2.6120ms  3.0180ms  cuMemcpyDtoHAsync
+ 17.20%  81.032ms         3  27.011ms     377ns  81.031ms  cuDevicePrimaryCtxRetain
+ 12.55%  59.108ms         1  59.108ms  59.108ms  59.108ms  cuDevicePrimaryCtxRelease
+  5.90%  27.779ms         1  27.779ms  27.779ms  27.779ms  cuMemHostAlloc
+  3.57%  16.799ms         1  16.799ms  16.799ms  16.799ms  cuMemFreeHost
+  0.89%  4.1810ms         5  836.20us  188.68us  2.8516ms  cuMemAlloc
+  0.64%  2.9996ms       201  14.923us     699ns  2.7528ms  cuStreamSynchronize
+  0.41%  1.9502ms       200  9.7510us  7.1630us  42.124us  cuLaunchKernel
+  0.26%  1.2153ms       108  11.252us  5.8660us  162.20us  cuMemcpyHtoDAsync
+  0.15%  684.75us         1  684.75us  684.75us  684.75us  cuMemAllocHost
+  0.08%  357.29us         1  357.29us  357.29us  357.29us  cuModuleLoadData
+  0.01%  34.042us         1  34.042us  34.042us  34.042us  cuStreamCreate
+  0.01%  30.622us         6  5.1030us  4.6010us  5.6580us  cuEventSynchronize
+  0.01%  26.153us         7  3.7360us  3.1310us  5.3290us  cuEventRecord
+  0.00%  7.5680us         3  2.5220us     454ns  6.1690us  cuCtxSetCurrent
+  0.00%  6.2240us         3  2.0740us     449ns  4.2160us  cuDeviceGetCount
+  0.00%  6.1970us         8     774ns     362ns  1.2680us  cuDeviceGetAttribute
+  0.00%  5.4080us         6     901ns     350ns  1.6750us  cuDeviceGet
+  0.00%  4.2430us         1  4.2430us  4.2430us  4.2430us  cuEventCreate
+  0.00%  2.9990us         1  2.9990us  2.9990us  2.9990us  cuMemFree
+  0.00%  2.6900us         4     672ns     314ns  1.5340us  cuModuleGetFunction
+  0.00%  1.0800us         2     540ns     365ns     715ns  cuDeviceComputeCapability
+  0.00%     807ns         2     403ns     333ns     474ns  cuCtxGetCurrent
+
+==27230== OpenACC (excl):
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 39.98%  137.73ms        50  2.7546ms  2.6162ms  3.0198ms  acc_enqueue_download@laplace7.c:98
+ 39.86%  137.33ms        50  2.7465ms  2.6147ms  2.8302ms  acc_enqueue_download@laplace7.c:108
+ 17.69%  60.936ms         1  60.936ms  60.936ms  60.936ms  acc_enter_data@laplace7.c:90
+  0.80%  2.7552ms         1  2.7552ms  2.7552ms  2.7552ms  acc_wait@laplace7.c:90
+  0.22%  763.57us        50  15.271us  4.4560us  488.75us  acc_compute_construct@laplace7.c:96
+  0.20%  695.29us        50  13.905us  11.205us  49.079us  acc_enqueue_launch@laplace7.c:98 (main_98_gpu)
+  0.19%  665.69us        50  13.313us  11.540us  22.036us  acc_enqueue_launch@laplace7.c:108 (main_108_gpu)
+  0.18%  621.98us        50  12.439us  6.7300us  164.44us  acc_enqueue_upload@laplace7.c:96
+  0.15%  500.54us        50  10.010us  8.7110us  27.270us  acc_enqueue_launch@laplace7.c:98 (main_102_gpu_red)
+  0.14%  490.56us        50  9.8110us  8.7520us  18.123us  acc_enqueue_launch@laplace7.c:108 (main_112_gpu_red)
+  0.12%  419.09us        50  8.3810us  6.7980us  13.091us  acc_enqueue_upload@laplace7.c:106
+  0.11%  386.65us         8  48.331us  41.729us  73.464us  acc_enqueue_upload@laplace7.c:90
+  0.11%  379.50us         1  379.50us  379.50us  379.50us  acc_device_init@laplace7.c:90
+  0.08%  264.98us       100  2.6490us  1.5100us  6.8670us  acc_wait@laplace7.c:108
+  0.08%  264.18us        50  5.2830us  4.5100us  9.8680us  acc_compute_construct@laplace7.c:106
+  0.07%  252.51us       100  2.5250us  1.5190us  5.0030us  acc_wait@laplace7.c:98
+  0.02%  54.462us         1  54.462us  54.462us  54.462us  acc_exit_data@laplace7.c:90
+  0.00%       0ns         2       0ns       0ns       0ns  acc_alloc@laplace7.c:90
+  0.00%       0ns         2       0ns       0ns       0ns  acc_delete@laplace7.c:118
+  0.00%       0ns         2       0ns       0ns       0ns  acc_create@laplace7.c:90
+
+======== CPU profiling result (bottom up):
+Time(%)      Time  Name
+ 74.64%  1.59233s  ???
+ 74.64%  1.59233s  | start_thread
+ 74.64%  1.59233s  |   clone
+ 12.92%   275.6ms  cuMemcpyDtoHAsync_v2
+ 12.92%   275.6ms  | __pgi_uacc_cuda_downloads
+ 12.92%   275.6ms  |   __pgi_uacc_downloads
+ 12.92%   275.6ms  |     main
+  3.83%  81.658ms  cuDevicePrimaryCtxRetain
+  3.83%  81.658ms  | __pgi_uacc_cuda_init_device
+  3.83%  81.658ms  |   __pgi_uacc_cuda_select_valid
+  3.83%  81.658ms  |     __pgi_uacc_select_devid
+  3.83%  81.658ms  |       __pgi_uacc_dataenterstart
+  3.83%  81.658ms  |         main
+  2.87%  61.243ms  cuDevicePrimaryCtxRelease
+  2.87%  61.243ms  | __pgi_uacc_cuda_release_buffer
+  2.87%  61.243ms  |   __run_exit_handlers
+  2.87%  61.243ms  |     ???
+  2.87%  61.243ms  |       ???
+  1.91%  40.829ms  __c_mcopy4
+  1.91%  40.829ms  | __pgi_uacc_cuda_dataup1
+  1.91%  40.829ms  |   __pgi_uacc_dataup1
+  1.91%  40.829ms  |     __pgi_uacc_dataupx
+  1.91%  40.829ms  |       __pgi_uacc_dataonb
+  1.91%  40.829ms  |         main
+  0.96%  20.414ms  main
+  0.48%  10.207ms  cuMemcpyHtoDAsync_v2
+  0.48%  10.207ms  | __pgi_uacc_cuda_uploads
+  0.48%  10.207ms  |   __pgi_uacc_uploads
+  0.48%  10.207ms  |     main
+  0.48%  10.207ms  cuMemAlloc_v2
+  0.48%  10.207ms  | __pgi_uacc_cuda_stream
+  0.48%  10.207ms  |   __pgi_uacc_cuda_init_device
+  0.48%  10.207ms  |     __pgi_uacc_cuda_select_valid
+  0.48%  10.207ms  |       __pgi_uacc_select_devid
+  0.48%  10.207ms  |         __pgi_uacc_dataenterstart
+  0.48%  10.207ms  |           main
+  0.48%  10.207ms  __GI_memset
+  0.48%  10.207ms  | main
+  0.48%  10.207ms  cuMemHostAlloc
+  0.48%  10.207ms  | __pgi_uacc_cuda_get_buffer
+  0.48%  10.207ms  |   __pgi_uacc_cuda_dataup1
+  0.48%  10.207ms  |     __pgi_uacc_dataup1
+  0.48%  10.207ms  |       __pgi_uacc_dataupx
+  0.48%  10.207ms  |         __pgi_uacc_dataonb
+  0.48%  10.207ms  |           main
+  0.48%  10.207ms  cuInit
+  0.48%  10.207ms  | __pgi_uacc_cuda_init
+  0.48%  10.207ms  |   __pgi_uacc_enumerate
+  0.48%  10.207ms  |     __pgi_uacc_initialize
+  0.48%  10.207ms  |       __pgi_uacc_dataenterstart
+  0.48%  10.207ms  |         main
+  0.48%  10.207ms  cuMemFreeHost
+  0.48%  10.207ms    __pgi_uacc_cuda_free_device_buffers
+  0.48%  10.207ms      __pgi_uacc_cuda_release_buffer
+  0.48%  10.207ms        __run_exit_handlers
+  0.48%  10.207ms          ???
+  0.48%  10.207ms            ???
+
+======== Data collected at 100Hz frequency
+
+ ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ pgprof --print-gpu-trace ./lp7GPU 100 >print_gpu_perf7.txt
+pgprof-Warning-Installed CUDA driver version is not supported for GPU profiling.
+==27398== PGPROF is profiling process 27398, command: ./lp7GPU 100
+==27398== Profiling application: ./lp7GPU 100
+==27398== Profiling result:
+   Start  Duration            Grid Size      Block Size     Regs*    SSMem*    DSMem*      Size  Throughput           Device   Context    Stream  Name
+308.57ms  3.1026ms                    -               -         -         -         -  16.000MB  5.0361GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+312.96ms  3.0918ms                    -               -         -         -         -  16.000MB  5.0536GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+316.96ms  3.0555ms                    -               -         -         -         -  16.000MB  5.1138GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+321.14ms  2.7637ms                    -               -         -         -         -  16.000MB  5.6536GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+327.60ms  3.1461ms                    -               -         -         -         -  16.000MB  4.9665GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+331.72ms  3.0644ms                    -               -         -         -         -  16.000MB  5.0990GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+335.75ms  2.9900ms                    -               -         -         -         -  16.000MB  5.2257GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+340.63ms  2.7596ms                    -               -         -         -         -  16.000MB  5.6621GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+343.77ms  1.3440us                    -               -         -         -         -        4B  2.8383MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+344.09ms  2.6287ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [66]
+346.73ms  185.98us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [67]
+346.92ms  2.4960us                    -               -         -         -         -        4B  1.5283MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+346.97ms  1.0560us                    -               -         -         -         -        4B  3.6124MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+346.99ms  2.6223ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [72]
+349.62ms  185.12us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [73]
+349.81ms  2.2080us                    -               -         -         -         -        4B  1.7277MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+349.84ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+349.86ms  2.6252ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [78]
+352.49ms  185.47us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [79]
+352.68ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+352.73ms     992ns                    -               -         -         -         -        4B  3.8455MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+352.75ms  2.6258ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [84]
+355.38ms  185.12us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [85]
+355.58ms  1.9840us                    -               -         -         -         -        4B  1.9227MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+355.61ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+355.63ms  2.6231ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [90]
+358.26ms  185.25us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [91]
+358.45ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+358.48ms     992ns                    -               -         -         -         -        4B  3.8455MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+358.50ms  2.6223ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [96]
+361.13ms  185.21us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [97]
+361.32ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+361.36ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+361.39ms  2.6225ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [102]
+364.01ms  185.63us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [103]
+364.20ms  1.9840us                    -               -         -         -         -        4B  1.9227MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+364.24ms     992ns                    -               -         -         -         -        4B  3.8455MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+364.26ms  2.6186ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [108]
+366.88ms  184.99us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [109]
+367.08ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+367.11ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+367.13ms  2.6202ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [114]
+369.75ms  185.37us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [115]
+369.95ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+369.98ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+370.00ms  2.6168ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [120]
+372.62ms  184.89us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [121]
+372.81ms  1.9840us                    -               -         -         -         -        4B  1.9227MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+372.87ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+372.89ms  2.6215ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [126]
+375.51ms  185.47us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [127]
+375.71ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+375.74ms  1.0560us                    -               -         -         -         -        4B  3.6124MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+375.76ms  2.6157ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [132]
+378.38ms  185.02us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [133]
+378.57ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+378.60ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+378.62ms  2.6244ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [138]
+381.25ms  185.25us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [139]
+381.44ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+381.48ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+381.50ms  2.6200ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [144]
+384.12ms  185.79us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [145]
+384.31ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+384.35ms  1.0880us                    -               -         -         -         -        4B  3.5062MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+384.36ms  2.6213ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [150]
+386.99ms  185.47us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [151]
+387.18ms  2.1440us                    -               -         -         -         -        4B  1.7792MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+387.22ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+387.23ms  2.6232ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [156]
+389.86ms  184.96us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [157]
+390.05ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+390.08ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+390.10ms  2.6315ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [162]
+392.73ms  185.47us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [163]
+392.93ms  1.9840us                    -               -         -         -         -        4B  1.9227MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+392.97ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+392.99ms  2.6206ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [168]
+395.61ms  185.63us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [169]
+395.80ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+395.84ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+395.86ms  2.6244ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [174]
+398.48ms  185.41us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [175]
+398.68ms  1.9200us                    -               -         -         -         -        4B  1.9868MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+398.71ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+398.73ms  2.6239ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [180]
+401.35ms  185.63us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [181]
+401.55ms  2.1440us                    -               -         -         -         -        4B  1.7792MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+401.59ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+401.61ms  2.6244ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [186]
+404.24ms  185.57us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [187]
+404.44ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+404.47ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+404.49ms  2.6196ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [192]
+407.11ms  185.25us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [193]
+407.30ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+407.33ms     992ns                    -               -         -         -         -        4B  3.8455MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+407.34ms  2.6294ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [198]
+409.98ms  186.08us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [199]
+410.17ms  1.9840us                    -               -         -         -         -        4B  1.9227MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+410.20ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+410.22ms  2.6197ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [204]
+412.84ms  184.93us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [205]
+413.04ms  1.9510us                    -               -         -         -         -        4B  1.9553MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+413.08ms     992ns                    -               -         -         -         -        4B  3.8455MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+413.10ms  2.6217ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [210]
+415.72ms  185.92us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [211]
+415.91ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+415.95ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+415.97ms  2.6156ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [216]
+418.59ms  186.40us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [217]
+418.78ms  2.1120us                    -               -         -         -         -        4B  1.8062MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+418.82ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+418.84ms  2.6225ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [222]
+421.46ms  185.92us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [223]
+421.66ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+421.69ms     991ns                    -               -         -         -         -        4B  3.8493MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+421.71ms  2.6169ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [228]
+424.33ms  185.02us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [229]
+424.52ms  2.1760us                    -               -         -         -         -        4B  1.7531MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+424.55ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+424.57ms  2.6194ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [234]
+427.19ms  185.41us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [235]
+427.38ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+427.41ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+427.43ms  2.6196ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [240]
+430.05ms  185.28us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [241]
+430.24ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+430.29ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+430.32ms  2.6246ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [246]
+432.95ms  185.95us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [247]
+433.14ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+433.17ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+433.19ms  2.6165ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [252]
+435.81ms  184.99us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [253]
+436.00ms  1.9840us                    -               -         -         -         -        4B  1.9227MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+436.04ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+436.05ms  2.6213ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [258]
+438.68ms  185.31us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [259]
+438.87ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+438.91ms     992ns                    -               -         -         -         -        4B  3.8455MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+438.93ms  2.6239ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [264]
+441.55ms  185.12us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [265]
+441.75ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+441.78ms     992ns                    -               -         -         -         -        4B  3.8455MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+441.80ms  2.6282ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [270]
+444.43ms  185.76us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [271]
+444.62ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+444.65ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+444.67ms  2.6215ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [276]
+447.29ms  185.21us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [277]
+447.49ms  1.9840us                    -               -         -         -         -        4B  1.9227MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+447.51ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+447.53ms  2.6238ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [282]
+450.16ms  185.34us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [283]
+450.35ms  1.9200us                    -               -         -         -         -        4B  1.9868MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+450.39ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+450.42ms  2.6255ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [288]
+453.05ms  185.09us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [289]
+453.24ms  1.9200us                    -               -         -         -         -        4B  1.9868MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+453.27ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+453.29ms  2.6250ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [294]
+455.92ms  185.66us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [295]
+456.11ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+456.13ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+456.15ms  2.6215ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [300]
+458.77ms  185.05us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [301]
+458.96ms  1.9200us                    -               -         -         -         -        4B  1.9868MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+458.99ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+459.01ms  2.6198ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [306]
+461.63ms  185.57us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [307]
+461.83ms  1.9840us                    -               -         -         -         -        4B  1.9227MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+461.86ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+461.88ms  2.6177ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [312]
+464.50ms  185.02us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [313]
+464.68ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+464.71ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+464.73ms  2.6255ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [318]
+467.35ms  185.50us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [319]
+467.55ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+467.58ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+467.59ms  2.6191ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [324]
+470.21ms  185.12us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [325]
+470.41ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+470.44ms     992ns                    -               -         -         -         -        4B  3.8455MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+470.46ms  2.6215ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [330]
+473.08ms  185.69us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [331]
+473.27ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+473.30ms     992ns                    -               -         -         -         -        4B  3.8455MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+473.32ms  2.6179ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [336]
+475.94ms  185.05us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [337]
+476.13ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+476.16ms  1.0230us                    -               -         -         -         -        4B  3.7289MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+476.17ms  2.6243ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [342]
+478.80ms  185.41us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [343]
+479.00ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+479.02ms     992ns                    -               -         -         -         -        4B  3.8455MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+479.04ms  2.6183ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [348]
+481.66ms  184.96us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [349]
+481.85ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+481.88ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+481.90ms  2.6259ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [354]
+484.53ms  185.69us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [355]
+484.72ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+484.75ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+484.76ms  2.6239ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [360]
+487.39ms  185.05us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [361]
+487.58ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+487.61ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+487.63ms  2.6267ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [366]
+490.26ms  185.47us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [367]
+490.45ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+490.48ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+490.50ms  2.6248ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [372]
+493.13ms  185.15us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [373]
+493.32ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+493.35ms     992ns                    -               -         -         -         -        4B  3.8455MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+493.36ms  2.6203ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [378]
+495.99ms  185.25us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [379]
+496.18ms  1.9200us                    -               -         -         -         -        4B  1.9868MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+496.21ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+496.22ms  2.6240ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [384]
+498.85ms  185.02us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [385]
+499.04ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+499.07ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+499.08ms  2.6280ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [390]
+501.71ms  185.66us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [391]
+501.90ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+501.94ms     991ns                    -               -         -         -         -        4B  3.8493MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+501.95ms  2.6206ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [396]
+504.58ms  185.05us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [397]
+504.77ms  1.9200us                    -               -         -         -         -        4B  1.9868MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+504.79ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+504.80ms  2.6268ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [402]
+507.44ms  185.31us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [403]
+507.63ms  2.0160us                    -               -         -         -         -        4B  1.8922MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+507.65ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+507.67ms  2.6203ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [408]
+510.29ms  185.09us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [409]
+510.48ms  1.9840us                    -               -         -         -         -        4B  1.9227MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+510.51ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+510.53ms  2.6283ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [414]
+513.16ms  185.41us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [415]
+513.35ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+513.38ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+513.39ms  2.6177ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [420]
+516.01ms  184.89us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [421]
+516.21ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+516.24ms     991ns                    -               -         -         -         -        4B  3.8493MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+516.25ms  2.6215ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [426]
+518.88ms  185.57us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [427]
+519.07ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+519.09ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+519.11ms  2.6163ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [432]
+521.73ms  185.05us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [433]
+521.92ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+521.95ms     992ns                    -               -         -         -         -        4B  3.8455MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+521.97ms  2.6200ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [438]
+524.59ms  185.37us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [439]
+524.78ms  2.0160us                    -               -         -         -         -        4B  1.8922MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+524.81ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+524.82ms  2.6121ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [444]
+527.43ms  184.89us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [445]
+527.62ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+527.65ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+527.66ms  2.6256ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [450]
+530.29ms  185.21us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [451]
+530.48ms  1.9840us                    -               -         -         -         -        4B  1.9227MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+530.53ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+530.55ms  2.6178ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [456]
+533.18ms  184.96us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [457]
+533.37ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+533.41ms     992ns                    -               -         -         -         -        4B  3.8455MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+533.43ms  2.6253ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [462]
+536.06ms  185.44us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [463]
+536.25ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+536.28ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+536.30ms  2.6187ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [468]
+538.92ms  185.21us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [469]
+539.12ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+539.16ms     992ns                    -               -         -         -         -        4B  3.8455MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+539.18ms  2.6245ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [474]
+541.81ms  185.34us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [475]
+542.00ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+542.04ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+542.06ms  2.6233ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [480]
+544.69ms  185.09us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [481]
+544.88ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+544.92ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+544.94ms  2.6221ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [486]
+547.57ms  185.21us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [487]
+547.76ms  2.1760us                    -               -         -         -         -        4B  1.7531MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+547.79ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+547.81ms  2.6215ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [492]
+550.44ms  184.93us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [493]
+550.63ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+550.67ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+550.69ms  2.6192ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [498]
+553.31ms  185.50us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [499]
+553.51ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+553.70ms  1.1840us                    -               -         -         -         -        4B  3.2219MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+553.73ms  2.6461ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [504]
+556.38ms  176.48us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [505]
+556.56ms  1.9200us                    -               -         -         -         -        4B  1.9868MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+556.60ms     992ns                    -               -         -         -         -        4B  3.8455MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+556.62ms  2.4428ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [510]
+559.07ms  177.41us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [511]
+559.25ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+559.29ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+559.31ms  2.4368ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [516]
+561.75ms  176.80us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [517]
+561.93ms  1.9200us                    -               -         -         -         -        4B  1.9868MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+561.97ms     992ns                    -               -         -         -         -        4B  3.8455MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+562.00ms  2.4415ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [522]
+564.44ms  176.70us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [523]
+564.62ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+564.65ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+564.67ms  2.4354ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [528]
+567.11ms  176.83us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [529]
+567.30ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+567.34ms     992ns                    -               -         -         -         -        4B  3.8455MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+567.35ms  2.4442ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [534]
+569.80ms  176.93us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [535]
+569.99ms  1.9200us                    -               -         -         -         -        4B  1.9868MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+570.02ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+570.04ms  2.4397ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [540]
+572.48ms  176.41us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [541]
+572.67ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+572.71ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+572.73ms  2.4463ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [546]
+575.18ms  177.05us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [547]
+575.37ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+575.40ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+575.42ms  2.4419ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [552]
+577.87ms  176.57us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [553]
+578.05ms  1.9200us                    -               -         -         -         -        4B  1.9868MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+578.08ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+578.09ms  2.4464ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [558]
+580.54ms  176.70us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [559]
+580.73ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+580.77ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+580.79ms  2.4423ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [564]
+583.23ms  176.54us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [565]
+583.41ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+583.44ms     992ns                    -               -         -         -         -        4B  3.8455MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+583.46ms  2.4454ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [570]
+585.91ms  177.34us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [571]
+586.09ms  1.9200us                    -               -         -         -         -        4B  1.9868MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+586.12ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+586.14ms  2.4413ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [576]
+588.58ms  176.38us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [577]
+588.76ms  1.9190us                    -               -         -         -         -        4B  1.9879MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+588.79ms     992ns                    -               -         -         -         -        4B  3.8455MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+588.81ms  2.4471ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [582]
+591.26ms  176.99us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [583]
+591.44ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+591.48ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+591.50ms  2.4410ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [588]
+593.94ms  176.45us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [589]
+594.12ms  1.9200us                    -               -         -         -         -        4B  1.9868MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+594.16ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+594.17ms  2.4416ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [594]
+596.62ms  177.34us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [595]
+596.80ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+596.83ms     992ns                    -               -         -         -         -        4B  3.8455MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+596.85ms  2.4395ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [600]
+599.29ms  176.51us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [601]
+599.47ms  1.9200us                    -               -         -         -         -        4B  1.9868MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+599.51ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+599.52ms  2.4442ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [606]
+601.97ms  177.05us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [607]
+602.15ms  2.0800us                    -               -         -         -         -        4B  1.8340MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+602.19ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+602.20ms  2.4425ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [612]
+604.65ms  176.29us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [613]
+604.83ms  1.9200us                    -               -         -         -         -        4B  1.9868MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+604.86ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+604.88ms  2.4433ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [618]
+607.32ms  177.02us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [619]
+607.51ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+607.54ms     992ns                    -               -         -         -         -        4B  3.8455MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+607.55ms  2.4355ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [624]
+609.99ms  177.12us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [625]
+610.17ms  1.9200us                    -               -         -         -         -        4B  1.9868MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+610.36ms     992ns                    -               -         -         -         -        4B  3.8455MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+610.37ms  2.4411ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [630]
+612.82ms  176.48us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [631]
+613.00ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+613.04ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+613.06ms  2.4405ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [636]
+615.50ms  176.45us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [637]
+615.68ms  1.9200us                    -               -         -         -         -        4B  1.9868MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+615.72ms     992ns                    -               -         -         -         -        4B  3.8455MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+615.73ms  2.4479ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [642]
+618.18ms  176.99us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [643]
+618.37ms  1.9520us                    -               -         -         -         -        4B  1.9543MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+618.40ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+618.41ms  2.4455ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [648]
+620.86ms  176.51us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [649]
+621.05ms  1.9200us                    -               -         -         -         -        4B  1.9868MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+621.08ms  1.0240us                    -               -         -         -         -        4B  3.7253MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+621.10ms  2.4478ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_98_gpu [654]
+623.55ms  176.61us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_102_gpu_red [655]
+623.73ms  1.9200us                    -               -         -         -         -        4B  1.9868MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+623.76ms     992ns                    -               -         -         -         -        4B  3.8455MB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+623.78ms  2.4404ms         (128 1024 1)        (32 4 1)        19        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_108_gpu [660]
+626.22ms  177.15us              (1 1 1)       (256 1 1)        14        0B  1.0000KB         -           -  GeForce GTX 680         1        14  main_112_gpu_red [661]
+626.40ms  1.9200us                    -               -         -         -         -        4B  1.9868MB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+
+Regs: Number of registers used per CUDA thread. This number includes registers used internally by the CUDA driver and/or tools and can be more than what the compiler shows.
+SSMem: Static shared memory allocated per CUDA block.
+DSMem: Dynamic shared memory allocated per CUDA block.
+
+======== CPU profiling result (bottom up):
+Time(%)      Time  Name
+ 75.24%  1.57344s  ???
+ 75.24%  1.57344s  | start_thread
+ 75.24%  1.57344s  |   clone
+ 12.62%  263.93ms  cuMemcpyDtoHAsync_v2
+ 12.62%  263.93ms  | __pgi_uacc_cuda_downloads
+ 12.62%  263.93ms  |   __pgi_uacc_downloads
+ 12.62%  263.93ms  |     main
+  3.88%   81.21ms  cuDevicePrimaryCtxRetain
+  3.88%   81.21ms  | __pgi_uacc_cuda_init_device
+  3.88%   81.21ms  |   __pgi_uacc_cuda_select_valid
+  3.88%   81.21ms  |     __pgi_uacc_select_devid
+  3.88%   81.21ms  |       __pgi_uacc_dataenterstart
+  3.88%   81.21ms  |         main
+  2.43%  50.756ms  cuDevicePrimaryCtxRelease
+  2.43%  50.756ms  | __pgi_uacc_cuda_release_buffer
+  2.43%  50.756ms  |   __run_exit_handlers
+  2.43%  50.756ms  |     ???
+  2.43%  50.756ms  |       ???
+  1.94%  40.605ms  __c_mcopy4
+  1.94%  40.605ms  | __pgi_uacc_cuda_dataup1
+  1.94%  40.605ms  |   __pgi_uacc_dataup1
+  1.94%  40.605ms  |     __pgi_uacc_dataupx
+  1.94%  40.605ms  |       __pgi_uacc_dataonb
+  1.94%  40.605ms  |         main
+  0.97%  20.302ms  cuInit
+  0.97%  20.302ms  | __pgi_uacc_cuda_init
+  0.97%  20.302ms  |   __pgi_uacc_enumerate
+  0.97%  20.302ms  |     __pgi_uacc_initialize
+  0.97%  20.302ms  |       __pgi_uacc_dataenterstart
+  0.97%  20.302ms  |         main
+  0.49%  10.151ms  cuMemHostAlloc
+  0.49%  10.151ms  | __pgi_uacc_cuda_get_buffer
+  0.49%  10.151ms  |   __pgi_uacc_cuda_dataup1
+  0.49%  10.151ms  |     __pgi_uacc_dataup1
+  0.49%  10.151ms  |       __pgi_uacc_dataupx
+  0.49%  10.151ms  |         __pgi_uacc_dataonb
+  0.49%  10.151ms  |           main
+  0.49%  10.151ms  main
+  0.49%  10.151ms  cuMemcpyHtoDAsync_v2
+  0.49%  10.151ms  | __pgi_uacc_cuda_uploads
+  0.49%  10.151ms  |   __pgi_uacc_uploads
+  0.49%  10.151ms  |     main
+  0.49%  10.151ms  __GI_memset
+  0.49%  10.151ms  | main
+  0.49%  10.151ms  cuLaunchKernel
+  0.49%  10.151ms  | __pgi_uacc_cuda_launch
+  0.49%  10.151ms  |   __pgi_uacc_launch
+  0.49%  10.151ms  |     main
+  0.49%  10.151ms  cuMemFreeHost
+  0.49%  10.151ms    __pgi_uacc_cuda_free_device_buffers
+  0.49%  10.151ms      __pgi_uacc_cuda_release_buffer
+  0.49%  10.151ms        __run_exit_handlers
+  0.49%  10.151ms          ???
+  0.49%  10.151ms            ???
+
+======== Data collected at 100Hz frequency

@@ -3,7 +3,7 @@
 #include <math.h>
 
 #ifndef REAL
-#define REAL double
+#define REAL float
 #endif
 
 #ifndef M_PI
@@ -13,17 +13,19 @@
 #define F1(x,y,z) F1[((ny)*(nz)*(x))+((nz)*(y))+(z)]
 #define F2(x,y,z) F2[((ny)*(nz)*(x))+((nz)*(y))+(z)]
 
-void diffusion (REAL * F1, REAL * F2, 
+void diffusion (REAL * F1, REAL * F2,
                 int nx, int ny, int nz,
                 REAL ce, REAL cw, REAL cn, REAL cs, REAL ct,
                 REAL cb, REAL cc, int time)
 {
   int t, x, y, z;
-  for (t = 0; t < time; ++t) 
+  for (t = 0; t < time; ++t)
+#pragma acc data copyin(x,y,z)
   {
-    for (z=0; z < nz; z++)
-      for (y = 0; y < ny; y++) 
-        for (x = 0; x < nx; x++)
+	#pragma acc kernels
+    for (x=0; x < nx; x++)
+      for (y = 0; y < ny; y++)
+        for (z = 0; z < nz;)
         {
           int west, east, north, south, top, down;
           if (x == 0)    west = x;  else west = x - 1;
@@ -37,7 +39,48 @@ void diffusion (REAL * F1, REAL * F2,
              F1(east,y,z)  *ce +  F1(x,north,z) *cn +
              F1(x,south,z) *cs +  F1(x,y,down)  *cb +
              F1(x,y,top)   *ct;
-        }
+          z++;
+
+          if (x == 0)    west = x;  else west = x - 1;
+          if (x == nx-1) east = x;  else east = x + 1;
+          if (y == 0)    north= y;  else north= y - 1;
+          if (y == ny-1) south= y;  else south= y + 1;
+          if (z == 0)    down= 0;  else down= z - 1;
+          if (z == nz-1) top=  z;  else top = z + 1;
+          F2(x,y,z) =
+             F1(x,y,z)     *cc +  F1(west,y,z)  *cw +
+             F1(east,y,z)  *ce +  F1(x,north,z) *cn +
+             F1(x,south,z) *cs +  F1(x,y,down)  *cb +
+             F1(x,y,top)   *ct;
+          z++;
+
+          if (x == 0)    west = x;  else west = x - 1;
+          if (x == nx-1) east = x;  else east = x + 1;
+          if (y == 0)    north= y;  else north= y - 1;
+          if (y == ny-1) south= y;  else south= y + 1;
+          if (z == 0)    down= 0;  else down= z - 1;
+          if (z == nz-1) top=  z;  else top = z + 1;
+          F2(x,y,z) =
+             F1(x,y,z)     *cc +  F1(west,y,z)  *cw +
+             F1(east,y,z)  *ce +  F1(x,north,z) *cn +
+             F1(x,south,z) *cs +  F1(x,y,down)  *cb +
+             F1(x,y,top)   *ct;
+          z++;
+
+          if (x == 0)    west = x;  else west = x - 1;
+          if (x == nx-1) east = x;  else east = x + 1;
+          if (y == 0)    north= y;  else north= y - 1;
+          if (y == ny-1) south= y;  else south= y + 1;
+          if (z == 0)    down= 0;  else down= z - 1;
+          if (z == nz-1) top=  z;  else top = z + 1;
+          F2(x,y,z) =
+             F1(x,y,z)     *cc +  F1(west,y,z)  *cw +
+             F1(east,y,z)  *ce +  F1(x,north,z) *cn +
+             F1(x,south,z) *cs +  F1(x,y,down)  *cb +
+             F1(x,y,top)   *ct;
+          z++;
+
+         }
     REAL *tt = F1;   F1 = F2;  F2 = tt;  // swap matrices
   }
 }
@@ -48,13 +91,13 @@ void init (REAL *F1, const int nx, const int ny, const int nz,
            const REAL kappa, const REAL time)
 {
   REAL ax, ay, az;
-  int jz, jy, jx;
+  int jx, jy, jz;
   ax = exp(-kappa*time*(kx*kx));
   ay = exp(-kappa*time*(ky*ky));
   az = exp(-kappa*time*(kz*kz));
-  for (jz = 0; jz < nz; jz++) 
-    for (jy = 0; jy < ny; jy++) 
-      for (jx = 0; jx < nx; jx++)
+  for (jx = 0; jx < nx; jx++)
+    for (jy = 0; jy < ny; jy++)
+      for (jz = 0; jz < nz; jz++)
       {
         REAL x = dx*((REAL)(jx + 0.5));
         REAL y = dy*((REAL)(jy + 0.5));
@@ -70,17 +113,17 @@ void init (REAL *F1, const int nx, const int ny, const int nz,
 REAL sum_values (REAL *F1, const int nx, const int ny, const int nz)
 {
   REAL sum=0.0;
-  int jz, jy, jx;
-  for (jz = 0; jz < nz; jz++)
+  int jx, jy, jz;
+  for (jx = 0; jx < nx; jx++)
     for (jy = 0; jy < ny; jy++)
-      for (jx = 0; jx < nx; jx++)
+      for (jz = 0; jz < nz; jz++)
         sum += F1(jx,jy,jz);
   return sum;
 }
 
-int main(int argc, char *argv[]) 
-{ 
-  int  jz, jy, jx;
+int main(int argc, char *argv[])
+{
+  int  jx, jy, jz;
   int  NX=128, NY=128, NZ=128;
 
   if (argc>1) { NX= atoi(argv[1]); } // get  first command line parameter
@@ -98,7 +141,7 @@ int main(int argc, char *argv[])
   REAL *f_final = NULL;
 
   REAL  time  = 0.0;
-  int   count = 0;  
+  int   count = 0;
 
   REAL l, dx, dy, dz, kx, ky, kz, kappa, dt;
   REAL ce, cw, cn, cs, ct, cb, cc;
@@ -120,14 +163,14 @@ int main(int argc, char *argv[])
   ct = cb = kappa*dt/(dz*dz);
   cc = 1.0 - (ce + cw + cn + cs + ct + cb);
 
-  printf("Running diffusion kernel with NX=%d, NY=%d, NZ=%d, %d times\n", 
+  printf("Running diffusion kernel with NX=%d, NY=%d, NZ=%d, %d times\n",
          NX, NY, NZ, count);
 
   diffusion(f1, f2, NX, NY, NZ, ce, cw, cn, cs, ct, cb, cc, count);
 
   err = err - sum_values(f_final, NX, NY, NZ);
   fprintf(stderr, "Accuracy     : %E\n", err);
-  
+
   free(f1); free(f2);
   return 0;
 }

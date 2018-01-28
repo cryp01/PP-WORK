@@ -1,0 +1,45 @@
+module add cuda/7.5
+nvidia-smi
+pgaccelinfo // For 0
+export CUDA_VISIBLE_DEVICES=0,1
+pgaccelinfo // For 0,1
+
+
+-----------------------------------GPU
+
+---#laplace1_baseline.c (GPU)
+
+pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel laplace1_baseline.c -o lp1GPU
+perf stat ./lp1GPU 100
+pgprof ./lp1GPU 100
+
+---#laplace2_lf.c (CPU)
+
+pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel laplace2_lf.c -o lp2GPU
+perf stat ./lp2GPU 100
+pgprof ./lp2GPU 100
+
+---#laplace3_li.c (CPU)
+
+pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel laplace2_lf.c -o lp3GPU
+perf stat ./lp3GPU 100
+pgprof ./lp3GPU 100
+
+---#laplace4_cm.c (CPU)
+
+pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel laplace4_cm.c -o lp4GPU
+perf stat ./lp4GPU 100
+pgprof ./lp4GPU 100
+
+---#laplace5_db.c (CPU)
+
+pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel laplace5_db.c -o lp5GPU
+perf stat ./lp5GPU 100
+pgprof ./lp5GPU 100
+
+---#laplace6_db_improve.c (CPU)
+
+pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel laplace6_db_improve.c -o lp6GPU
+perf stat ./lp6GPU 100
+pgprof ./lp6GPU 100
+

@@ -1,0 +1,1320 @@
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ module add cuda/7.5
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ nvidia-smi
+Sun Jan 21 22:53:18 2018
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 384.81                 Driver Version: 384.81                    |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|===============================+======================+======================|
+|   0  GeForce GTX 680     Off  | 00000000:02:00.0 N/A |                  N/A |
+| 39%   41C    P0    N/A /  N/A |      0MiB /  1996MiB |     N/A      Default |
++-------------------------------+----------------------+----------------------+
+|   1  GeForce GTX 108...  Off  | 00000000:03:00.0 Off |                  N/A |
+|  0%   43C    P5    28W / 250W |      0MiB / 11172MiB |      0%      Default |
++-------------------------------+----------------------+----------------------+
+
++-----------------------------------------------------------------------------+
+| Processes:                                                       GPU Memory |
+|  GPU       PID   Type   Process name                             Usage      |
+|=============================================================================|
+|    0                    Not Supported                                       |
++-----------------------------------------------------------------------------+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ pgaccelinfo
+
+CUDA Driver Version:           9000
+NVRM version:                  NVIDIA UNIX x86_64 Kernel Module  384.81  Sat Sep  2 02:43:11 PDT 2017
+
+Device Number:                 0
+Device Name:                   GeForce GTX 680
+Device Revision Number:        3.0
+Global Memory Size:            2093023232
+Number of Multiprocessors:     8
+Number of SP Cores:            1536
+Number of DP Cores:            512
+Concurrent Copy and Execution: Yes
+Total Constant Memory:         65536
+Total Shared Memory per Block: 49152
+Registers per Block:           65536
+Warp Size:                     32
+Maximum Threads per Block:     1024
+Maximum Block Dimensions:      1024, 1024, 64
+Maximum Grid Dimensions:       2147483647 x 65535 x 65535
+Maximum Memory Pitch:          2147483647B
+Texture Alignment:             512B
+Clock Rate:                    1137 MHz
+Execution Timeout:             No
+Integrated Device:             No
+Can Map Host Memory:           Yes
+Compute Mode:                  default
+Concurrent Kernels:            Yes
+ECC Enabled:                   No
+Memory Clock Rate:             3004 MHz
+Memory Bus Width:              256 bits
+L2 Cache Size:                 524288 bytes
+Max Threads Per SMP:           2048
+Async Engines:                 1
+Unified Addressing:            Yes
+Managed Memory:                Yes
+PGI Compiler Option:           -ta=tesla:cc30
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ export CUDA_VISIBLE_DEVICES=0,1
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ pgaccelinfo
+
+CUDA Driver Version:           9000
+NVRM version:                  NVIDIA UNIX x86_64 Kernel Module  384.81  Sat Sep  2 02:43:11 PDT 2017
+
+Device Number:                 0
+Device Name:                   GeForce GTX 1080 Ti
+Device Revision Number:        6.1
+Global Memory Size:            11715084288
+Number of Multiprocessors:     28
+Concurrent Copy and Execution: Yes
+Total Constant Memory:         65536
+Total Shared Memory per Block: 49152
+Registers per Block:           65536
+Warp Size:                     32
+Maximum Threads per Block:     1024
+Maximum Block Dimensions:      1024, 1024, 64
+Maximum Grid Dimensions:       2147483647 x 65535 x 65535
+Maximum Memory Pitch:          2147483647B
+Texture Alignment:             512B
+Clock Rate:                    1620 MHz
+Execution Timeout:             No
+Integrated Device:             No
+Can Map Host Memory:           Yes
+Compute Mode:                  default
+Concurrent Kernels:            Yes
+ECC Enabled:                   No
+Memory Clock Rate:             5505 MHz
+Memory Bus Width:              352 bits
+L2 Cache Size:                 2883584 bytes
+Max Threads Per SMP:           2048
+Async Engines:                 2
+Unified Addressing:            Yes
+Managed Memory:                Yes
+PGI Compiler Option:           -ta=tesla:cc60
+
+Device Number:                 1
+Device Name:                   GeForce GTX 680
+Device Revision Number:        3.0
+Global Memory Size:            2093023232
+Number of Multiprocessors:     8
+Number of SP Cores:            1536
+Number of DP Cores:            512
+Concurrent Copy and Execution: Yes
+Total Constant Memory:         65536
+Total Shared Memory per Block: 49152
+Registers per Block:           65536
+Warp Size:                     32
+Maximum Threads per Block:     1024
+Maximum Block Dimensions:      1024, 1024, 64
+Maximum Grid Dimensions:       2147483647 x 65535 x 65535
+Maximum Memory Pitch:          2147483647B
+Texture Alignment:             512B
+Clock Rate:                    1137 MHz
+Execution Timeout:             No
+Integrated Device:             No
+Can Map Host Memory:           Yes
+Compute Mode:                  default
+Concurrent Kernels:            Yes
+ECC Enabled:                   No
+Memory Clock Rate:             3004 MHz
+Memory Bus Width:              256 bits
+L2 Cache Size:                 524288 bytes
+Max Threads Per SMP:           2048
+Async Engines:                 1
+Unified Addressing:            Yes
+Managed Memory:                Yes
+PGI Compiler Option:           -ta=tesla:cc30
+
+-----------------------------------GPU
+
+---#laplace1_baseline.c (GPU)
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel laplace1_baseline.c -o lp1GPU
+main:
+     77, Generating copyin(Anew[:][:],A[:][:])
+     80, Accelerator kernel generated
+         Generating Tesla code
+         81, #pragma acc loop seq
+         82, #pragma acc loop vector(128) /* threadIdx.x */
+     81, Loop is parallelizable
+     82, Loop is parallelizable
+     86, Accelerator kernel generated
+         Generating Tesla code
+         87, #pragma acc loop seq
+         88, #pragma acc loop vector(128) /* threadIdx.x */
+         89, Generating implicit reduction(max:error)
+     87, Loop is parallelizable
+     88, Loop is parallelizable
+     91, Accelerator kernel generated
+         Generating Tesla code
+         92, #pragma acc loop seq
+         93, #pragma acc loop vector(128) /* threadIdx.x */
+     92, Loop is parallelizable
+     93, Loop is parallelizable
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ perf stat ./lp1GPU 100
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 100 iterations
+   10, 0.155006
+   20, 0.110024
+   30, 0.089901
+   40, 0.077374
+   50, 0.069623
+   60, 0.063285
+   70, 0.058825
+   80, 0.054946
+   90, 0.051831
+  100, 0.049208
+
+ Performance counter stats for './lp1GPU 100':
+
+      76553,185522      task-clock (msec)         #    0,996 CPUs utilized
+             5.045      context-switches          #    0,066 K/sec
+                12      cpu-migrations            #    0,000 K/sec
+             2.805      page-faults               #    0,037 K/sec
+   256.849.078.127      cycles                    #    3,355 GHz
+    88.976.993.439      stalled-cycles-frontend   #   34,64% frontend cycles idle
+    32.931.825.827      stalled-cycles-backend    #   12,82% backend  cycles idle
+   361.791.406.984      instructions              #    1,41  insns per cycle
+                                                  #    0,25  stalled cycles per insn
+    78.891.504.902      branches                  # 1030,545 M/sec
+       191.507.526      branch-misses             #    0,24% of all branches
+
+      76,848901834 seconds time elapsed
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ pgprof ./lp1GPU 100
+pgprof-Warning-Installed CUDA driver version is not supported for GPU profiling.
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 100 iterations
+==18268== PGPROF is profiling process 18268, command: ./lp1GPU 100
+   10, 0.155006
+   20, 0.110024
+   30, 0.089901
+   40, 0.077374
+   50, 0.069623
+   60, 0.063285
+   70, 0.058825
+   80, 0.054946
+   90, 0.051831
+  100, 0.049208
+==18268== Profiling application: ./lp1GPU 100
+==18268== Profiling result:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 45.67%  34.3205s       100  343.20ms  342.04ms  356.42ms  main_80_gpu
+ 29.55%  22.2013s       100  222.01ms  221.34ms  223.90ms  main_91_gpu
+ 24.75%  18.5959s       100  185.96ms  185.19ms  187.88ms  main_86_gpu
+  0.03%  24.481ms       108  226.67us     960ns  3.2935ms  [CUDA memcpy HtoD]
+  0.00%  236.96us       100  2.3690us  2.3350us  2.9440us  main_89_gpu_red
+  0.00%  191.96us       100  1.9190us  1.8560us  2.4320us  [CUDA memcpy DtoH]
+
+==18268== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 75.06%  56.5263s       401  140.96ms     686ns  356.42ms  cuStreamSynchronize
+ 24.69%  18.5970s       100  185.97ms  185.21ms  187.88ms  cuMemcpyDtoHAsync
+  0.12%  87.860ms         3  29.287ms     219ns  87.859ms  cuDevicePrimaryCtxRetain
+  0.06%  46.108ms         1  46.108ms  46.108ms  46.108ms  cuDevicePrimaryCtxRelease
+  0.04%  26.477ms         1  26.477ms  26.477ms  26.477ms  cuMemHostAlloc
+  0.01%  10.701ms         1  10.701ms  10.701ms  10.701ms  cuMemFreeHost
+  0.01%  5.3210ms       400  13.302us  7.6650us  44.976us  cuLaunchKernel
+  0.01%  3.9411ms         5  788.21us  169.16us  3.0437ms  cuMemAlloc
+  0.00%  1.3299ms       108  12.313us  10.052us  40.692us  cuMemcpyHtoDAsync
+  0.00%  1.1838ms         6  197.30us  1.8930us  583.42us  cuEventSynchronize
+  0.00%  678.05us         1  678.05us  678.05us  678.05us  cuMemAllocHost
+  0.00%  466.68us         1  466.68us  466.68us  466.68us  cuModuleLoadData
+  0.00%  34.907us         1  34.907us  34.907us  34.907us  cuStreamCreate
+  0.00%  24.187us         7  3.4550us  2.2330us  5.8410us  cuEventRecord
+  0.00%  11.143us         1  11.143us  11.143us  11.143us  cuEventCreate
+  0.00%  3.9050us         3  1.3010us     368ns  3.0770us  cuDeviceGetCount
+  0.00%  3.5540us         3  1.1840us     455ns  2.2050us  cuCtxSetCurrent
+  0.00%  2.9060us         8     363ns     217ns     536ns  cuDeviceGetAttribute
+  0.00%  2.8860us         4     721ns     247ns  2.0690us  cuModuleGetFunction
+  0.00%  2.6820us         1  2.6820us  2.6820us  2.6820us  cuMemFree
+  0.00%  2.6620us         6     443ns     242ns     609ns  cuDeviceGet
+  0.00%     686ns         2     343ns     210ns     476ns  cuDeviceComputeCapability
+  0.00%     506ns         2     253ns     197ns     309ns  cuCtxGetCurrent
+
+==18268== OpenACC (excl):
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 45.65%  34.3212s       100  343.21ms  342.05ms  356.43ms  acc_wait@laplace1_baseline.c:80
+ 29.53%  22.2019s       100  222.02ms  221.34ms  223.91ms  acc_wait@laplace1_baseline.c:91
+ 24.73%  18.5972s       100  185.97ms  185.21ms  187.88ms  acc_enqueue_download@laplace1_baseline.c:86
+  0.07%  56.137ms         1  56.137ms  56.137ms  56.137ms  acc_enter_data@laplace1_baseline.c:77
+  0.00%  3.2172ms         1  3.2172ms  3.2172ms  3.2172ms  acc_wait@laplace1_baseline.c:77
+  0.00%  1.9334ms       100  19.333us  16.302us  50.731us  acc_enqueue_launch@laplace1_baseline.c:80 (main_80_gpu)
+  0.00%  1.7265ms       100  17.265us  14.922us  34.759us  acc_enqueue_launch@laplace1_baseline.c:91 (main_91_gpu)
+  0.00%  1.5808ms       100  15.808us  14.112us  26.345us  acc_enqueue_launch@laplace1_baseline.c:86 (main_86_gpu)
+  0.00%  1.3041ms       100  13.040us  11.554us  20.502us  acc_enqueue_upload@laplace1_baseline.c:86
+  0.00%  1.1088ms       100  11.088us  6.3540us  391.71us  acc_compute_construct@laplace1_baseline.c:86
+  0.00%  1.0389ms       100  10.388us  9.2650us  17.582us  acc_enqueue_launch@laplace1_baseline.c:86 (main_89_gpu_red)
+  0.00%  778.82us       200  3.8940us  1.5490us  134.60us  acc_wait@laplace1_baseline.c:86
+  0.00%  487.32us         1  487.32us  487.32us  487.32us  acc_device_init@laplace1_baseline.c:77
+  0.00%  482.51us       100  4.8250us  4.0870us  15.742us  acc_compute_construct@laplace1_baseline.c:80
+  0.00%  366.73us       100  3.6670us  3.1500us  7.3920us  acc_compute_construct@laplace1_baseline.c:91
+  0.00%  269.89us         8  33.736us  14.224us  62.066us  acc_enqueue_upload@laplace1_baseline.c:77
+  0.00%  30.530us         1  30.530us  30.530us  30.530us  acc_exit_data@laplace1_baseline.c:77
+  0.00%       0ns         2       0ns       0ns       0ns  acc_alloc@laplace1_baseline.c:77
+  0.00%       0ns         2       0ns       0ns       0ns  acc_delete@laplace1_baseline.c:99
+  0.00%       0ns         2       0ns       0ns       0ns  acc_create@laplace1_baseline.c:77
+
+======== CPU profiling result (bottom up):
+Time(%)      Time  Name
+ 75.00%  226.128s  ???
+ 75.00%  226.128s  | start_thread
+ 75.00%  226.128s  |   clone
+ 18.76%  56.5694s  cuStreamSynchronize
+ 18.76%  56.5594s  | __pgi_uacc_cuda_wait
+ 18.76%  56.5594s  | | __pgi_uacc_computedone
+ 18.76%  56.5594s  | |   main
+  0.00%  10.002ms  | __pgi_uacc_cuda_downloads
+  0.00%  10.002ms  |   __pgi_uacc_downloads
+  0.00%  10.002ms  |     main
+  6.16%  18.5731s  cuMemcpyDtoHAsync_v2
+  6.16%  18.5731s  | __pgi_uacc_cuda_downloads
+  6.16%  18.5731s  |   __pgi_uacc_downloads
+  6.16%  18.5731s  |     main
+  0.03%  90.015ms  cuDevicePrimaryCtxRetain
+  0.03%  90.015ms  | __pgi_uacc_cuda_init_device
+  0.03%  90.015ms  |   __pgi_uacc_cuda_select_valid
+  0.03%  90.015ms  |     __pgi_uacc_select_devid
+  0.03%  90.015ms  |       __pgi_uacc_dataenterstart
+  0.03%  90.015ms  |         main
+  0.02%  50.008ms  cuDevicePrimaryCtxRelease
+  0.02%  50.008ms  | __pgi_uacc_cuda_release_buffer
+  0.02%  50.008ms  |   __run_exit_handlers
+  0.02%  50.008ms  |     ???
+  0.02%  50.008ms  |       ???
+  0.01%  20.003ms  __open64
+  0.01%  20.003ms  | open_verify
+  0.01%  20.003ms  |   open_path
+  0.01%  20.003ms  |     _dl_map_object
+  0.01%  20.003ms  |       dl_open_worker
+  0.01%  20.003ms  |         _dl_catch_error
+  0.01%  20.003ms  |           _dl_open
+  0.01%  20.003ms  |             dlopen_doit
+  0.01%  20.003ms  |               _dl_catch_error
+  0.01%  20.003ms  |                 _dlerror_run
+  0.01%  20.003ms  |                   dlopen@@GLIBC_2.2.5
+  0.01%  20.003ms  |                     __pgi_uacc_add_profile_library
+  0.01%  20.003ms  |                       __pgi_uacc_add_profile_libraries
+  0.01%  20.003ms  |                         __pgi_uacc_globalinit
+  0.01%  20.003ms  |                           __pgi_uacc_enumerate
+  0.01%  20.003ms  |                             __pgi_uacc_initialize
+  0.01%  20.003ms  |                               __pgi_uacc_dataenterstart
+  0.01%  20.003ms  |                                 main
+  0.01%  20.003ms  __c_mcopy4
+  0.01%  20.003ms  | __pgi_uacc_cuda_dataup1
+  0.01%  20.003ms  |   __pgi_uacc_dataup1
+  0.01%  20.003ms  |     __pgi_uacc_dataupx
+  0.01%  20.003ms  |       __pgi_uacc_dataonb
+  0.01%  20.003ms  |         main
+  0.00%  10.002ms  cuInit
+  0.00%  10.002ms  | __pgi_uacc_cuda_init
+  0.00%  10.002ms  |   __pgi_uacc_enumerate
+  0.00%  10.002ms  |     __pgi_uacc_initialize
+  0.00%  10.002ms  |       __pgi_uacc_dataenterstart
+  0.00%  10.002ms  |         main
+  0.00%  10.002ms  cuMemFreeHost
+  0.00%  10.002ms  | __pgi_uacc_cuda_free_device_buffers
+  0.00%  10.002ms  |   __pgi_uacc_cuda_release_buffer
+  0.00%  10.002ms  |     __run_exit_handlers
+  0.00%  10.002ms  |       ???
+  0.00%  10.002ms  |         ???
+  0.00%  10.002ms  cuMemHostAlloc
+  0.00%  10.002ms  | __pgi_uacc_cuda_get_buffer
+  0.00%  10.002ms  |   __pgi_uacc_cuda_dataup1
+  0.00%  10.002ms  |     __pgi_uacc_dataup1
+  0.00%  10.002ms  |       __pgi_uacc_dataupx
+  0.00%  10.002ms  |         __pgi_uacc_dataonb
+  0.00%  10.002ms  |           main
+  0.00%  10.002ms  _dl_relocate_object
+  0.00%  10.002ms  | dl_open_worker
+  0.00%  10.002ms  |   _dl_catch_error
+  0.00%  10.002ms  |     _dl_open
+  0.00%  10.002ms  |       dlopen_doit
+  0.00%  10.002ms  |         _dl_catch_error
+  0.00%  10.002ms  |           _dlerror_run
+  0.00%  10.002ms  |             dlopen@@GLIBC_2.2.5
+  0.00%  10.002ms  |               __pgi_uacc_add_profile_library
+  0.00%  10.002ms  |                 __pgi_uacc_add_profile_libraries
+  0.00%  10.002ms  |                   __pgi_uacc_globalinit
+  0.00%  10.002ms  |                     __pgi_uacc_enumerate
+  0.00%  10.002ms  |                       __pgi_uacc_initialize
+  0.00%  10.002ms  |                         __pgi_uacc_dataenterstart
+  0.00%  10.002ms  |                           main
+  0.00%  10.002ms  __GI_memset
+  0.00%  10.002ms  | main
+  0.00%  10.002ms  cuMemAlloc_v2
+  0.00%  10.002ms    __pgi_uacc_cuda_alloc
+  0.00%  10.002ms      __pgi_uacc_alloc
+  0.00%  10.002ms        do_create
+  0.00%  10.002ms          __pgi_uacc_excontig_search
+  0.00%  10.002ms            __pgi_uacc_create
+  0.00%  10.002ms              __pgi_uacc_dataonb
+  0.00%  10.002ms                main
+
+======== Data collected at 100Hz frequency
+
+
+---#laplace2_lf.c (GPU)
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel laplace2_lf.c -o lp2GPU
+main:
+     77, Generating copyin(Anew[:][:],A[:][:])
+     81, Accelerator kernel generated
+         Generating Tesla code
+         82, #pragma acc loop seq
+         83, #pragma acc loop vector(128) /* threadIdx.x */
+         85, Generating implicit reduction(max:error)
+     82, Loop is parallelizable
+     83, Loop is parallelizable
+     88, Accelerator kernel generated
+         Generating Tesla code
+         89, #pragma acc loop seq
+         90, #pragma acc loop vector(128) /* threadIdx.x */
+     89, Loop is parallelizable
+     90, Loop is parallelizable
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ perf stat ./lp2GPU 100
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 100 iterations
+   10, 0.155006
+   20, 0.110024
+   30, 0.089901
+   40, 0.077374
+   50, 0.069623
+   60, 0.063285
+   70, 0.058825
+   80, 0.054946
+   90, 0.051831
+  100, 0.049208
+
+ Performance counter stats for './lp2GPU 100':
+
+      65828,334151      task-clock (msec)         #    0,996 CPUs utilized
+             4.330      context-switches          #    0,066 K/sec
+                16      cpu-migrations            #    0,000 K/sec
+             2.799      page-faults               #    0,043 K/sec
+   220.696.625.910      cycles                    #    3,353 GHz
+    74.820.208.956      stalled-cycles-frontend   #   33,90% frontend cycles idle
+    27.509.123.764      stalled-cycles-backend    #   12,46% backend  cycles idle
+   312.566.865.401      instructions              #    1,42  insns per cycle
+                                                  #    0,24  stalled cycles per insn
+    68.345.210.077      branches                  # 1038,234 M/sec
+       112.717.227      branch-misses             #    0,16% of all branches
+
+      66,089101791 seconds time elapsed
+
+======== Data collected at 100Hz frequency
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ pgprof ./lp2GPU 100
+pgprof-Warning-Installed CUDA driver version is not supported for GPU profiling.
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 100 iterations
+==18390== PGPROF is profiling process 18390, command: ./lp2GPU 100
+   10, 0.155006
+   20, 0.110024
+   30, 0.089901
+   40, 0.077374
+   50, 0.069623
+   60, 0.063285
+   70, 0.058825
+   80, 0.054946
+   90, 0.051831
+  100, 0.049208
+==18390== Profiling application: ./lp2GPU 100
+==18390== Profiling result:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 65.41%  41.9042s       100  419.04ms  418.65ms  435.18ms  main_81_gpu
+ 34.55%  22.1353s       100  221.35ms  221.34ms  221.36ms  main_88_gpu
+  0.04%  24.185ms       108  223.94us     960ns  3.2606ms  [CUDA memcpy HtoD]
+  0.00%  236.29us       100  2.3620us  2.3040us  3.1680us  main_85_gpu_red
+  0.00%  192.29us       100  1.9220us  1.8880us  2.4000us  [CUDA memcpy DtoH]
+
+==18390== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 65.23%  41.9050s       100  419.05ms  418.60ms  435.18ms  cuMemcpyDtoHAsync
+ 34.46%  22.1392s       301  73.552ms     782ns  221.43ms  cuStreamSynchronize
+  0.14%  87.687ms         3  29.229ms     353ns  87.686ms  cuDevicePrimaryCtxRetain
+  0.08%  54.247ms         1  54.247ms  54.247ms  54.247ms  cuDevicePrimaryCtxRelease
+  0.05%  29.203ms         1  29.203ms  29.203ms  29.203ms  cuMemHostAlloc
+  0.02%  15.438ms         1  15.438ms  15.438ms  15.438ms  cuMemFreeHost
+  0.01%  3.8327ms         5  766.54us  202.94us  2.8499ms  cuMemAlloc
+  0.01%  3.8091ms       300  12.696us  7.6550us  111.34us  cuLaunchKernel
+  0.00%  1.3664ms       108  12.651us  10.116us  45.304us  cuMemcpyHtoDAsync
+  0.00%  747.15us         1  747.15us  747.15us  747.15us  cuMemAllocHost
+  0.00%  567.95us         6  94.657us  2.1120us  353.78us  cuEventSynchronize
+  0.00%  438.16us         1  438.16us  438.16us  438.16us  cuModuleLoadData
+  0.00%  39.074us         1  39.074us  39.074us  39.074us  cuStreamCreate
+  0.00%  27.095us         7  3.8700us  2.7870us  6.0980us  cuEventRecord
+  0.00%  5.9470us         3  1.9820us     481ns  4.5120us  cuDeviceGetCount
+  0.00%  5.0850us         1  5.0850us  5.0850us  5.0850us  cuEventCreate
+  0.00%  4.6660us         8     583ns     340ns     791ns  cuDeviceGetAttribute
+  0.00%  4.5560us         6     759ns     328ns  1.0310us  cuDeviceGet
+  0.00%  3.8400us         3  1.2800us     506ns  2.3060us  cuCtxSetCurrent
+  0.00%  3.0290us         3  1.0090us     411ns  1.9880us  cuModuleGetFunction
+  0.00%  2.6810us         1  2.6810us  2.6810us  2.6810us  cuMemFree
+  0.00%  1.0500us         2     525ns     341ns     709ns  cuDeviceComputeCapability
+  0.00%     920ns         2     460ns     338ns     582ns  cuCtxGetCurrent
+
+==18390== OpenACC (excl):
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 65.36%  41.9052s       100  419.05ms  418.61ms  435.18ms  acc_enqueue_download@laplace2_lf.c:81
+ 34.53%  22.1360s       100  221.36ms  221.35ms  221.44ms  acc_wait@laplace2_lf.c:88
+  0.09%  59.052ms         1  59.052ms  59.052ms  59.052ms  acc_enter_data@laplace2_lf.c:77
+  0.00%  3.1030ms         1  3.1030ms  3.1030ms  3.1030ms  acc_wait@laplace2_lf.c:77
+  0.00%  1.6980ms       100  16.979us  15.307us  29.007us  acc_enqueue_launch@laplace2_lf.c:88 (main_88_gpu)
+  0.00%  1.6262ms       100  16.261us  14.107us  52.424us  acc_enqueue_launch@laplace2_lf.c:81 (main_81_gpu)
+  0.00%  1.3190ms       100  13.189us  11.569us  26.006us  acc_enqueue_upload@laplace2_lf.c:81
+  0.00%  1.1737ms       100  11.736us  6.3150us  458.12us  acc_compute_construct@laplace2_lf.c:81
+  0.00%  1.1631ms       100  11.631us  9.2420us  114.01us  acc_enqueue_launch@laplace2_lf.c:81 (main_85_gpu_red)
+  0.00%  644.46us       200  3.2220us  1.6630us  7.9610us  acc_wait@laplace2_lf.c:81
+  0.00%  460.49us         1  460.49us  460.49us  460.49us  acc_device_init@laplace2_lf.c:77
+  0.00%  347.61us       100  3.4760us  2.9410us  6.3220us  acc_compute_construct@laplace2_lf.c:88
+  0.00%  307.40us         8  38.424us  19.619us  69.240us  acc_enqueue_upload@laplace2_lf.c:77
+  0.00%  35.172us         1  35.172us  35.172us  35.172us  acc_exit_data@laplace2_lf.c:77
+  0.00%       0ns         2       0ns       0ns       0ns  acc_delete@laplace2_lf.c:96
+  0.00%       0ns         2       0ns       0ns       0ns  acc_create@laplace2_lf.c:77
+  0.00%       0ns         2       0ns       0ns       0ns  acc_alloc@laplace2_lf.c:77
+
+======== CPU profiling result (bottom up):
+Time(%)      Time  Name
+ 75.00%  192.897s  ???
+ 75.00%  192.897s  | start_thread
+ 75.00%  192.897s  |   clone
+ 16.28%  41.8781s  cuMemcpyDtoHAsync_v2
+ 16.28%  41.8781s  | __pgi_uacc_cuda_downloads
+ 16.28%  41.8781s  |   __pgi_uacc_downloads
+ 16.28%  41.8781s  |     main
+  8.63%  22.1843s  cuStreamSynchronize
+  8.63%  22.1843s  | __pgi_uacc_cuda_wait
+  8.62%  22.1743s  |   __pgi_uacc_computedone
+  8.62%  22.1743s  |   | main
+  0.00%  10.002ms  |   __pgi_uacc_dataenterdone
+  0.00%  10.002ms  |     main
+  0.03%  90.017ms  cuDevicePrimaryCtxRetain
+  0.03%  90.017ms  | __pgi_uacc_cuda_init_device
+  0.03%  90.017ms  |   __pgi_uacc_cuda_select_valid
+  0.03%  90.017ms  |     __pgi_uacc_select_devid
+  0.03%  90.017ms  |       __pgi_uacc_dataenterstart
+  0.03%  90.017ms  |         main
+  0.02%  60.012ms  cuDevicePrimaryCtxRelease
+  0.02%  60.012ms  | __pgi_uacc_cuda_release_buffer
+  0.02%  60.012ms  |   __run_exit_handlers
+  0.02%  60.012ms  |     ???
+  0.02%  60.012ms  |       ???
+  0.01%  30.006ms  __c_mcopy4
+  0.01%  30.006ms  | __pgi_uacc_cuda_dataup1
+  0.01%  30.006ms  |   __pgi_uacc_dataup1
+  0.01%  30.006ms  |     __pgi_uacc_dataupx
+  0.01%  30.006ms  |       __pgi_uacc_dataonb
+  0.01%  30.006ms  |         main
+  0.00%  10.002ms  cuMemHostAlloc
+  0.00%  10.002ms  | __pgi_uacc_cuda_get_buffer
+  0.00%  10.002ms  |   __pgi_uacc_cuda_dataup1
+  0.00%  10.002ms  |     __pgi_uacc_dataup1
+  0.00%  10.002ms  |       __pgi_uacc_dataupx
+  0.00%  10.002ms  |         __pgi_uacc_dataonb
+  0.00%  10.002ms  |           main
+  0.00%  10.002ms  _dl_relocate_object
+  0.00%  10.002ms  | dl_open_worker
+  0.00%  10.002ms  |   _dl_catch_error
+  0.00%  10.002ms  |     _dl_open
+  0.00%  10.002ms  |       dlopen_doit
+  0.00%  10.002ms  |         _dl_catch_error
+  0.00%  10.002ms  |           _dlerror_run
+  0.00%  10.002ms  |             dlopen@@GLIBC_2.2.5
+  0.00%  10.002ms  |               __pgi_uacc_add_profile_library
+  0.00%  10.002ms  |                 __pgi_uacc_add_profile_libraries
+  0.00%  10.002ms  |                   __pgi_uacc_globalinit
+  0.00%  10.002ms  |                     __pgi_uacc_enumerate
+  0.00%  10.002ms  |                       __pgi_uacc_initialize
+  0.00%  10.002ms  |                         __pgi_uacc_dataenterstart
+  0.00%  10.002ms  |                           main
+  0.00%  10.002ms  pthread_cond_signal@@GLIBC_2.3.2
+  0.00%  10.002ms  __GI_memset
+  0.00%  10.002ms  | main
+  0.00%  10.002ms  cuInit
+  0.00%  10.002ms  | __pgi_uacc_cuda_init
+  0.00%  10.002ms  |   __pgi_uacc_enumerate
+  0.00%  10.002ms  |     __pgi_uacc_initialize
+  0.00%  10.002ms  |       __pgi_uacc_dataenterstart
+  0.00%  10.002ms  |         main
+  0.00%  10.002ms  cuMemFreeHost
+  0.00%  10.002ms    __pgi_uacc_cuda_free_device_buffers
+  0.00%  10.002ms      __pgi_uacc_cuda_release_buffer
+  0.00%  10.002ms        __run_exit_handlers
+  0.00%  10.002ms          ???
+  0.00%  10.002ms            ???
+
+======== Data collected at 100Hz frequency
+
+
+---#laplace3_li.c (GPU)
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel laplace3_li.c -o lp3GPU
+main:
+     77, Generating copyin(Anew[:][:],A[:][:])
+     81, Accelerator kernel generated
+         Generating Tesla code
+         82, #pragma acc loop seq
+         83, #pragma acc loop vector(128) /* threadIdx.x */
+         86, Generating implicit reduction(max:error)
+     82, Loop is parallelizable
+     83, Loop is parallelizable
+     88, Accelerator kernel generated
+         Generating Tesla code
+         89, #pragma acc loop seq
+         90, #pragma acc loop vector(128) /* threadIdx.x */
+     89, Loop is parallelizable
+     90, Loop is parallelizable
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ perf stat ./lp3GPU 100
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 100 iterations
+   10, 0.155006
+   20, 0.110024
+   30, 0.089901
+   40, 0.077374
+   50, 0.069623
+   60, 0.063285
+   70, 0.058825
+   80, 0.054946
+   90, 0.051831
+  100, 0.049208
+
+ Performance counter stats for './lp3GPU 100':
+
+      17777,222587      task-clock (msec)         #    0,990 CPUs utilized
+             1.283      context-switches          #    0,072 K/sec
+                17      cpu-migrations            #    0,001 K/sec
+             2.799      page-faults               #    0,157 K/sec
+    57.952.667.547      cycles                    #    3,260 GHz
+    21.034.227.830      stalled-cycles-frontend   #   36,30% frontend cycles idle
+     8.208.428.584      stalled-cycles-backend    #   14,16% backend  cycles idle
+    80.035.550.723      instructions              #    1,38  insns per cycle
+                                                  #    0,26  stalled cycles per insn
+    17.507.116.222      branches                  #  984,806 M/sec
+         5.084.178      branch-misses             #    0,03% of all branches
+
+      17,959735052 seconds time elapsed
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ pgprof ./lp3GPU 100
+pgprof-Warning-Installed CUDA driver version is not supported for GPU profiling.
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 100 iterations
+==18438== PGPROF is profiling process 18438, command: ./lp3GPU 100
+   10, 0.155006
+   20, 0.110024
+   30, 0.089901
+   40, 0.077374
+   50, 0.069623
+   60, 0.063285
+   70, 0.058825
+   80, 0.054946
+   90, 0.051831
+  100, 0.049208
+==18438== Profiling application: ./lp3GPU 100
+==18438== Profiling result:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 72.50%  11.8852s       100  118.85ms  118.29ms  127.52ms  main_81_gpu
+ 27.35%  4.48370s       100  44.837ms  44.784ms  47.378ms  main_88_gpu
+  0.15%  24.319ms       108  225.17us     960ns  3.2751ms  [CUDA memcpy HtoD]
+  0.00%  261.44us       100  2.6140us  2.5280us  3.4240us  main_86_gpu_red
+  0.00%  192.67us       100  1.9260us  1.8560us  2.4640us  [CUDA memcpy DtoH]
+
+==18438== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 71.76%  11.8864s       100  118.86ms  118.30ms  127.52ms  cuMemcpyDtoHAsync
+ 27.09%  4.48764s       301  14.909ms     769ns  47.382ms  cuStreamSynchronize
+  0.52%  86.286ms         3  28.762ms     367ns  86.285ms  cuDevicePrimaryCtxRetain
+  0.32%  53.279ms         1  53.279ms  53.279ms  53.279ms  cuDevicePrimaryCtxRelease
+  0.15%  24.114ms         1  24.114ms  24.114ms  24.114ms  cuMemHostAlloc
+  0.09%  15.071ms         1  15.071ms  15.071ms  15.071ms  cuMemFreeHost
+  0.02%  3.7747ms         5  754.93us  196.67us  2.8328ms  cuMemAlloc
+  0.02%  3.5209ms       300  11.736us  7.3760us  41.059us  cuLaunchKernel
+  0.01%  1.4140ms       108  13.093us  9.9100us  107.84us  cuMemcpyHtoDAsync
+  0.00%  718.24us         6  119.71us  2.1670us  408.16us  cuEventSynchronize
+  0.00%  712.94us         1  712.94us  712.94us  712.94us  cuMemAllocHost
+  0.00%  418.99us         1  418.99us  418.99us  418.99us  cuModuleLoadData
+  0.00%  37.371us         1  37.371us  37.371us  37.371us  cuStreamCreate
+  0.00%  26.239us         7  3.7480us  2.6640us  5.8470us  cuEventRecord
+  0.00%  5.5130us         3  1.8370us     476ns  4.4530us  cuDeviceGetCount
+  0.00%  4.3850us         1  4.3850us  4.3850us  4.3850us  cuEventCreate
+  0.00%  4.1180us         6     686ns     318ns     975ns  cuDeviceGet
+  0.00%  3.8950us         3  1.2980us     481ns  2.4570us  cuCtxSetCurrent
+  0.00%  3.6730us         8     459ns     333ns     723ns  cuDeviceGetAttribute
+  0.00%  2.9520us         3     984ns     388ns  1.9720us  cuModuleGetFunction
+  0.00%  2.7020us         1  2.7020us  2.7020us  2.7020us  cuMemFree
+  0.00%     963ns         2     481ns     331ns     632ns  cuDeviceComputeCapability
+  0.00%     837ns         2     418ns     361ns     476ns  cuCtxGetCurrent
+
+==18438== OpenACC (excl):
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 72.32%  11.8866s       100  118.87ms  118.30ms  127.52ms  acc_enqueue_download@laplace3_li.c:81
+ 27.28%  4.48443s       100  44.844ms  44.791ms  47.384ms  acc_wait@laplace3_li.c:88
+  0.33%  53.744ms         1  53.744ms  53.744ms  53.744ms  acc_enter_data@laplace3_li.c:77
+  0.02%  3.1179ms         1  3.1179ms  3.1179ms  3.1179ms  acc_wait@laplace3_li.c:77
+  0.01%  1.6412ms       100  16.412us  14.969us  29.897us  acc_enqueue_launch@laplace3_li.c:88 (main_88_gpu)
+  0.01%  1.5316ms       100  15.315us  13.752us  47.877us  acc_enqueue_launch@laplace3_li.c:81 (main_81_gpu)
+  0.01%  1.3599ms       100  13.598us  11.231us  109.74us  acc_enqueue_upload@laplace3_li.c:81
+  0.01%  1.3320ms       100  13.319us  6.1900us  436.14us  acc_compute_construct@laplace3_li.c:81
+  0.01%  989.88us       100  9.8980us  8.9040us  18.603us  acc_enqueue_launch@laplace3_li.c:81 (main_86_gpu_red)
+  0.00%  629.60us       200  3.1470us  1.6410us  9.9410us  acc_wait@laplace3_li.c:81
+  0.00%  440.66us         1  440.66us  440.66us  440.66us  acc_device_init@laplace3_li.c:77
+  0.00%  337.24us       100  3.3720us  2.9300us  5.5260us  acc_compute_construct@laplace3_li.c:88
+  0.00%  298.83us         8  37.353us  18.026us  65.300us  acc_enqueue_upload@laplace3_li.c:77
+  0.00%  33.205us         1  33.205us  33.205us  33.205us  acc_exit_data@laplace3_li.c:77
+  0.00%       0ns         2       0ns       0ns       0ns  acc_alloc@laplace3_li.c:77
+  0.00%       0ns         2       0ns       0ns       0ns  acc_delete@laplace3_li.c:95
+  0.00%       0ns         2       0ns       0ns       0ns  acc_create@laplace3_li.c:77
+
+======== CPU profiling result (bottom up):
+Time(%)      Time  Name
+ 75.01%  49.8506s  ???
+ 75.01%  49.8506s  | start_thread
+ 75.01%  49.8506s  |   clone
+ 17.94%  11.9249s  cuMemcpyDtoHAsync_v2
+ 17.94%  11.9249s  | __pgi_uacc_cuda_downloads
+ 17.94%  11.9249s  |   __pgi_uacc_downloads
+ 17.94%  11.9249s  |     main
+  6.71%  4.46184s  cuStreamSynchronize
+  6.71%  4.46184s  | __pgi_uacc_cuda_wait
+  6.70%  4.45184s  |   __pgi_uacc_computedone
+  6.70%  4.45184s  |   | main
+  0.02%  10.004ms  |   __pgi_uacc_dataenterdone
+  0.02%  10.004ms  |     main
+  0.14%  90.037ms  cuDevicePrimaryCtxRetain
+  0.14%  90.037ms  | __pgi_uacc_cuda_init_device
+  0.14%  90.037ms  |   __pgi_uacc_cuda_select_valid
+  0.14%  90.037ms  |     __pgi_uacc_select_devid
+  0.14%  90.037ms  |       __pgi_uacc_dataenterstart
+  0.14%  90.037ms  |         main
+  0.08%  50.021ms  cuDevicePrimaryCtxRelease
+  0.08%  50.021ms  | __pgi_uacc_cuda_release_buffer
+  0.08%  50.021ms  |   __run_exit_handlers
+  0.08%  50.021ms  |     ???
+  0.08%  50.021ms  |       ???
+  0.05%  30.012ms  __c_mcopy4
+  0.05%  30.012ms  | __pgi_uacc_cuda_dataup1
+  0.05%  30.012ms  |   __pgi_uacc_dataup1
+  0.05%  30.012ms  |     __pgi_uacc_dataupx
+  0.05%  30.012ms  |       __pgi_uacc_dataonb
+  0.05%  30.012ms  |         main
+  0.02%  10.004ms  cuMemHostAlloc
+  0.02%  10.004ms  | __pgi_uacc_cuda_get_buffer
+  0.02%  10.004ms  |   __pgi_uacc_cuda_dataup1
+  0.02%  10.004ms  |     __pgi_uacc_dataup1
+  0.02%  10.004ms  |       __pgi_uacc_dataupx
+  0.02%  10.004ms  |         __pgi_uacc_dataonb
+  0.02%  10.004ms  |           main
+  0.02%  10.004ms  do_lookup_x
+  0.02%  10.004ms  | _dl_lookup_symbol_x
+  0.02%  10.004ms  |   _dl_relocate_object
+  0.02%  10.004ms  |     dl_open_worker
+  0.02%  10.004ms  |       _dl_catch_error
+  0.02%  10.004ms  |         _dl_open
+  0.02%  10.004ms  |           dlopen_doit
+  0.02%  10.004ms  |             _dl_catch_error
+  0.02%  10.004ms  |               _dlerror_run
+  0.02%  10.004ms  |                 dlopen@@GLIBC_2.2.5
+  0.02%  10.004ms  |                   __pgi_uacc_add_profile_library
+  0.02%  10.004ms  |                     __pgi_uacc_add_profile_libraries
+  0.02%  10.004ms  |                       __pgi_uacc_globalinit
+  0.02%  10.004ms  |                         __pgi_uacc_enumerate
+  0.02%  10.004ms  |                           __pgi_uacc_initialize
+  0.02%  10.004ms  |                             __pgi_uacc_dataenterstart
+  0.02%  10.004ms  |                               main
+  0.02%  10.004ms  cuMemFreeHost
+  0.02%  10.004ms  | __pgi_uacc_cuda_free_device_buffers
+  0.02%  10.004ms  |   __pgi_uacc_cuda_release_buffer
+  0.02%  10.004ms  |     __run_exit_handlers
+  0.02%  10.004ms  |       ???
+  0.02%  10.004ms  |         ???
+  0.02%  10.004ms  __GI_memset
+  0.02%  10.004ms  | main
+  0.02%  10.004ms  cuInit
+  0.02%  10.004ms    __pgi_uacc_cuda_init
+  0.02%  10.004ms      __pgi_uacc_enumerate
+  0.02%  10.004ms        __pgi_uacc_initialize
+  0.02%  10.004ms          __pgi_uacc_dataenterstart
+  0.02%  10.004ms            main
+
+======== Data collected at 100Hz frequency
+
+---#laplace4_cm.c (GPU)
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel laplace4_cm.c -o lp4GPU
+main:
+     77, Generating copyin(Anew[:][:],A[:][:])
+     81, Accelerator kernel generated
+         Generating Tesla code
+         82, #pragma acc loop seq
+         83, #pragma acc loop vector(128) /* threadIdx.x */
+         86, Generating implicit reduction(max:error)
+     82, Loop is parallelizable
+     83, Loop is parallelizable
+     88, Accelerator kernel generated
+         Generating Tesla code
+         89, #pragma acc loop seq
+         90, #pragma acc loop vector(128) /* threadIdx.x */
+     89, Loop is parallelizable
+     90, Loop is parallelizable
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ perf stat ./lp4GPU 100
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 100 iterations
+   10, 0.155006
+   20, 0.110024
+   30, 0.089901
+   40, 0.077374
+   50, 0.069623
+   60, 0.063285
+   70, 0.058825
+   80, 0.054946
+   90, 0.051831
+  100, 0.049208
+
+ Performance counter stats for './lp4GPU 100':
+
+      15358,309609      task-clock (msec)         #    0,989 CPUs utilized
+             1.134      context-switches          #    0,074 K/sec
+                15      cpu-migrations            #    0,001 K/sec
+             2.795      page-faults               #    0,182 K/sec
+    49.814.568.004      cycles                    #    3,243 GHz
+    17.616.128.415      stalled-cycles-frontend   #   35,36% frontend cycles idle
+     7.081.182.937      stalled-cycles-backend    #   14,22% backend  cycles idle
+    68.587.752.361      instructions              #    1,38  insns per cycle
+                                                  #    0,26  stalled cycles per insn
+    14.997.507.834      branches                  #  976,508 M/sec
+        32.035.156      branch-misses             #    0,21% of all branches
+
+      15,534434007 seconds time elapsed
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ pgprof ./lp4GPU 100
+pgprof-Warning-Installed CUDA driver version is not supported for GPU profiling.
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 100 iterations
+==18604== PGPROF is profiling process 18604, command: ./lp4GPU 100
+   10, 0.155006
+   20, 0.110024
+   30, 0.089901
+   40, 0.077374
+   50, 0.069623
+   60, 0.063285
+   70, 0.058825
+   80, 0.054946
+   90, 0.051831
+  100, 0.049208
+==18604== Profiling application: ./lp4GPU 100
+==18604== Profiling result:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 67.79%  9.56243s       100  95.624ms  95.406ms  101.51ms  main_81_gpu
+ 32.03%  4.51843s       100  45.184ms  45.134ms  47.387ms  main_88_gpu
+  0.17%  24.173ms       108  223.83us     960ns  3.2371ms  [CUDA memcpy HtoD]
+  0.00%  238.40us       100  2.3830us  2.3360us  3.2960us  main_86_gpu_red
+  0.00%  191.97us       100  1.9190us  1.8870us  2.4960us  [CUDA memcpy DtoH]
+
+==18604== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 67.00%  9.56348s       100  95.635ms  95.414ms  101.51ms  cuMemcpyDtoHAsync
+ 31.68%  4.52179s       301  15.023ms     679ns  47.392ms  cuStreamSynchronize
+  0.65%  93.085ms         3  31.028ms     382ns  93.084ms  cuDevicePrimaryCtxRetain
+  0.31%  44.889ms         1  44.889ms  44.889ms  44.889ms  cuDevicePrimaryCtxRelease
+  0.20%  28.463ms         1  28.463ms  28.463ms  28.463ms  cuMemHostAlloc
+  0.07%  10.477ms         1  10.477ms  10.477ms  10.477ms  cuMemFreeHost
+  0.03%  4.0704ms         5  814.09us  208.28us  3.0745ms  cuMemAlloc
+  0.02%  3.5444ms       300  11.814us  7.7810us  47.369us  cuLaunchKernel
+  0.01%  1.2977ms       108  12.015us  9.9020us  44.865us  cuMemcpyHtoDAsync
+  0.01%  767.36us         6  127.89us  2.1570us  379.23us  cuEventSynchronize
+  0.01%  753.26us         1  753.26us  753.26us  753.26us  cuMemAllocHost
+  0.00%  313.46us         1  313.46us  313.46us  313.46us  cuModuleLoadData
+  0.00%  36.333us         1  36.333us  36.333us  36.333us  cuStreamCreate
+  0.00%  26.751us         7  3.8210us  2.8020us  6.1410us  cuEventRecord
+  0.00%  7.3200us         3  2.4400us     550ns  5.7450us  cuCtxSetCurrent
+  0.00%  5.0650us         3  1.6880us     491ns  4.0800us  cuDeviceGetCount
+  0.00%  4.9210us         1  4.9210us  4.9210us  4.9210us  cuEventCreate
+  0.00%  4.5790us         6     763ns     398ns  1.2820us  cuDeviceGet
+  0.00%  3.6120us         8     451ns     335ns     738ns  cuDeviceGetAttribute
+  0.00%  3.0100us         1  3.0100us  3.0100us  3.0100us  cuMemFree
+  0.00%  2.7660us         3     922ns     507ns  1.4240us  cuModuleGetFunction
+  0.00%  1.0290us         2     514ns     355ns     674ns  cuDeviceComputeCapability
+  0.00%     863ns         2     431ns     318ns     545ns  cuCtxGetCurrent
+
+==18604== OpenACC (excl):
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 67.58%  9.56366s       100  95.637ms  95.416ms  101.51ms  acc_enqueue_download@laplace4_cm.c:81
+ 31.93%  4.51903s       100  45.190ms  45.140ms  47.394ms  acc_wait@laplace4_cm.c:88
+  0.41%  58.615ms         1  58.615ms  58.615ms  58.615ms  acc_enter_data@laplace4_cm.c:77
+  0.02%  2.7743ms         1  2.7743ms  2.7743ms  2.7743ms  acc_wait@laplace4_cm.c:77
+  0.01%  1.6112ms       100  16.111us  15.228us  25.083us  acc_enqueue_launch@laplace4_cm.c:88 (main_88_gpu)
+  0.01%  1.5441ms       100  15.441us  13.900us  55.392us  acc_enqueue_launch@laplace4_cm.c:81 (main_81_gpu)
+  0.01%  1.2320ms       100  12.319us  11.246us  18.777us  acc_enqueue_upload@laplace4_cm.c:81
+  0.01%  1.1161ms       100  11.160us  6.0760us  461.00us  acc_compute_construct@laplace4_cm.c:81
+  0.01%  1.0260ms       100  10.260us  9.3470us  18.162us  acc_enqueue_launch@laplace4_cm.c:81 (main_86_gpu_red)
+  0.00%  583.66us       200  2.9180us  1.5550us  6.5690us  acc_wait@laplace4_cm.c:81
+  0.00%  336.85us         1  336.85us  336.85us  336.85us  acc_device_init@laplace4_cm.c:77
+  0.00%  317.37us       100  3.1730us  2.8890us  6.0640us  acc_compute_construct@laplace4_cm.c:88
+  0.00%  300.27us         8  37.533us  17.051us  68.459us  acc_enqueue_upload@laplace4_cm.c:77
+  0.00%  26.467us         1  26.467us  26.467us  26.467us  acc_exit_data@laplace4_cm.c:77
+  0.00%       0ns         2       0ns       0ns       0ns  acc_alloc@laplace4_cm.c:77
+  0.00%       0ns         2       0ns       0ns       0ns  acc_delete@laplace4_cm.c:95
+  0.00%       0ns         2       0ns       0ns       0ns  acc_create@laplace4_cm.c:77
+
+======== CPU profiling result (bottom up):
+Time(%)      Time  Name
+ 75.00%  43.0159s  ???
+ 75.00%  43.0159s  | start_thread
+ 75.00%  43.0159s  |   clone
+ 16.69%  9.57243s  cuMemcpyDtoHAsync_v2
+ 16.69%  9.57243s  | __pgi_uacc_cuda_downloads
+ 16.69%  9.57243s  |   __pgi_uacc_downloads
+ 16.69%  9.57243s  |     main
+  7.91%  4.53589s  cuStreamSynchronize
+  7.91%  4.53589s  | __pgi_uacc_cuda_wait
+  7.91%  4.53589s  |   __pgi_uacc_computedone
+  7.91%  4.53589s  |     main
+  0.17%  100.13ms  cuDevicePrimaryCtxRetain
+  0.17%  100.13ms  | __pgi_uacc_cuda_init_device
+  0.17%  100.13ms  |   __pgi_uacc_cuda_select_valid
+  0.17%  100.13ms  |     __pgi_uacc_select_devid
+  0.17%  100.13ms  |       __pgi_uacc_dataenterstart
+  0.17%  100.13ms  |         main
+  0.09%  50.065ms  cuDevicePrimaryCtxRelease
+  0.09%  50.065ms  | __pgi_uacc_cuda_release_buffer
+  0.09%  50.065ms  |   __run_exit_handlers
+  0.09%  50.065ms  |     ???
+  0.09%  50.065ms  |       ???
+  0.03%  20.026ms  __c_mcopy4
+  0.03%  20.026ms  | __pgi_uacc_cuda_dataup1
+  0.03%  20.026ms  |   __pgi_uacc_dataup1
+  0.03%  20.026ms  |     __pgi_uacc_dataupx
+  0.03%  20.026ms  |       __pgi_uacc_dataonb
+  0.03%  20.026ms  |         main
+  0.02%  10.013ms  cuMemHostAlloc
+  0.02%  10.013ms  | __pgi_uacc_cuda_get_buffer
+  0.02%  10.013ms  |   __pgi_uacc_cuda_dataup1
+  0.02%  10.013ms  |     __pgi_uacc_dataup1
+  0.02%  10.013ms  |       __pgi_uacc_dataupx
+  0.02%  10.013ms  |         __pgi_uacc_dataonb
+  0.02%  10.013ms  |           main
+  0.02%  10.013ms  _dl_relocate_object
+  0.02%  10.013ms  | dl_open_worker
+  0.02%  10.013ms  |   _dl_catch_error
+  0.02%  10.013ms  |     _dl_open
+  0.02%  10.013ms  |       dlopen_doit
+  0.02%  10.013ms  |         _dl_catch_error
+  0.02%  10.013ms  |           _dlerror_run
+  0.02%  10.013ms  |             dlopen@@GLIBC_2.2.5
+  0.02%  10.013ms  |               __pgi_uacc_add_profile_library
+  0.02%  10.013ms  |                 __pgi_uacc_add_profile_libraries
+  0.02%  10.013ms  |                   __pgi_uacc_globalinit
+  0.02%  10.013ms  |                     __pgi_uacc_enumerate
+  0.02%  10.013ms  |                       __pgi_uacc_initialize
+  0.02%  10.013ms  |                         __pgi_uacc_dataenterstart
+  0.02%  10.013ms  |                           main
+  0.02%  10.013ms  cuMemAlloc_v2
+  0.02%  10.013ms  | __pgi_uacc_cuda_alloc
+  0.02%  10.013ms  |   __pgi_uacc_alloc
+  0.02%  10.013ms  |     do_create
+  0.02%  10.013ms  |       __pgi_uacc_excontig_search
+  0.02%  10.013ms  |         __pgi_uacc_create
+  0.02%  10.013ms  |           __pgi_uacc_dataonb
+  0.02%  10.013ms  |             main
+  0.02%  10.013ms  __GI_memset
+  0.02%  10.013ms  | main
+  0.02%  10.013ms  cuInit
+  0.02%  10.013ms  | __pgi_uacc_cuda_init
+  0.02%  10.013ms  |   __pgi_uacc_enumerate
+  0.02%  10.013ms  |     __pgi_uacc_initialize
+  0.02%  10.013ms  |       __pgi_uacc_dataenterstart
+  0.02%  10.013ms  |         main
+  0.02%  10.013ms  cuMemFreeHost
+  0.02%  10.013ms    __pgi_uacc_cuda_free_device_buffers
+  0.02%  10.013ms      __pgi_uacc_cuda_release_buffer
+  0.02%  10.013ms        __run_exit_handlers
+  0.02%  10.013ms          ???
+  0.02%  10.013ms            ???
+
+======== Data collected at 100Hz frequency
+
+---#laplace5_db.c (GPU)
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel laplace5_db.c -o lp5GPU
+main:
+     77, Generating copyin(Anew[:][:],A[:][:])
+     81, Accelerator kernel generated
+         Generating Tesla code
+         83, #pragma acc loop seq
+         84, #pragma acc loop vector(128) /* threadIdx.x */
+         87, Generating implicit reduction(max:error)
+         90, #pragma acc loop seq
+         91, #pragma acc loop vector(128) /* threadIdx.x */
+     83, Loop is parallelizable
+     84, Loop is parallelizable
+     90, Loop is parallelizable
+     91, Loop is parallelizable
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel laplace5_db.c -o lp5GPU
+main:
+     77, Generating copyin(Anew[:][:],A[:][:])
+     81, Accelerator kernel generated
+         Generating Tesla code
+         83, #pragma acc loop seq
+         84, #pragma acc loop vector(128) /* threadIdx.x */
+         87, Generating implicit reduction(max:error)
+         90, #pragma acc loop seq
+         91, #pragma acc loop vector(128) /* threadIdx.x */
+     83, Loop is parallelizable
+     84, Loop is parallelizable
+     90, Loop is parallelizable
+     91, Loop is parallelizable
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ perf stat ./lp5GPU 100
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 100 iterations
+   10, 0.405117
+   20, 0.410726
+   30, 0.412261
+   40, 0.412927
+   50, 0.413285
+   60, 0.413503
+   70, 0.413647
+   80, 0.413748
+   90, 0.413823
+  100, 0.413879
+
+ Performance counter stats for './lp5GPU 100':
+
+      10235,073955      task-clock (msec)         #    0,984 CPUs utilized
+               814      context-switches          #    0,080 K/sec
+                20      cpu-migrations            #    0,002 K/sec
+             2.792      page-faults               #    0,273 K/sec
+    32.647.518.303      cycles                    #    3,190 GHz
+    12.022.305.250      stalled-cycles-frontend   #   36,82% frontend cycles idle
+     4.595.839.897      stalled-cycles-backend    #   14,08% backend  cycles idle
+    43.468.340.807      instructions              #    1,33  insns per cycle
+                                                  #    0,28  stalled cycles per insn
+     9.524.111.223      branches                  #  930,537 M/sec
+        31.856.945      branch-misses             #    0,33% of all branches
+
+      10,406417558 seconds time elapsed
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ pgprof ./lp5GPU 100
+pgprof-Warning-Installed CUDA driver version is not supported for GPU profiling.
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 100 iterations
+==19149== PGPROF is profiling process 19149, command: ./lp5GPU 100
+   10, 0.405117
+   20, 0.410726
+   30, 0.412261
+   40, 0.412927
+   50, 0.413285
+   60, 0.413503
+   70, 0.413647
+   80, 0.413748
+   90, 0.413823
+  100, 0.413879
+==19149== Profiling application: ./lp5GPU 100
+==19149== Profiling result:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 99.73%  8.97415s       100  89.741ms  86.985ms  97.491ms  main_81_gpu
+  0.27%  24.061ms       108  222.79us     960ns  3.3338ms  [CUDA memcpy HtoD]
+  0.00%  239.42us       100  2.3940us  2.3360us  3.1680us  main_87_gpu_red
+  0.00%  194.01us       100  1.9400us  1.8870us  3.5200us  [CUDA memcpy DtoH]
+
+==19149== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 98.12%  8.97526s       100  89.753ms  86.993ms  97.476ms  cuMemcpyDtoHAsync
+  0.90%  82.762ms         3  27.587ms     382ns  82.761ms  cuDevicePrimaryCtxRetain
+  0.50%  45.312ms         1  45.312ms  45.312ms  45.312ms  cuDevicePrimaryCtxRelease
+  0.24%  21.632ms         1  21.632ms  21.632ms  21.632ms  cuMemHostAlloc
+  0.11%  10.307ms         1  10.307ms  10.307ms  10.307ms  cuMemFreeHost
+  0.04%  4.0395ms         5  807.91us  166.92us  3.1169ms  cuMemAlloc
+  0.03%  3.0426ms       201  15.137us     772ns  2.7527ms  cuStreamSynchronize
+  0.02%  2.2167ms       200  11.083us  7.3780us  58.816us  cuLaunchKernel
+  0.01%  1.2269ms       108  11.359us  8.4860us  42.918us  cuMemcpyHtoDAsync
+  0.01%  539.30us         1  539.30us  539.30us  539.30us  cuMemAllocHost
+  0.00%  423.80us         1  423.80us  423.80us  423.80us  cuModuleLoadData
+  0.00%  29.162us         7  4.1660us  2.9550us  7.2770us  cuEventRecord
+  0.00%  26.070us         1  26.070us  26.070us  26.070us  cuStreamCreate
+  0.00%  25.877us         6  4.3120us  2.7250us  6.5900us  cuEventSynchronize
+  0.00%  5.5600us         3  1.8530us     525ns  4.2530us  cuDeviceGetCount
+  0.00%  4.3800us         8     547ns     410ns     696ns  cuDeviceGetAttribute
+  0.00%  4.3630us         6     727ns     344ns  1.0020us  cuDeviceGet
+  0.00%  4.0890us         1  4.0890us  4.0890us  4.0890us  cuEventCreate
+  0.00%  2.8920us         3     964ns     320ns  1.8910us  cuCtxSetCurrent
+  0.00%  2.7800us         2  1.3900us     521ns  2.2590us  cuModuleGetFunction
+  0.00%  2.3270us         1  2.3270us  2.3270us  2.3270us  cuMemFree
+  0.00%  1.1350us         2     567ns     350ns     785ns  cuDeviceComputeCapability
+  0.00%     874ns         2     437ns     348ns     526ns  cuCtxGetCurrent
+
+==19149== OpenACC (excl):
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 99.31%  8.97546s       100  89.755ms  86.995ms  97.479ms  acc_enqueue_download@laplace5_db.c:81
+  0.58%  52.725ms         1  52.725ms  52.725ms  52.725ms  acc_enter_data@laplace5_db.c:77
+  0.03%  2.7560ms         1  2.7560ms  2.7560ms  2.7560ms  acc_wait@laplace5_db.c:77
+  0.02%  1.6069ms       100  16.069us  13.870us  67.947us  acc_enqueue_launch@laplace5_db.c:81 (main_81_gpu)
+  0.01%  1.1461ms       100  11.460us  5.3820us  539.04us  acc_compute_construct@laplace5_db.c:81
+  0.01%  1.1051ms       100  11.051us  9.4220us  26.992us  acc_enqueue_upload@laplace5_db.c:81
+  0.01%  1.0456ms       100  10.455us  8.9030us  28.419us  acc_enqueue_launch@laplace5_db.c:81 (main_87_gpu_red)
+  0.01%  801.91us       200  4.0090us  1.6670us  176.00us  acc_wait@laplace5_db.c:81
+  0.00%  440.89us         1  440.89us  440.89us  440.89us  acc_device_init@laplace5_db.c:77
+  0.00%  323.17us         8  40.396us  24.163us  60.009us  acc_enqueue_upload@laplace5_db.c:77
+  0.00%  29.175us         1  29.175us  29.175us  29.175us  acc_exit_data@laplace5_db.c:77
+  0.00%       0ns         2       0ns       0ns       0ns  acc_delete@laplace5_db.c:100
+  0.00%       0ns         2       0ns       0ns       0ns  acc_create@laplace5_db.c:77
+  0.00%       0ns         2       0ns       0ns       0ns  acc_alloc@laplace5_db.c:77
+
+======== CPU profiling result (bottom up):
+Time(%)      Time  Name
+ 75.00%   27.621s  ???
+ 75.00%   27.621s  | start_thread
+ 75.00%   27.621s  |   clone
+ 24.38%  8.97682s  cuMemcpyDtoHAsync_v2
+ 24.38%  8.97682s  | __pgi_uacc_cuda_downloads
+ 24.38%  8.97682s  |   __pgi_uacc_downloads
+ 24.38%  8.97682s  |     main
+  0.22%  80.061ms  cuDevicePrimaryCtxRetain
+  0.22%  80.061ms  | __pgi_uacc_cuda_init_device
+  0.22%  80.061ms  |   __pgi_uacc_cuda_select_valid
+  0.22%  80.061ms  |     __pgi_uacc_select_devid
+  0.22%  80.061ms  |       __pgi_uacc_dataenterstart
+  0.22%  80.061ms  |         main
+  0.14%  50.038ms  cuDevicePrimaryCtxRelease
+  0.14%  50.038ms  | __pgi_uacc_cuda_release_buffer
+  0.14%  50.038ms  |   __run_exit_handlers
+  0.14%  50.038ms  |     ???
+  0.14%  50.038ms  |       ???
+  0.05%  20.015ms  __c_mcopy4
+  0.05%  20.015ms  | __pgi_uacc_cuda_dataup1
+  0.05%  20.015ms  |   __pgi_uacc_dataup1
+  0.05%  20.015ms  |     __pgi_uacc_dataupx
+  0.05%  20.015ms  |       __pgi_uacc_dataonb
+  0.05%  20.015ms  |         main
+  0.03%  10.008ms  _dl_relocate_object
+  0.03%  10.008ms  | dl_open_worker
+  0.03%  10.008ms  |   _dl_catch_error
+  0.03%  10.008ms  |     _dl_open
+  0.03%  10.008ms  |       dlopen_doit
+  0.03%  10.008ms  |         _dl_catch_error
+  0.03%  10.008ms  |           _dlerror_run
+  0.03%  10.008ms  |             dlopen@@GLIBC_2.2.5
+  0.03%  10.008ms  |               __pgi_uacc_add_profile_library
+  0.03%  10.008ms  |                 __pgi_uacc_add_profile_libraries
+  0.03%  10.008ms  |                   __pgi_uacc_globalinit
+  0.03%  10.008ms  |                     __pgi_uacc_enumerate
+  0.03%  10.008ms  |                       __pgi_uacc_initialize
+  0.03%  10.008ms  |                         __pgi_uacc_dataenterstart
+  0.03%  10.008ms  |                           main
+  0.03%  10.008ms  cuMemFreeHost
+  0.03%  10.008ms  | __pgi_uacc_cuda_free_device_buffers
+  0.03%  10.008ms  |   __pgi_uacc_cuda_release_buffer
+  0.03%  10.008ms  |     __run_exit_handlers
+  0.03%  10.008ms  |       ???
+  0.03%  10.008ms  |         ???
+  0.03%  10.008ms  cuMemHostAlloc
+  0.03%  10.008ms  | __pgi_uacc_cuda_get_buffer
+  0.03%  10.008ms  |   __pgi_uacc_cuda_dataup1
+  0.03%  10.008ms  |     __pgi_uacc_dataup1
+  0.03%  10.008ms  |       __pgi_uacc_dataupx
+  0.03%  10.008ms  |         __pgi_uacc_dataonb
+  0.03%  10.008ms  |           main
+  0.03%  10.008ms  cuInit
+  0.03%  10.008ms  | __pgi_uacc_cuda_init
+  0.03%  10.008ms  |   __pgi_uacc_enumerate
+  0.03%  10.008ms  |     __pgi_uacc_initialize
+  0.03%  10.008ms  |       __pgi_uacc_dataenterstart
+  0.03%  10.008ms  |         main
+  0.03%  10.008ms  cuStreamSynchronize
+  0.03%  10.008ms  | __pgi_uacc_cuda_wait
+  0.03%  10.008ms  |   __pgi_uacc_computedone
+  0.03%  10.008ms  |     main
+  0.03%  10.008ms  cuModuleLoadData
+  0.03%  10.008ms  | __pgi_uacc_cuda_load_module
+  0.03%  10.008ms  |   __pgi_uacc_init_device
+  0.03%  10.008ms  |     __pgi_uacc_dataenterstart
+  0.03%  10.008ms  |       main
+  0.03%  10.008ms  __GI_memset
+  0.03%  10.008ms  | main
+  0.03%  10.008ms  cuMemAlloc_v2
+  0.03%  10.008ms    __pgi_uacc_cuda_alloc
+  0.03%  10.008ms      __pgi_uacc_alloc
+  0.03%  10.008ms        do_create
+  0.03%  10.008ms          __pgi_uacc_excontig_search
+  0.03%  10.008ms            __pgi_uacc_create
+  0.03%  10.008ms              __pgi_uacc_dataonb
+  0.03%  10.008ms                main
+
+======== Data collected at 100Hz frequency
+
+---#laplace6_db_improve.c (GPU)
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel laplace6_db_improve.c -o lp6GPU
+main:
+     77, Generating create(Anew[:][:])
+         Generating copyin(A[:][:])
+     81, Accelerator kernel generated
+         Generating Tesla code
+         81, Generating reduction(max:error)
+         83, #pragma acc loop seq
+         84, #pragma acc loop vector(128) /* threadIdx.x */
+         90, #pragma acc loop seq
+         91, #pragma acc loop vector(128) /* threadIdx.x */
+     83, Loop is parallelizable
+     84, Loop is parallelizable
+     90, Loop is parallelizable
+     91, Loop is parallelizable
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ perf stat ./lp6GPU 100
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 100 iterations
+   10, 0.405117
+   20, 0.410726
+   30, 0.412261
+   40, 0.412927
+   50, 0.413285
+   60, 0.413503
+   70, 0.413647
+   80, 0.413748
+   90, 0.413823
+  100, 0.413879
+
+ Performance counter stats for './lp6GPU 100':
+
+      10204,919954      task-clock (msec)         #    0,985 CPUs utilized
+               807      context-switches          #    0,079 K/sec
+                14      cpu-migrations            #    0,001 K/sec
+             2.752      page-faults               #    0,270 K/sec
+    32.748.359.305      cycles                    #    3,209 GHz
+    11.978.178.541      stalled-cycles-frontend   #   36,58% frontend cycles idle
+     4.900.899.676      stalled-cycles-backend    #   14,97% backend  cycles idle
+    43.802.443.077      instructions              #    1,34  insns per cycle
+                                                  #    0,27  stalled cycles per insn
+     9.599.281.412      branches                  #  940,652 M/sec
+        27.530.042      branch-misses             #    0,29% of all branches
+
+      10,364354184 seconds time elapsed
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ pgprof ./lp6GPU 100
+pgprof-Warning-Installed CUDA driver version is not supported for GPU profiling.
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 100 iterations
+==22005== PGPROF is profiling process 22005, command: ./lp6GPU 100
+   10, 0.405117
+   20, 0.410726
+   30, 0.412261
+   40, 0.412927
+   50, 0.413285
+   60, 0.413503
+   70, 0.413647
+   80, 0.413748
+   90, 0.413823
+  100, 0.413879
+==22005== Profiling application: ./lp6GPU 100
+==22005== Profiling result:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 99.86%  8.97028s       100  89.703ms  86.846ms  97.370ms  main_81_gpu
+  0.14%  12.433ms       104  119.55us     960ns  3.2013ms  [CUDA memcpy HtoD]
+  0.00%  236.00us       100  2.3590us  2.3040us  3.0400us  main_81_gpu_red
+  0.00%  192.35us       100  1.9230us  1.8870us  2.4960us  [CUDA memcpy DtoH]
+
+==22005== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 97.81%  8.97130s       100  89.713ms  86.853ms  97.365ms  cuMemcpyDtoHAsync
+  0.97%  88.636ms         3  29.545ms     311ns  88.636ms  cuDevicePrimaryCtxRetain
+  0.64%  59.073ms         1  59.073ms  59.073ms  59.073ms  cuDevicePrimaryCtxRelease
+  0.31%  28.848ms         1  28.848ms  28.848ms  28.848ms  cuMemHostAlloc
+  0.17%  15.398ms         1  15.398ms  15.398ms  15.398ms  cuMemFreeHost
+  0.04%  3.8609ms         5  772.18us  212.25us  2.8378ms  cuMemAlloc
+  0.02%  2.1771ms       200  10.885us  7.9190us  47.932us  cuLaunchKernel
+  0.01%  1.1460ms       104  11.019us  8.8120us  44.551us  cuMemcpyHtoDAsync
+  0.01%  769.55us         1  769.55us  769.55us  769.55us  cuMemAllocHost
+  0.00%  287.50us       201  1.4300us     820ns  6.7340us  cuStreamSynchronize
+  0.00%  269.63us         1  269.63us  269.63us  269.63us  cuModuleLoadData
+  0.00%  38.872us         1  38.872us  38.872us  38.872us  cuStreamCreate
+  0.00%  12.398us         3  4.1320us  3.9300us  4.3700us  cuEventRecord
+  0.00%  10.461us         2  5.2300us  5.0900us  5.3710us  cuEventSynchronize
+  0.00%  5.1470us         3  1.7150us     418ns  4.0890us  cuDeviceGetCount
+  0.00%  4.7710us         1  4.7710us  4.7710us  4.7710us  cuEventCreate
+  0.00%  4.3150us         3  1.4380us     576ns  2.6260us  cuCtxSetCurrent
+  0.00%  4.0160us         6     669ns     302ns  1.0310us  cuDeviceGet
+  0.00%  3.9110us         8     488ns     378ns     613ns  cuDeviceGetAttribute
+  0.00%  3.1710us         1  3.1710us  3.1710us  3.1710us  cuMemFree
+  0.00%  1.8990us         2     949ns     348ns  1.5510us  cuModuleGetFunction
+  0.00%     929ns         2     464ns     311ns     618ns  cuDeviceComputeCapability
+  0.00%     696ns         2     348ns     294ns     402ns  cuCtxGetCurrent
+
+==22005== OpenACC (excl):
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 99.41%  8.97149s       100  89.715ms  86.855ms  97.368ms  acc_enqueue_download@laplace6_db_improve.c:81
+  0.52%  47.277ms         1  47.277ms  47.277ms  47.277ms  acc_enter_data@laplace6_db_improve.c:77
+  0.02%  1.5591ms       100  15.591us  14.165us  55.976us  acc_enqueue_launch@laplace6_db_improve.c:81 (main_81_gpu)
+  0.01%  1.1005ms       100  11.005us  9.7130us  19.849us  acc_enqueue_upload@laplace6_db_improve.c:81
+  0.01%  1.0605ms       100  10.605us  5.4330us  466.93us  acc_compute_construct@laplace6_db_improve.c:81
+  0.01%  1.0479ms       100  10.478us  9.5430us  18.805us  acc_enqueue_launch@laplace6_db_improve.c:81 (main_81_gpu_red)
+  0.01%  623.45us       200  3.1170us  1.7870us  8.2470us  acc_wait@laplace6_db_improve.c:81
+  0.00%  293.52us         1  293.52us  293.52us  293.52us  acc_device_init@laplace6_db_improve.c:77
+  0.00%  216.70us         4  54.174us  44.074us  67.922us  acc_enqueue_upload@laplace6_db_improve.c:77
+  0.00%  33.196us         1  33.196us  33.196us  33.196us  acc_exit_data@laplace6_db_improve.c:77
+  0.00%  10.334us         1  10.334us  10.334us  10.334us  acc_wait@laplace6_db_improve.c:77
+  0.00%       0ns         2       0ns       0ns       0ns  acc_alloc@laplace6_db_improve.c:77
+  0.00%       0ns         2       0ns       0ns       0ns  acc_delete@laplace6_db_improve.c:100
+  0.00%       0ns         2       0ns       0ns       0ns  acc_create@laplace6_db_improve.c:77
+
+======== CPU profiling result (bottom up):
+Time(%)      Time  Name
+ 75.01%  27.6462s  ???
+ 75.01%  27.6462s  | start_thread
+ 75.01%  27.6462s  |   clone
+ 24.36%   8.9785s  cuMemcpyDtoHAsync_v2
+ 24.36%   8.9785s  | __pgi_uacc_cuda_downloads
+ 24.36%   8.9785s  |   __pgi_uacc_downloads
+ 24.36%   8.9785s  |     main
+  0.24%  90.085ms  cuDevicePrimaryCtxRetain
+  0.24%  90.085ms  | __pgi_uacc_cuda_init_device
+  0.24%  90.085ms  |   __pgi_uacc_cuda_select_valid
+  0.24%  90.085ms  |     __pgi_uacc_select_devid
+  0.24%  90.085ms  |       __pgi_uacc_dataenterstart
+  0.24%  90.085ms  |         main
+  0.16%  60.057ms  cuDevicePrimaryCtxRelease
+  0.16%  60.057ms  | __pgi_uacc_cuda_release_buffer
+  0.16%  60.057ms  |   __run_exit_handlers
+  0.16%  60.057ms  |     ???
+  0.16%  60.057ms  |       ???
+  0.05%  20.019ms  cuMemFreeHost
+  0.05%  20.019ms  | __pgi_uacc_cuda_free_device_buffers
+  0.05%  20.019ms  |   __pgi_uacc_cuda_release_buffer
+  0.05%  20.019ms  |     __run_exit_handlers
+  0.05%  20.019ms  |       ???
+  0.05%  20.019ms  |         ???
+  0.03%  10.009ms  cuMemAlloc_v2
+  0.03%  10.009ms  | __pgi_uacc_cuda_alloc
+  0.03%  10.009ms  |   __pgi_uacc_alloc
+  0.03%  10.009ms  |     do_create
+  0.03%  10.009ms  |       __pgi_uacc_excontig_search
+  0.03%  10.009ms  |         __pgi_uacc_create
+  0.03%  10.009ms  |           __pgi_uacc_dataonb
+  0.03%  10.009ms  |             main
+  0.03%  10.009ms  cuMemHostAlloc
+  0.03%  10.009ms  | __pgi_uacc_cuda_get_buffer
+  0.03%  10.009ms  |   __pgi_uacc_cuda_dataup1
+  0.03%  10.009ms  |     __pgi_uacc_dataup1
+  0.03%  10.009ms  |       __pgi_uacc_dataupx
+  0.03%  10.009ms  |         __pgi_uacc_dataonb
+  0.03%  10.009ms  |           main
+  0.03%  10.009ms  do_lookup_x
+  0.03%  10.009ms  | _dl_lookup_symbol_x
+  0.03%  10.009ms  |   _dl_relocate_object
+  0.03%  10.009ms  |     dl_open_worker
+  0.03%  10.009ms  |       _dl_catch_error
+  0.03%  10.009ms  |         _dl_open
+  0.03%  10.009ms  |           dlopen_doit
+  0.03%  10.009ms  |             _dl_catch_error
+  0.03%  10.009ms  |               _dlerror_run
+  0.03%  10.009ms  |                 dlopen@@GLIBC_2.2.5
+  0.03%  10.009ms  |                   __pgi_uacc_add_profile_library
+  0.03%  10.009ms  |                     __pgi_uacc_add_profile_libraries
+  0.03%  10.009ms  |                       __pgi_uacc_globalinit
+  0.03%  10.009ms  |                         __pgi_uacc_enumerate
+  0.03%  10.009ms  |                           __pgi_uacc_initialize
+  0.03%  10.009ms  |                             __pgi_uacc_dataenterstart
+  0.03%  10.009ms  |                               main
+  0.03%  10.009ms  __GI_memset
+  0.03%  10.009ms  | main
+  0.03%  10.009ms  __c_mcopy4
+  0.03%  10.009ms  | __pgi_uacc_cuda_dataup1
+  0.03%  10.009ms  |   __pgi_uacc_dataup1
+  0.03%  10.009ms  |     __pgi_uacc_dataupx
+  0.03%  10.009ms  |       __pgi_uacc_dataonb
+  0.03%  10.009ms  |         main
+  0.03%  10.009ms  cuInit
+  0.03%  10.009ms    __pgi_uacc_cuda_init
+  0.03%  10.009ms      __pgi_uacc_enumerate
+  0.03%  10.009ms        __pgi_uacc_initialize
+  0.03%  10.009ms          __pgi_uacc_dataenterstart
+  0.03%  10.009ms            main
+
+======== Data collected at 100Hz frequency

@@ -1,0 +1,55 @@
+
+ppM-1-1@aolin21:~$ module add pgi64/17.4
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ pgcc -fast -Minfo=all laplace7.c -o lp7CPU
+main:
+     59, Loop not fused: dependence chain to sibling loop
+         2 loops fused
+         Generated vector simd code for the loop
+     71, Loop not fused: function call before adjacent loop
+         2 loops fused
+         Generated vector simd code for the loop
+     91, Loop not vectorized/parallelized: potential early exits
+     97, Loop not fused: no successor loop
+     98, Generated an alternate version of the loop
+         Generated vector simd code for the loop containing reductions
+         Generated 3 prefetch instructions for the loop
+         Generated vector simd code for the loop containing reductions
+         Generated 3 prefetch instructions for the loop
+    107, Loop not fused: function call before adjacent loop
+    108, Generated an alternate version of the loop
+         Generated vector simd code for the loop containing reductions
+         Generated 3 prefetch instructions for the loop
+         Generated vector simd code for the loop containing reductions
+         Generated 3 prefetch instructions for the loop
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ perf stat ./lp7CPU 100
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 100 iterations
+   10, 0.155006
+   20, 0.110024
+   30, 0.089901
+   40, 0.077374
+   50, 0.069623
+   60, 0.063285
+   70, 0.058825
+   80, 0.054946
+   90, 0.051831
+  100, 0.049208
+
+ Performance counter stats for './lp7CPU 100':
+
+       2080,696232      task-clock (msec)         #    0,997 CPUs utilized
+               134      context-switches          #    0,064 K/sec
+                 3      cpu-migrations            #    0,001 K/sec
+               944      page-faults               #    0,454 K/sec
+     6.807.364.034      cycles                    #    3,272 GHz
+     3.193.156.175      stalled-cycles-frontend   #   46,91% frontend cycles idle
+     2.028.458.125      stalled-cycles-backend    #   29,80% backend  cycles idle
+     6.567.331.664      instructions              #    0,96  insns per cycle
+                                                  #    0,49  stalled cycles per insn
+       531.162.166      branches                  #  255,281 M/sec
+       116.847.745      branch-misses             #   22,00% of all branches
+
+       2,087689039 seconds time elapsed
+
+

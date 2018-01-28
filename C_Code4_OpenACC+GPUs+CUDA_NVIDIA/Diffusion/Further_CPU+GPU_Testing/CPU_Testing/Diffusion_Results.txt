@@ -1,0 +1,192 @@
+ppM-1-1@aolin21:~/Escritorio/GPU/Diffusion$ module add pgi64/17.4
+
+-----------------------------------CPU
+
+---#diff1_base.c (CPU)
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Diffusion$ pgcc -fast -Minfo=all diff1_base.c -o dif1CPU
+diffusion:
+     24, Loop not vectorized/parallelized: too deeply nested
+     30, Loop not vectorized: data dependency
+sum_values:
+     80, Loop not vectorized: may not be beneficial
+         Loop unrolled 8 times
+ppM-1-1@aolin21:~/Escritorio/GPU/Diffusion$ perf stat ./dif1CPU 10
+Running diffusion kernel with NX=10, NY=128, NZ=128, 163 times
+Accuracy     : -5.605469E-01
+
+ Performance counter stats for './dif1CPU 10':
+
+        483,848773      task-clock (msec)         #    0,995 CPUs utilized
+                35      context-switches          #    0,072 K/sec
+                 0      cpu-migrations            #    0,000 K/sec
+               681      page-faults               #    0,001 M/sec
+     1.413.397.159      cycles                    #    2,921 GHz
+       670.859.992      stalled-cycles-frontend   #   47,46% frontend cycles idle
+       241.166.404      stalled-cycles-backend    #   17,06% backend  cycles idle
+     2.018.412.286      instructions              #    1,43  insns per cycle
+                                                  #    0,33  stalled cycles per insn
+        36.065.913      branches                  #   74,540 M/sec
+            59.747      branch-misses             #    0,17% of all branches
+
+       0,486453902 seconds time elapsed
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Diffusion$ perf stat ./dif1CPU 100
+Running diffusion kernel with NX=100, NY=128, NZ=128, 1638 times
+Accuracy     : -2.168750E+01
+
+ Performance counter stats for './dif1CPU 100':
+
+     123087,493250      task-clock (msec)         #    0,998 CPUs utilized
+             6.336      context-switches          #    0,051 K/sec
+                 8      cpu-migrations            #    0,000 K/sec
+             1.007      page-faults               #    0,008 K/sec
+   415.877.674.483      cycles                    #    3,379 GHz
+   343.995.807.354      stalled-cycles-frontend   #   82,72% frontend cycles idle
+   162.685.909.386      stalled-cycles-backend    #   39,12% backend  cycles idle
+   189.708.666.629      instructions              #    0,46  insns per cycle
+                                                  #    1,81  stalled cycles per insn
+     2.843.601.104      branches                  #   23,102 M/sec
+        32.370.839      branch-misses             #    1,14% of all branches
+
+     123,334763394 seconds time elapsed
+
+----#diff2_unr2.c (CPU)
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Diffusion$ pgcc -fast -Minfo=all diff2_unr2.c -o dif2CPU
+diffusion:
+     22, Loop not vectorized/parallelized: too deeply nested
+     28, Loop not vectorized: data dependency
+sum_values:
+     92, Generated 2 alternate versions of the loop
+         Generated vector simd code for the loop containing reductions
+         Generated a prefetch instruction for the loop
+         Generated vector simd code for the loop containing reductions
+         Generated a prefetch instruction for the loop
+         Generated vector simd code for the loop containing reductions
+         Generated a prefetch instruction for the loop
+ppM-1-1@aolin21:~/Escritorio/GPU/Diffusion$ perf stat ./dif2CPU 100
+Running diffusion kernel with NX=100, NY=128, NZ=128, 1638 times
+Accuracy     : 7.468750E+00
+
+ Performance counter stats for './dif2CPU 100':
+
+      21423,538210      task-clock (msec)         #    0,998 CPUs utilized
+             1.109      context-switches          #    0,052 K/sec
+                 5      cpu-migrations            #    0,000 K/sec
+             1.005      page-faults               #    0,047 K/sec
+    72.144.318.256      cycles                    #    3,368 GHz
+    14.023.649.524      stalled-cycles-frontend   #   19,44% frontend cycles idle
+       680.373.912      stalled-cycles-backend    #    0,94% backend  cycles idle
+   158.422.000.366      instructions              #    2,20  insns per cycle
+                                                  #    0,09  stalled cycles per insn
+     1.426.012.873      branches                  #   66,563 M/sec
+         1.717.940      branch-misses             #    0,12% of all branches
+
+      21,473198286 seconds time elapsed
+
+----#diff3_unr4.c (CPU)
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Diffusion$ pgcc -fast -Minfo=all diff3_unr4.c -o dif3CPU
+diffusion:
+     22, Loop not vectorized/parallelized: too deeply nested
+     28, Loop not vectorized: data dependency
+sum_values:
+    119, Generated 2 alternate versions of the loop
+         Generated vector simd code for the loop containing reductions
+         Generated a prefetch instruction for the loop
+         Generated vector simd code for the loop containing reductions
+         Generated a prefetch instruction for the loop
+         Generated vector simd code for the loop containing reductions
+         Generated a prefetch instruction for the loop
+ppM-1-1@aolin21:~/Escritorio/GPU/Diffusion$ perf stat ./dif3CPU 100
+Running diffusion kernel with NX=100, NY=128, NZ=128, 1638 times
+Accuracy     : 7.468750E+00
+
+ Performance counter stats for './dif3CPU 100':
+
+      18370,104121      task-clock (msec)         #    0,998 CPUs utilized
+               950      context-switches          #    0,052 K/sec
+                 2      cpu-migrations            #    0,000 K/sec
+             1.516      page-faults               #    0,083 K/sec
+    61.849.611.182      cycles                    #    3,367 GHz
+    16.823.473.710      stalled-cycles-frontend   #   27,20% frontend cycles idle
+     2.215.799.601      stalled-cycles-backend    #    3,58% backend  cycles idle
+   133.986.635.393      instructions              #    2,17  insns per cycle
+                                                  #    0,13  stalled cycles per insn
+       753.378.295      branches                  #   41,011 M/sec
+         1.713.830      branch-misses             #    0,23% of all branches
+
+      18,413053457 seconds time elapsed
+
+----#diff4_vect.c (CPU)
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Diffusion$ pgcc -fast -Minfo=all diff4_vect.c -o dif4CPU
+diffusion:
+     23, Loop not vectorized/parallelized: too deeply nested
+     36, Loop not vectorized: data dependency
+sum_values:
+    101, Generated 2 alternate versions of the loop
+         Generated vector simd code for the loop containing reductions
+         Generated a prefetch instruction for the loop
+         Generated vector simd code for the loop containing reductions
+         Generated a prefetch instruction for the loop
+         Generated vector simd code for the loop containing reductions
+         Generated a prefetch instruction for the loop
+ppM-1-1@aolin21:~/Escritorio/GPU/Diffusion$ perf stat ./dif4CPU 100
+Running diffusion kernel with NX=100, NY=128, NZ=128, 1638 times
+Accuracy     : 2.303125E+02
+
+ Performance counter stats for './dif4CPU 100':
+
+      17834,085023      task-clock (msec)         #    0,998 CPUs utilized
+               925      context-switches          #    0,052 K/sec
+                 2      cpu-migrations            #    0,000 K/sec
+             1.007      page-faults               #    0,056 K/sec
+    60.053.348.108      cycles                    #    3,367 GHz
+    15.445.494.093      stalled-cycles-frontend   #   25,72% frontend cycles idle
+     1.521.078.864      stalled-cycles-backend    #    2,53% backend  cycles idle
+   131.865.925.119      instructions              #    2,20  insns per cycle
+                                                  #    0,12  stalled cycles per insn
+     2.723.407.768      branches                  #  152,708 M/sec
+        21.849.572      branch-misses             #    0,80% of all branches
+
+      17,876098978 seconds time elapsed
+
+----#diff5_double.c (CPU)
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Diffusion$ pgcc -fast -Minfo=all diff5_double.c -o dif5CPU
+diffusion:
+     22, Loop not vectorized/parallelized: too deeply nested
+     28, Loop not vectorized: data dependency
+init:
+    101, Generated 3 alternate versions of the loop
+         Generated vector simd code for the loop
+sum_values:
+    120, Generated 2 alternate versions of the loop
+         Generated vector simd code for the loop containing reductions
+         Generated a prefetch instruction for the loop
+         Generated vector simd code for the loop containing reductions
+         Generated a prefetch instruction for the loop
+         Generated vector simd code for the loop containing reductions
+         Generated a prefetch instruction for the loop
+ppM-1-1@aolin21:~/Escritorio/GPU/Diffusion$ perf stat ./dif5CPU 100
+Running diffusion kernel with NX=100, NY=128, NZ=128, 1638 times
+Accuracy     : 1.129229E-08
+
+ Performance counter stats for './dif5CPU 100':
+
+      18772,558542      task-clock (msec)         #    0,998 CPUs utilized
+               982      context-switches          #    0,052 K/sec
+                 5      cpu-migrations            #    0,000 K/sec
+             1.143      page-faults               #    0,061 K/sec
+    63.207.690.113      cycles                    #    3,367 GHz
+    19.977.325.458      stalled-cycles-frontend   #   31,61% frontend cycles idle
+     2.568.072.322      stalled-cycles-backend    #    4,06% backend  cycles idle
+   133.687.393.141      instructions              #    2,12  insns per cycle
+                                                  #    0,15  stalled cycles per insn
+       736.007.098      branches                  #   39,207 M/sec
+         2.847.540      branch-misses             #    0,39% of all branches
+
+      18,816518479 seconds time elapsed
+

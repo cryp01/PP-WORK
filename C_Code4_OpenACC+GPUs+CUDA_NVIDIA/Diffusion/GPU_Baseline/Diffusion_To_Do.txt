@@ -1,0 +1,28 @@
+module add pgi64/17.4
+module add cuda/7.5
+nvidia-smi
+pgaccelinfo // For 0
+export CUDA_VISIBLE_DEVICES=0,1
+pgaccelinfo // For 0,1
+
+Test for corectness of the problem is the baseline results:
+./diff 50 50 50
+Running diffusion kernel with NX=50, NY=50, NZ=50, 124 times
+Accuracy     : -2.528395E-10
+
+
+pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel -DREAL=double DIFGPU.c -o DIFGPU
+perf stat ./DIFGPU 
+pgprof ./DIFGPU
+nvvp ./DIFGPU
+
+pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel -DREAL=double DIFGPU2.c -o DIFGPU2
+perf stat ./DIFGPU2 
+pgprof ./DIFGPU2
+nvvp ./DIFGPU2
+
+pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel -DREAL=double DIFGPU3.c -o DIFGPU3
+perf stat ./DIFGPU3 
+pgprof ./DIFGPU3
+nvvp ./DIFGPU3
+

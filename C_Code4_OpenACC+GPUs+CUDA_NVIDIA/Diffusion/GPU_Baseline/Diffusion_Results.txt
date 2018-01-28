@@ -1,0 +1,597 @@
+
+==>Parallelizing with num_gangs(4) num_workers(16) vector vector_length(64)
+
+
+ppM-1-1@aolin21:~/Escritorio/GPUdiffusion/GPU$ pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel -DREAL=double DIFGPU.c -o DIFGPU
+diffusion:
+     22, Generating copy(F1[:nz*(ny*nx)],F2[:nz*(ny*nx)])
+     24, Generating present(F1[:],F2[:])
+     26, Accelerator kernel generated
+         Generating Tesla code
+         27, #pragma acc loop vector(64) /* threadIdx.x */
+         29, #pragma acc loop worker(16) /* threadIdx.y */
+         31, #pragma acc loop gang(4) /* blockIdx.x */
+     27, Loop is parallelizable
+     29, Loop is parallelizable
+init:
+     63, Generating copy(F1[:nz*(ny*nx)])
+     65, Accelerator kernel generated
+         Generating Tesla code
+         66, #pragma acc loop vector(64) /* threadIdx.x */
+         68, #pragma acc loop worker(16) /* threadIdx.y */
+         70, #pragma acc loop gang(4) /* blockIdx.x */
+     66, Loop is parallelizable
+     68, Loop is parallelizable
+sum_values:
+     90, Generating copy(F1[:nz*(ny*nx)])
+
+ppM-1-1@aolin21:~/Escritorio/GPUdiffusion/GPU$ ./DIFGPU
+Running diffusion kernel with NX=128, NY=128, NZ=128, 2097 times
+Accuracy     : 5.937181E-08
+ppM-1-1@aolin21:~/Escritorio/GPUdiffusion/GPU$ perf stat ./DIFGPU
+Running diffusion kernel with NX=128, NY=128, NZ=128, 2097 times
+Accuracy     : 5.937181E-08
+
+ Performance counter stats for './DIFGPU':
+
+       3210,671272      task-clock (msec)         #    0,953 CPUs utilized
+               338      context-switches          #    0,105 K/sec
+                14      cpu-migrations            #    0,004 K/sec
+             4.288      page-faults               #    0,001 M/sec
+     8.754.642.599      cycles                    #    2,727 GHz
+     4.080.633.632      stalled-cycles-frontend   #   46,61% frontend cycles idle
+     2.164.029.060      stalled-cycles-backend    #   24,72% backend  cycles idle
+    10.031.142.712      instructions              #    1,15  insns per cycle
+                                                  #    0,41  stalled cycles per insn
+     2.180.610.624      branches                  #  679,176 M/sec
+         3.324.283      branch-misses             #    0,15% of all branches
+
+       3,368859493 seconds time elapsed
+
+ppM-1-1@aolin21:~/Escritorio/GPUdiffusion/GPU$ pgprof ./DIFGPU
+pgprof-Warning-Installed CUDA driver version is not supported for GPU profiling.
+==16412== PGPROF is profiling process 16412, command: ./DIFGPU
+Running diffusion kernel with NX=128, NY=128, NZ=128, 2097 times
+Accuracy     : 5.937181E-08
+==16412== Profiling application: ./DIFGPU
+==16412== Profiling result:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 98.32%  1.77473s      2097  846.32us  836.02us  906.49us  diffusion_26_gpu
+  0.76%  13.740ms         5  2.7480ms  2.7446ms  2.7510ms  [CUDA memcpy HtoD]
+  0.72%  12.972ms        10  1.2972ms  2.3040us  2.5945ms  [CUDA memcpy DtoH]
+  0.20%  3.6578ms         1  3.6578ms  3.6578ms  3.6578ms  init_65_gpu
+
+==16412== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 88.94%  1.80523s      2106  857.18us  544.09us  3.6580ms  cuStreamSynchronize
+  4.31%  87.523ms         3  29.174ms     353ns  87.522ms  cuDevicePrimaryCtxRetain
+  3.16%  64.066ms         1  64.066ms  64.066ms  64.066ms  cuDevicePrimaryCtxRelease
+  1.33%  26.950ms         1  26.950ms  26.950ms  26.950ms  cuMemHostAlloc
+  1.06%  21.574ms      2098  10.282us  8.0100us  44.718us  cuLaunchKernel
+  0.82%  16.722ms         1  16.722ms  16.722ms  16.722ms  cuMemFreeHost
+  0.16%  3.1895ms         3  1.0632ms  198.68us  2.7684ms  cuMemAlloc
+  0.13%  2.6965ms        21  128.40us     752ns  2.5939ms  cuEventSynchronize
+  0.03%  670.03us         1  670.03us  670.03us  670.03us  cuMemAllocHost
+  0.03%  520.15us         1  520.15us  520.15us  520.15us  cuModuleLoadData
+  0.01%  170.58us         5  34.116us  11.921us  46.214us  cuMemcpyHtoDAsync
+  0.01%  138.15us        10  13.814us  6.0870us  25.618us  cuMemcpyDtoHAsync
+  0.01%  107.47us        23  4.6720us  1.6780us  12.975us  cuEventRecord
+  0.00%  32.336us         1  32.336us  32.336us  32.336us  cuStreamCreate
+  0.00%  11.223us         4  2.8050us     604ns  6.5140us  cuEventCreate
+  0.00%  7.3420us         3  2.4470us     543ns  4.8030us  cuDeviceGetCount
+  0.00%  6.5580us         8     819ns     464ns  1.2280us  cuDeviceGetAttribute
+  0.00%  5.0210us         6     836ns     350ns  1.6060us  cuDeviceGet
+  0.00%  3.4260us         3  1.1420us     420ns  2.1540us  cuCtxSetCurrent
+  0.00%  3.0770us         2  1.5380us     576ns  2.5010us  cuModuleGetFunction
+  0.00%  2.7390us         1  2.7390us  2.7390us  2.7390us  cuMemFree
+  0.00%  1.2270us         2     613ns     367ns     860ns  cuDeviceComputeCapability
+  0.00%     838ns         2     419ns     303ns     535ns  cuCtxGetCurrent
+
+==16412== OpenACC (excl):
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 93.03%  1.78358s      2097  850.54us  835.00us  968.66us  acc_wait@DIFGPU.c:26
+  1.57%  30.174ms         1  30.174ms  30.174ms  30.174ms  acc_enter_data@DIFGPU.c:63
+  1.33%  25.502ms      2097  12.160us  9.5250us  127.11us  acc_enqueue_launch@DIFGPU.c:26 (diffusion_26_gpu)
+  0.60%  11.566ms         2  5.7830ms  5.4964ms  6.0695ms  acc_wait@DIFGPU.c:97
+  0.43%  8.3013ms         1  8.3013ms  8.3013ms  8.3013ms  acc_enter_data@DIFGPU.c:22
+  0.43%  8.1784ms         1  8.1784ms  8.1784ms  8.1784ms  acc_exit_data@DIFGPU.c:22
+  0.42%  8.1136ms         1  8.1136ms  8.1136ms  8.1136ms  acc_wait@DIFGPU.c:82
+  0.35%  6.7394ms         2  3.3697ms  3.2161ms  3.5233ms  acc_enter_data@DIFGPU.c:90
+  0.29%  5.5021ms         2  2.7510ms  2.7483ms  2.7538ms  acc_wait@DIFGPU.c:90
+  0.29%  5.4931ms         1  5.4931ms  5.4931ms  5.4931ms  acc_wait@DIFGPU.c:50
+  0.27%  5.2033ms      2097  2.4810us  1.7370us  416.23us  acc_exit_data@DIFGPU.c:24
+  0.25%  4.8740ms      2097  2.3240us  1.8890us  5.7110us  acc_compute_construct@DIFGPU.c:26
+  0.19%  3.6604ms         1  3.6604ms  3.6604ms  3.6604ms  acc_wait@DIFGPU.c:65
+  0.18%  3.4794ms      2097  1.6590us  1.3630us  4.8860us  acc_enter_data@DIFGPU.c:24
+  0.14%  2.7515ms         1  2.7515ms  2.7515ms  2.7515ms  acc_wait@DIFGPU.c:22
+  0.14%  2.7483ms         1  2.7483ms  2.7483ms  2.7483ms  acc_wait@DIFGPU.c:63
+  0.03%  540.74us         1  540.74us  540.74us  540.74us  acc_device_init@DIFGPU.c:63
+  0.01%  147.68us         2  73.837us  69.285us  78.390us  acc_exit_data@DIFGPU.c:90
+  0.01%  109.96us         2  54.981us  50.178us  59.785us  acc_enqueue_upload@DIFGPU.c:90
+  0.00%  83.514us         4  20.878us  9.4650us  33.050us  acc_enqueue_download@DIFGPU.c:97
+  0.00%  73.324us         4  18.331us  9.4490us  29.485us  acc_enqueue_download@DIFGPU.c:50
+  0.00%  61.467us         2  30.733us  15.781us  45.686us  acc_enqueue_upload@DIFGPU.c:22
+  0.00%  60.557us         1  60.557us  60.557us  60.557us  acc_enqueue_upload@DIFGPU.c:63
+  0.00%  59.728us         1  59.728us  59.728us  59.728us  acc_exit_data@DIFGPU.c:63
+  0.00%  50.417us         1  50.417us  50.417us  50.417us  acc_enqueue_launch@DIFGPU.c:65 (init_65_gpu)
+  0.00%  42.111us         2  21.055us  12.152us  29.959us  acc_enqueue_download@DIFGPU.c:82
+  0.00%  17.852us         1  17.852us  17.852us  17.852us  acc_compute_construct@DIFGPU.c:65
+  0.00%       0ns         2       0ns       0ns       0ns  acc_delete@DIFGPU.c:97
+  0.00%       0ns         2       0ns       0ns       0ns  acc_create@DIFGPU.c:90
+  0.00%       0ns         1       0ns       0ns       0ns  acc_delete@DIFGPU.c:82
+  0.00%       0ns         1       0ns       0ns       0ns  acc_alloc@DIFGPU.c:63
+  0.00%       0ns         1       0ns       0ns       0ns  acc_create@DIFGPU.c:63
+  0.00%       0ns         1       0ns       0ns       0ns  acc_alloc@DIFGPU.c:22
+  0.00%       0ns         2       0ns       0ns       0ns  acc_create@DIFGPU.c:22
+  0.00%       0ns         2       0ns       0ns       0ns  acc_delete@DIFGPU.c:50
+
+======== CPU profiling result (bottom up):
+Time(%)      Time  Name
+ 75.93%  6.77814s  ???
+ 75.93%  6.77814s  | start_thread
+ 75.93%  6.77814s  |   clone
+ 20.36%  1.81755s  cuStreamSynchronize
+ 20.36%  1.81755s  | __pgi_uacc_cuda_wait
+ 20.36%  1.81755s  |   __pgi_uacc_computedone
+ 20.25%  1.80751s  |     diffusion
+  0.11%  10.042ms  |     init
+  1.01%  90.375ms  cuDevicePrimaryCtxRetain
+  1.01%  90.375ms  | __pgi_uacc_cuda_init_device
+  1.01%  90.375ms  |   __pgi_uacc_cuda_select_valid
+  1.01%  90.375ms  |     __pgi_uacc_select_devid
+  1.01%  90.375ms  |       __pgi_uacc_dataenterstart
+  1.01%  90.375ms  |         init
+  1.01%  90.375ms  sum_values
+  0.79%  70.292ms  cuDevicePrimaryCtxRelease
+  0.79%  70.292ms  | __pgi_uacc_cuda_release_buffer
+  0.79%  70.292ms  |   __run_exit_handlers
+  0.79%  70.292ms  |     ???
+  0.79%  70.292ms  |       ???
+  0.56%  50.208ms  __c_mcopy8
+  0.34%  30.125ms  | __pgi_uacc_cuda_dataup1
+  0.34%  30.125ms  | | __pgi_uacc_dataup1
+  0.34%  30.125ms  | |   __pgi_uacc_dataupx
+  0.34%  30.125ms  | |     __pgi_uacc_dataonb
+  0.22%  20.083ms  | |       sum_values
+  0.11%  10.042ms  | |       diffusion
+  0.22%  20.083ms  | __pgi_uacc_cuda_drain_down
+  0.11%  10.042ms  |   __pgi_uacc_cuda_wait
+  0.11%  10.042ms  |   | __pgi_uacc_dataexitdone
+  0.11%  10.042ms  |   |   sum_values
+  0.11%  10.042ms  |   __pgi_uacc_cuda_get_buffer
+  0.11%  10.042ms  |     __pgi_uacc_cuda_datadown1
+  0.11%  10.042ms  |       __pgi_uacc_datadown1
+  0.11%  10.042ms  |         __pgi_uacc_datadownx
+  0.11%  10.042ms  |           __pgi_uacc_dataoffb2
+  0.11%  10.042ms  |             diffusion
+  0.11%  10.042ms  cuMemFreeHost
+  0.11%  10.042ms  | __pgi_uacc_cuda_free_device_buffers
+  0.11%  10.042ms  |   __pgi_uacc_cuda_release_buffer
+  0.11%  10.042ms  |     __run_exit_handlers
+  0.11%  10.042ms  |       ???
+  0.11%  10.042ms  |         ???
+  0.11%  10.042ms  cuMemHostAlloc
+  0.11%  10.042ms  | __pgi_uacc_cuda_get_buffer
+  0.11%  10.042ms  |   __pgi_uacc_cuda_dataup1
+  0.11%  10.042ms  |     __pgi_uacc_dataup1
+  0.11%  10.042ms  |       __pgi_uacc_dataupx
+  0.11%  10.042ms  |         __pgi_uacc_dataonb
+  0.11%  10.042ms  |           init
+  0.11%  10.042ms  cuInit
+  0.11%  10.042ms    __pgi_uacc_cuda_init
+  0.11%  10.042ms      __pgi_uacc_enumerate
+  0.11%  10.042ms        __pgi_uacc_initialize
+  0.11%  10.042ms          __pgi_uacc_dataenterstart
+  0.11%  10.042ms            init
+
+======== Data collected at 100Hz frequency
+
+==>Parallelizing with num_gangs(4) num_workers(8) vector vector_length(128) in main
+
+ppM-1-1@aolin21:~/Escritorio/GPUdiffusion/GPU$ pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel -DREAL=double DIFGPU2.c -o DIFGPU2
+diffusion:
+     22, Generating copy(F1[:nz*(ny*nx)],F2[:nz*(ny*nx)])
+     24, Generating present(F1[:],F2[:])
+     26, Accelerator kernel generated
+         Generating Tesla code
+         27, #pragma acc loop vector(128) /* threadIdx.x */
+         29, #pragma acc loop worker(8) /* threadIdx.y */
+         31, #pragma acc loop gang(4) /* blockIdx.x */
+     27, Loop is parallelizable
+     29, Loop is parallelizable
+init:
+     63, Generating copy(F1[:nz*(ny*nx)])
+     65, Accelerator kernel generated
+         Generating Tesla code
+         66, #pragma acc loop vector(64) /* threadIdx.x */
+         68, #pragma acc loop worker(16) /* threadIdx.y */
+         70, #pragma acc loop gang(4) /* blockIdx.x */
+     66, Loop is parallelizable
+     68, Loop is parallelizable
+sum_values:
+     90, Generating copy(F1[:nz*(ny*nx)])
+
+ppM-1-1@aolin21:~/Escritorio/GPUdiffusion/GPU$ ./DIFGPU2
+Running diffusion kernel with NX=128, NY=128, NZ=128, 2097 times
+Accuracy     : 5.937181E-08
+ppM-1-1@aolin21:~/Escritorio/GPUdiffusion/GPU$ perf stat ./DIFGPU2
+Running diffusion kernel with NX=128, NY=128, NZ=128, 2097 times
+Accuracy     : 5.937181E-08
+
+ Performance counter stats for './DIFGPU2':
+
+       3106,173780      task-clock (msec)         #    0,949 CPUs utilized
+               344      context-switches          #    0,111 K/sec
+                10      cpu-migrations            #    0,003 K/sec
+             4.287      page-faults               #    0,001 M/sec
+     8.912.215.307      cycles                    #    2,869 GHz
+     4.435.002.532      stalled-cycles-frontend   #   49,76% frontend cycles idle
+     2.437.915.685      stalled-cycles-backend    #   27,35% backend  cycles idle
+     9.691.665.319      instructions              #    1,09  insns per cycle
+                                                  #    0,46  stalled cycles per insn
+     2.107.644.038      branches                  #  678,534 M/sec
+         3.760.070      branch-misses             #    0,18% of all branches
+
+       3,274058157 seconds time elapsed
+
+ppM-1-1@aolin21:~/Escritorio/GPUdiffusion/GPU$ pgprof ./DIFGPU2
+pgprof-Warning-Installed CUDA driver version is not supported for GPU profiling.
+==17585== PGPROF is profiling process 17585, command: ./DIFGPU2
+Running diffusion kernel with NX=128, NY=128, NZ=128, 2097 times
+Accuracy     : 5.937181E-08
+==17585== Profiling application: ./DIFGPU2
+==17585== Profiling result:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 98.28%  1.74096s      2097  830.21us  819.86us  891.57us  diffusion_26_gpu
+  0.78%  13.806ms         5  2.7613ms  2.7510ms  2.7653ms  [CUDA memcpy HtoD]
+  0.73%  12.968ms        10  1.2968ms  2.3040us  2.5928ms  [CUDA memcpy DtoH]
+  0.21%  3.6584ms         1  3.6584ms  3.6584ms  3.6584ms  init_65_gpu
+
+==17585== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 88.66%  1.77255s      2106  841.67us  530.63us  3.6557ms  cuStreamSynchronize
+  4.70%  93.910ms         3  31.303ms     373ns  93.909ms  cuDevicePrimaryCtxRetain
+  2.81%  56.205ms         1  56.205ms  56.205ms  56.205ms  cuDevicePrimaryCtxRelease
+  1.36%  27.260ms         1  27.260ms  27.260ms  27.260ms  cuMemHostAlloc
+  1.24%  24.777ms      2098  11.809us  7.8110us  201.71us  cuLaunchKernel
+  0.83%  16.538ms         1  16.538ms  16.538ms  16.538ms  cuMemFreeHost
+  0.17%  3.4891ms         3  1.1630ms  212.96us  2.7767ms  cuMemAlloc
+  0.13%  2.6921ms        21  128.19us     726ns  2.5923ms  cuEventSynchronize
+  0.03%  651.85us         1  651.85us  651.85us  651.85us  cuMemAllocHost
+  0.02%  491.25us         1  491.25us  491.25us  491.25us  cuModuleLoadData
+  0.01%  297.68us         5  59.535us  12.552us  182.23us  cuMemcpyHtoDAsync
+  0.01%  137.06us        10  13.706us  6.0930us  25.975us  cuMemcpyDtoHAsync
+  0.01%  109.46us        23  4.7580us  1.7780us  12.824us  cuEventRecord
+  0.00%  30.401us         1  30.401us  30.401us  30.401us  cuStreamCreate
+  0.00%  18.488us         4  4.6220us     917ns  10.458us  cuEventCreate
+  0.00%  5.6320us         3  1.8770us     508ns  4.6030us  cuDeviceGetCount
+  0.00%  4.1460us         6     691ns     323ns  1.0560us  cuDeviceGet
+  0.00%  3.7410us         8     467ns     345ns     716ns  cuDeviceGetAttribute
+  0.00%  3.4750us         2  1.7370us     691ns  2.7840us  cuModuleGetFunction
+  0.00%  3.1710us         3  1.0570us     361ns  1.9900us  cuCtxSetCurrent
+  0.00%  2.6700us         1  2.6700us  2.6700us  2.6700us  cuMemFree
+  0.00%  1.0610us         2     530ns     338ns     723ns  cuDeviceComputeCapability
+  0.00%     800ns         2     400ns     336ns     464ns  cuCtxGetCurrent
+
+==17585== OpenACC (excl):
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 92.66%  1.75101s      2097  835.01us  821.16us  1.9454ms  acc_wait@DIFGPU2.c:26
+  1.62%  30.586ms         1  30.586ms  30.586ms  30.586ms  acc_enter_data@DIFGPU2.c:63
+  1.54%  29.028ms      2097  13.842us  9.2770us  204.17us  acc_enqueue_launch@DIFGPU2.c:26 (diffusion_26_gpu)
+  0.61%  11.536ms         2  5.7678ms  5.5085ms  6.0270ms  acc_wait@DIFGPU2.c:97
+  0.44%  8.3066ms         1  8.3066ms  8.3066ms  8.3066ms  acc_enter_data@DIFGPU2.c:22
+  0.44%  8.2583ms         1  8.2583ms  8.2583ms  8.2583ms  acc_exit_data@DIFGPU2.c:22
+  0.43%  8.1405ms         1  8.1405ms  8.1405ms  8.1405ms  acc_wait@DIFGPU2.c:82
+  0.32%  5.9994ms         2  2.9997ms  2.9414ms  3.0580ms  acc_enter_data@DIFGPU2.c:90
+  0.30%  5.7102ms      2097  2.7230us  1.6970us  303.36us  acc_exit_data@DIFGPU2.c:24
+  0.29%  5.5623ms      2097  2.6520us  1.8380us  47.769us  acc_compute_construct@DIFGPU2.c:26
+  0.29%  5.5246ms         2  2.7623ms  2.7558ms  2.7688ms  acc_wait@DIFGPU2.c:90
+  0.29%  5.5066ms         1  5.5066ms  5.5066ms  5.5066ms  acc_wait@DIFGPU2.c:50
+  0.21%  3.9723ms      2097  1.8940us  1.3590us  24.607us  acc_enter_data@DIFGPU2.c:24
+  0.19%  3.6581ms         1  3.6581ms  3.6581ms  3.6581ms  acc_wait@DIFGPU2.c:65
+  0.15%  2.7682ms         1  2.7682ms  2.7682ms  2.7682ms  acc_wait@DIFGPU2.c:22
+  0.15%  2.7617ms         1  2.7617ms  2.7617ms  2.7617ms  acc_wait@DIFGPU2.c:63
+  0.03%  510.95us         1  510.95us  510.95us  510.95us  acc_device_init@DIFGPU2.c:63
+  0.01%  238.82us         2  119.41us  40.394us  198.43us  acc_enqueue_upload@DIFGPU2.c:90
+  0.01%  148.57us         2  74.286us  68.873us  79.699us  acc_exit_data@DIFGPU2.c:90
+  0.00%  86.564us         4  21.641us  10.440us  33.145us  acc_enqueue_download@DIFGPU2.c:97
+  0.00%  67.662us         4  16.915us  9.4220us  27.902us  acc_enqueue_download@DIFGPU2.c:50
+  0.00%  62.552us         2  31.276us  16.828us  45.724us  acc_enqueue_upload@DIFGPU2.c:22
+  0.00%  55.851us         1  55.851us  55.851us  55.851us  acc_enqueue_launch@DIFGPU2.c:65 (init_65_gpu)
+  0.00%  53.525us         1  53.525us  53.525us  53.525us  acc_enqueue_upload@DIFGPU2.c:63
+  0.00%  53.336us         1  53.336us  53.336us  53.336us  acc_exit_data@DIFGPU2.c:63
+  0.00%  46.046us         2  23.023us  12.921us  33.125us  acc_enqueue_download@DIFGPU2.c:82
+  0.00%  17.636us         1  17.636us  17.636us  17.636us  acc_compute_construct@DIFGPU2.c:65
+  0.00%       0ns         1       0ns       0ns       0ns  acc_create@DIFGPU2.c:63
+  0.00%       0ns         2       0ns       0ns       0ns  acc_create@DIFGPU2.c:22
+  0.00%       0ns         2       0ns       0ns       0ns  acc_delete@DIFGPU2.c:50
+  0.00%       0ns         2       0ns       0ns       0ns  acc_delete@DIFGPU2.c:97
+  0.00%       0ns         2       0ns       0ns       0ns  acc_create@DIFGPU2.c:90
+  0.00%       0ns         1       0ns       0ns       0ns  acc_alloc@DIFGPU2.c:63
+  0.00%       0ns         1       0ns       0ns       0ns  acc_alloc@DIFGPU2.c:22
+  0.00%       0ns         1       0ns       0ns       0ns  acc_delete@DIFGPU2.c:82
+
+======== CPU profiling result (bottom up):
+Time(%)      Time  Name
+ 75.87%   6.7534s  ???
+ 75.87%   6.7534s  | start_thread
+ 75.87%   6.7534s  |   clone
+ 20.18%  1.79622s  cuStreamSynchronize
+ 20.18%  1.79622s  | __pgi_uacc_cuda_wait
+ 19.84%  1.76612s  |   __pgi_uacc_computedone
+ 19.84%  1.76612s  |   | diffusion
+  0.23%   20.07ms  |   __pgi_uacc_dataexitdone
+  0.11%  10.035ms  |   | sum_values
+  0.11%  10.035ms  |   | init
+  0.11%  10.035ms  |   __pgi_uacc_dataenterdone
+  0.11%  10.035ms  |     sum_values
+  1.01%  90.313ms  cuDevicePrimaryCtxRetain
+  1.01%  90.313ms  | __pgi_uacc_cuda_init_device
+  1.01%  90.313ms  |   __pgi_uacc_cuda_select_valid
+  1.01%  90.313ms  |     __pgi_uacc_select_devid
+  1.01%  90.313ms  |       __pgi_uacc_dataenterstart
+  1.01%  90.313ms  |         init
+  0.90%  80.278ms  sum_values
+  0.68%  60.209ms  cuDevicePrimaryCtxRelease
+  0.68%  60.209ms  | __pgi_uacc_cuda_release_buffer
+  0.68%  60.209ms  |   __run_exit_handlers
+  0.68%  60.209ms  |     ???
+  0.68%  60.209ms  |       ???
+  0.45%  40.139ms  __c_mcopy8
+  0.23%   20.07ms  | __pgi_uacc_cuda_drain_down
+  0.11%  10.035ms  | | __pgi_uacc_cuda_get_buffer
+  0.11%  10.035ms  | | | __pgi_uacc_cuda_datadown1
+  0.11%  10.035ms  | | |   __pgi_uacc_datadown1
+  0.11%  10.035ms  | | |     __pgi_uacc_datadownx
+  0.11%  10.035ms  | | |       __pgi_uacc_dataoffb2
+  0.11%  10.035ms  | | |         diffusion
+  0.11%  10.035ms  | | __pgi_uacc_cuda_wait
+  0.11%  10.035ms  | |   __pgi_uacc_dataexitdone
+  0.11%  10.035ms  | |     sum_values
+  0.23%   20.07ms  | __pgi_uacc_cuda_dataup1
+  0.23%   20.07ms  |   __pgi_uacc_dataup1
+  0.23%   20.07ms  |     __pgi_uacc_dataupx
+  0.23%   20.07ms  |       __pgi_uacc_dataonb
+  0.11%  10.035ms  |         diffusion
+  0.11%  10.035ms  |         init
+  0.34%  30.104ms  cuLaunchKernel
+  0.34%  30.104ms  | __pgi_uacc_cuda_launch
+  0.34%  30.104ms  |   __pgi_uacc_launch
+  0.34%  30.104ms  |     diffusion
+  0.11%  10.035ms  cuMemcpyHtoDAsync_v2
+  0.11%  10.035ms  | __pgi_uacc_cuda_dataup1
+  0.11%  10.035ms  |   __pgi_uacc_dataup1
+  0.11%  10.035ms  |     __pgi_uacc_dataupx
+  0.11%  10.035ms  |       __pgi_uacc_dataonb
+  0.11%  10.035ms  |         sum_values
+  0.11%  10.035ms  cuMemHostAlloc
+  0.11%  10.035ms  | __pgi_uacc_cuda_get_buffer
+  0.11%  10.035ms  |   __pgi_uacc_cuda_dataup1
+  0.11%  10.035ms  |     __pgi_uacc_dataup1
+  0.11%  10.035ms  |       __pgi_uacc_dataupx
+  0.11%  10.035ms  |         __pgi_uacc_dataonb
+  0.11%  10.035ms  |           init
+  0.11%  10.035ms  cuInit
+  0.11%  10.035ms  | __pgi_uacc_cuda_init
+  0.11%  10.035ms  |   __pgi_uacc_enumerate
+  0.11%  10.035ms  |     __pgi_uacc_initialize
+  0.11%  10.035ms  |       __pgi_uacc_dataenterstart
+  0.11%  10.035ms  |         init
+  0.11%  10.035ms  cuMemAlloc_v2
+  0.11%  10.035ms  | __pgi_uacc_cuda_stream
+  0.11%  10.035ms  |   __pgi_uacc_cuda_init_device
+  0.11%  10.035ms  |     __pgi_uacc_cuda_select_valid
+  0.11%  10.035ms  |       __pgi_uacc_select_devid
+  0.11%  10.035ms  |         __pgi_uacc_dataenterstart
+  0.11%  10.035ms  |           init
+  0.11%  10.035ms  cuMemFreeHost
+  0.11%  10.035ms    __pgi_uacc_cuda_free_device_buffers
+  0.11%  10.035ms      __pgi_uacc_cuda_release_buffer
+  0.11%  10.035ms        __run_exit_handlers
+  0.11%  10.035ms          ???
+  0.11%  10.035ms            ???
+
+======== Data collected at 100Hz frequency
+
+
+==>Parallelizing with num_gangs(4) num_workers(4) vector vector_length(128)
+
+ppM-1-1@aolin21:~/Escritorio/GPUdiffusion/GPU$ nano DIFGPU3.c
+ppM-1-1@aolin21:~/Escritorio/GPUdiffusion/GPU$ pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel -DREAL=double DIFGPU3.c -o DIFGPU3
+diffusion:
+     22, Generating copy(F1[:nz*(ny*nx)],F2[:nz*(ny*nx)])
+     24, Generating present(F1[:],F2[:])
+     26, Accelerator kernel generated
+         Generating Tesla code
+         27, #pragma acc loop vector(128) /* threadIdx.x */
+         29, #pragma acc loop worker(4) /* threadIdx.y */
+         31, #pragma acc loop gang(4) /* blockIdx.x */
+     27, Loop is parallelizable
+     29, Loop is parallelizable
+init:
+     63, Generating copy(F1[:nz*(ny*nx)])
+     65, Accelerator kernel generated
+         Generating Tesla code
+         66, #pragma acc loop vector(128) /* threadIdx.x */
+         68, #pragma acc loop worker(4) /* threadIdx.y */
+         70, #pragma acc loop gang(4) /* blockIdx.x */
+     66, Loop is parallelizable
+     68, Loop is parallelizable
+sum_values:
+     90, Generating copy(F1[:nz*(ny*nx)])
+
+ppM-1-1@aolin21:~/Escritorio/GPUdiffusion/GPU$ ./DIFGPU3
+Running diffusion kernel with NX=128, NY=128, NZ=128, 2097 times
+Accuracy     : 5.937181E-08
+ppM-1-1@aolin21:~/Escritorio/GPUdiffusion/GPU$ perf stat ./DIFGPU3
+Running diffusion kernel with NX=128, NY=128, NZ=128, 2097 times
+Accuracy     : 5.937181E-08
+
+ Performance counter stats for './DIFGPU3':
+
+       4279,650780      task-clock (msec)         #    0,966 CPUs utilized
+               426      context-switches          #    0,100 K/sec
+                14      cpu-migrations            #    0,003 K/sec
+            11.442      page-faults               #    0,003 M/sec
+    12.488.629.308      cycles                    #    2,918 GHz
+     5.550.399.560      stalled-cycles-frontend   #   44,44% frontend cycles idle
+     3.024.150.403      stalled-cycles-backend    #   24,22% backend  cycles idle
+    15.167.601.222      instructions              #    1,21  insns per cycle
+                                                  #    0,37  stalled cycles per insn
+     3.297.750.414      branches                  #  770,565 M/sec
+         3.371.170      branch-misses             #    0,10% of all branches
+
+       4,429705194 seconds time elapsed
+
+ppM-1-1@aolin21:~/Escritorio/GPUdiffusion/GPU$ pgprof ./DIFGPU2
+pgprof-Warning-Installed CUDA driver version is not supported for GPU profiling.
+==17392== PGPROF is profiling process 17392, command: ./DIFGPU2
+Running diffusion kernel with NX=128, NY=128, NZ=128, 2097 times
+Accuracy     : 5.937181E-08
+==17392== Profiling application: ./DIFGPU2
+==17392== Profiling result:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 98.28%  1.73844s      2097  829.01us  819.80us  890.55us  diffusion_26_gpu
+  0.78%  13.816ms         5  2.7632ms  2.7579ms  2.7711ms  [CUDA memcpy HtoD]
+  0.74%  13.037ms        10  1.3037ms  2.3040us  2.6134ms  [CUDA memcpy DtoH]
+  0.21%  3.6583ms         1  3.6583ms  3.6583ms  3.6583ms  init_65_gpu
+
+==17392== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 89.98%  1.76963s      2106  840.28us  518.01us  3.6572ms  cuStreamSynchronize
+  4.42%  86.961ms         3  28.987ms     365ns  86.961ms  cuDevicePrimaryCtxRetain
+  2.29%  45.030ms         1  45.030ms  45.030ms  45.030ms  cuDevicePrimaryCtxRelease
+  1.24%  24.387ms         1  24.387ms  24.387ms  24.387ms  cuMemHostAlloc
+  1.10%  21.596ms      2098  10.293us  7.8320us  159.60us  cuLaunchKernel
+  0.59%  11.680ms         1  11.680ms  11.680ms  11.680ms  cuMemFreeHost
+  0.16%  3.1636ms         3  1.0545ms  179.78us  2.7772ms  cuMemAlloc
+  0.14%  2.7229ms        21  129.66us     785ns  2.6145ms  cuEventSynchronize
+  0.03%  596.40us         1  596.40us  596.40us  596.40us  cuMemAllocHost
+  0.02%  459.96us         1  459.96us  459.96us  459.96us  cuModuleLoadData
+  0.01%  163.56us         5  32.712us  19.511us  40.887us  cuMemcpyHtoDAsync
+  0.01%  153.77us        10  15.376us  6.0610us  27.424us  cuMemcpyDtoHAsync
+  0.01%  115.42us        23  5.0180us  1.8540us  14.020us  cuEventRecord
+  0.00%  29.745us         1  29.745us  29.745us  29.745us  cuStreamCreate
+  0.00%  13.916us         4  3.4790us     548ns  5.9220us  cuEventCreate
+  0.00%  5.3270us         3  1.7750us     493ns  4.3240us  cuDeviceGetCount
+  0.00%  4.0610us         6     676ns     326ns  1.0320us  cuDeviceGet
+  0.00%  3.9660us         8     495ns     351ns     809ns  cuDeviceGetAttribute
+  0.00%  3.0810us         3  1.0270us     376ns  1.9830us  cuCtxSetCurrent
+  0.00%  2.9410us         2  1.4700us     487ns  2.4540us  cuModuleGetFunction
+  0.00%  2.4640us         1  2.4640us  2.4640us  2.4640us  cuMemFree
+  0.00%  1.2320us         2     616ns     366ns     866ns  cuDeviceComputeCapability
+  0.00%     891ns         2     445ns     341ns     550ns  cuCtxGetCurrent
+
+==17392== OpenACC (excl):
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 92.63%  1.74775s      2097  833.45us  746.89us  1.0088ms  acc_wait@DIFGPU2.c:26
+  1.46%  27.588ms         1  27.588ms  27.588ms  27.588ms  acc_enter_data@DIFGPU2.c:63
+  1.35%  25.436ms      2097  12.129us  9.3580us  162.19us  acc_enqueue_launch@DIFGPU2.c:26 (diffusion_26_gpu)
+  0.62%  11.633ms         2  5.8166ms  5.6045ms  6.0287ms  acc_wait@DIFGPU2.c:97
+  0.61%  11.569ms         1  11.569ms  11.569ms  11.569ms  acc_exit_data@DIFGPU2.c:22
+  0.61%  11.425ms         1  11.425ms  11.425ms  11.425ms  acc_wait@DIFGPU2.c:82
+  0.50%  9.4729ms         1  9.4729ms  9.4729ms  9.4729ms  acc_enter_data@DIFGPU2.c:22
+  0.32%  6.0012ms         2  3.0006ms  2.9806ms  3.0205ms  acc_enter_data@DIFGPU2.c:90
+  0.30%  5.7217ms         1  5.7217ms  5.7217ms  5.7217ms  acc_wait@DIFGPU2.c:50
+  0.29%  5.5393ms         2  2.7696ms  2.7648ms  2.7744ms  acc_wait@DIFGPU2.c:90
+  0.29%  5.4074ms      2097  2.5780us  1.8080us  453.03us  acc_exit_data@DIFGPU2.c:24
+  0.26%  4.9061ms      2097  2.3390us  1.9050us  7.2190us  acc_compute_construct@DIFGPU2.c:26
+  0.21%  3.9692ms      2097  1.8920us  1.4990us  117.24us  acc_enter_data@DIFGPU2.c:24
+  0.19%  3.6588ms         1  3.6588ms  3.6588ms  3.6588ms  acc_wait@DIFGPU2.c:65
+  0.15%  2.7694ms         1  2.7694ms  2.7694ms  2.7694ms  acc_wait@DIFGPU2.c:22
+  0.15%  2.7580ms         1  2.7580ms  2.7580ms  2.7580ms  acc_wait@DIFGPU2.c:63
+  0.03%  481.25us         1  481.25us  481.25us  481.25us  acc_device_init@DIFGPU2.c:63
+  0.01%  143.15us         2  71.574us  65.539us  77.609us  acc_exit_data@DIFGPU2.c:90
+  0.01%  97.295us         4  24.323us  9.5250us  34.923us  acc_enqueue_download@DIFGPU2.c:97
+  0.01%  94.597us         1  94.597us  94.597us  94.597us  acc_exit_data@DIFGPU2.c:63
+  0.00%  90.928us         2  45.464us  43.284us  47.644us  acc_enqueue_upload@DIFGPU2.c:90
+  0.00%  81.860us         2  40.930us  25.766us  56.094us  acc_enqueue_upload@DIFGPU2.c:22
+  0.00%  75.125us         4  18.781us  9.7030us  29.685us  acc_enqueue_download@DIFGPU2.c:50
+  0.00%  47.958us         1  47.958us  47.958us  47.958us  acc_enqueue_upload@DIFGPU2.c:63
+  0.00%  47.300us         1  47.300us  47.300us  47.300us  acc_enqueue_launch@DIFGPU2.c:65 (init_65_gpu)
+  0.00%  42.114us         2  21.057us  17.109us  25.005us  acc_enqueue_download@DIFGPU2.c:82
+  0.00%  14.607us         1  14.607us  14.607us  14.607us  acc_compute_construct@DIFGPU2.c:65
+  0.00%       0ns         1       0ns       0ns       0ns  acc_create@DIFGPU2.c:63
+  0.00%       0ns         2       0ns       0ns       0ns  acc_create@DIFGPU2.c:22
+  0.00%       0ns         2       0ns       0ns       0ns  acc_delete@DIFGPU2.c:50
+  0.00%       0ns         2       0ns       0ns       0ns  acc_delete@DIFGPU2.c:97
+  0.00%       0ns         2       0ns       0ns       0ns  acc_create@DIFGPU2.c:90
+  0.00%       0ns         1       0ns       0ns       0ns  acc_alloc@DIFGPU2.c:63
+  0.00%       0ns         1       0ns       0ns       0ns  acc_alloc@DIFGPU2.c:22
+  0.00%       0ns         1       0ns       0ns       0ns  acc_delete@DIFGPU2.c:82
+
+======== CPU profiling result (bottom up):
+Time(%)      Time  Name
+ 75.90%   6.8366s  ???
+ 75.90%   6.8366s  | start_thread
+ 75.90%   6.8366s  |   clone
+ 20.26%  1.82449s  cuStreamSynchronize
+ 20.26%  1.82449s  | __pgi_uacc_cuda_wait
+ 20.02%  1.80352s  |   __pgi_uacc_computedone
+ 20.02%  1.80352s  |   | diffusion
+  0.23%  20.971ms  |   __pgi_uacc_dataexitdone
+  0.12%  10.486ms  |     sum_values
+  0.12%  10.486ms  |     init
+  1.05%   94.37ms  cuDevicePrimaryCtxRetain
+  1.05%   94.37ms  | __pgi_uacc_cuda_init_device
+  1.05%   94.37ms  |   __pgi_uacc_cuda_select_valid
+  1.05%   94.37ms  |     __pgi_uacc_select_devid
+  1.05%   94.37ms  |       __pgi_uacc_dataenterstart
+  1.05%   94.37ms  |         init
+  0.70%  62.913ms  __c_mcopy8
+  0.47%  41.942ms  | __pgi_uacc_cuda_drain_down
+  0.35%  31.457ms  | | __pgi_uacc_cuda_wait
+  0.35%  31.457ms  | | | __pgi_uacc_dataexitdone
+  0.12%  10.486ms  | | |   sum_values
+  0.12%  10.486ms  | | |   init
+  0.12%  10.486ms  | | |   diffusion
+  0.12%  10.486ms  | | __pgi_uacc_cuda_get_buffer
+  0.12%  10.486ms  | |   __pgi_uacc_cuda_datadown1
+  0.12%  10.486ms  | |     __pgi_uacc_datadown1
+  0.12%  10.486ms  | |       __pgi_uacc_datadownx
+  0.12%  10.486ms  | |         __pgi_uacc_dataoffb2
+  0.12%  10.486ms  | |           diffusion
+  0.23%  20.971ms  | __pgi_uacc_cuda_dataup1
+  0.23%  20.971ms  |   __pgi_uacc_dataup1
+  0.23%  20.971ms  |     __pgi_uacc_dataupx
+  0.23%  20.971ms  |       __pgi_uacc_dataonb
+  0.12%  10.486ms  |         diffusion
+  0.12%  10.486ms  |         init
+  0.58%  52.428ms  cuDevicePrimaryCtxRelease
+  0.58%  52.428ms  | __pgi_uacc_cuda_release_buffer
+  0.58%  52.428ms  |   __run_exit_handlers
+  0.58%  52.428ms  |     ???
+  0.58%  52.428ms  |       ???
+  0.58%  52.428ms  sum_values
+  0.35%  31.457ms  cuLaunchKernel
+  0.35%  31.457ms  | __pgi_uacc_cuda_launch
+  0.35%  31.457ms  |   __pgi_uacc_launch
+  0.35%  31.457ms  |     diffusion
+  0.12%  10.486ms  __pgi_uacc_cuda_setptr
+  0.12%  10.486ms  | __pgi_uacc_setptr
+  0.12%  10.486ms  |   __pgi_uacc_dataonb
+  0.12%  10.486ms  |     diffusion
+  0.12%  10.486ms  __pgi_uacc_dataenterdone
+  0.12%  10.486ms  | diffusion
+  0.12%  10.486ms  cuMemHostAlloc
+  0.12%  10.486ms  | __pgi_uacc_cuda_get_buffer
+  0.12%  10.486ms  |   __pgi_uacc_cuda_dataup1
+  0.12%  10.486ms  |     __pgi_uacc_dataup1
+  0.12%  10.486ms  |       __pgi_uacc_dataupx
+  0.12%  10.486ms  |         __pgi_uacc_dataonb
+  0.12%  10.486ms  |           init
+  0.12%  10.486ms  cuInit
+  0.12%  10.486ms  | __pgi_uacc_cuda_init
+  0.12%  10.486ms  |   __pgi_uacc_enumerate
+  0.12%  10.486ms  |     __pgi_uacc_initialize
+  0.12%  10.486ms  |       __pgi_uacc_dataenterstart
+  0.12%  10.486ms  |         init
+  0.12%  10.486ms  cuMemFreeHost
+  0.12%  10.486ms    __pgi_uacc_cuda_free_device_buffers
+  0.12%  10.486ms      __pgi_uacc_cuda_release_buffer
+  0.12%  10.486ms        __run_exit_handlers
+  0.12%  10.486ms          ???
+  0.12%  10.486ms            ???
+
+======== Data collected at 100Hz frequency
+

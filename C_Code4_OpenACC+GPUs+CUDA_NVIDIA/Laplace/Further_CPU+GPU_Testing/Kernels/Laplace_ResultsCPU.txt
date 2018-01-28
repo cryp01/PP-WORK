@@ -1,0 +1,345 @@
+
+module add pgi64/17.4
+
+-----------------------------------CPU
+
+---#laplace1_baseline.c (CPU)
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ pgcc -fast -Minfo=all laplace1_baseline.c -o lp1CPU
+main:
+     59, Loop not fused: dependence chain to sibling loop
+         Generated vector simd code for the loop
+     65, Loop not fused: function call before adjacent loop
+         Generated vector simd code for the loop
+     78, Loop not vectorized/parallelized: potential early exits
+     81, Loop interchange produces reordered loop nest: 82,81
+         Generated an alternate version of the loop
+         Generated vector simd code for the loop
+         Generated 3 prefetch instructions for the loop
+         Generated vector simd code for the loop
+         Generated 3 prefetch instructions for the loop
+     82, Loop not fused: dependence chain to sibling loop
+     87, Loop not fused: dependence chain to sibling loop
+         Generated 5 prefetches in scalar loop
+     88, Generated vector simd code for the loop containing reductions
+         Residual loop unrolled 6 times (completely unrolled)
+     92, Loop interchange produces reordered loop nest: 93,92
+         Generated vector simd code for the loop
+         Generated a prefetch instruction for the loop
+     93, Loop not fused: function call before adjacent loop
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ perf stat ./lp1CPU 100
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 100 iterations
+   10, 0.155006
+   20, 0.110024
+   30, 0.089901
+   40, 0.077374
+   50, 0.069623
+   60, 0.063285
+   70, 0.058825
+   80, 0.054946
+   90, 0.051831
+  100, 0.049208
+
+ Performance counter stats for './lp1CPU 100':
+
+      53887,084585      task-clock (msec)         #    0,998 CPUs utilized
+             2.810      context-switches          #    0,052 K/sec
+                 7      cpu-migrations            #    0,000 K/sec
+               940      page-faults               #    0,017 K/sec
+   181.933.740.726      cycles                    #    3,376 GHz
+   175.036.598.686      stalled-cycles-frontend   #   96,21% frontend cycles idle
+   152.265.902.019      stalled-cycles-backend    #   83,69% backend  cycles idle
+    16.105.417.921      instructions              #    0,09  insns per cycle
+                                                  #   10,87  stalled cycles per insn
+     1.196.673.503      branches                  #   22,207 M/sec
+         2.414.281      branch-misses             #    0,20% of all branches
+
+      53,988859365 seconds time elapsed
+
+---#laplace2_lf.c (CPU)
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ pgcc -fast -Minfo=all laplace2_lf.c -o lp2CPU
+main:
+     59, Loop not fused: dependence chain to sibling loop
+         Generated vector simd code for the loop
+     65, Loop not fused: function call before adjacent loop
+         Generated vector simd code for the loop
+     78, Loop not vectorized/parallelized: potential early exits
+     82, Loop not fused: dependence chain to sibling loop
+         Generated 7 prefetches in scalar loop
+     83, Generated vector simd code for the loop containing reductions
+         Residual loop unrolled 6 times (completely unrolled)
+     89, Loop interchange produces reordered loop nest: 90,89
+         Generated vector simd code for the loop
+         Generated a prefetch instruction for the loop
+     90, Loop not fused: function call before adjacent loop
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ perf stat ./lp2CPU 100
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 100 iterations
+   10, 0.155006
+   20, 0.110024
+   30, 0.089901
+   40, 0.077374
+   50, 0.069623
+   60, 0.063285
+   70, 0.058825
+   80, 0.054946
+   90, 0.051831
+  100, 0.049208
+
+ Performance counter stats for './lp2CPU 100':
+
+      66616,082050      task-clock (msec)         #    0,998 CPUs utilized
+             3.491      context-switches          #    0,052 K/sec
+                 9      cpu-migrations            #    0,000 K/sec
+               940      page-faults               #    0,014 K/sec
+   224.890.107.035      cycles                    #    3,376 GHz
+   212.876.905.035      stalled-cycles-frontend   #   94,66% frontend cycles idle
+   161.596.209.454      stalled-cycles-backend    #   71,86% backend  cycles idle
+    24.931.758.733      instructions              #    0,11  insns per cycle
+                                                  #    8,54  stalled cycles per insn
+       681.730.995      branches                  #   10,234 M/sec
+         2.333.817      branch-misses             #    0,34% of all branches
+
+      66,738687780 seconds time elapsed
+
+
+---#laplace3_li.c (CPU)
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ pgcc -fast -Minfo=all laplace3_li.c -o lp3CPU
+main:
+     59, Loop not fused: dependence chain to sibling loop
+         Generated vector simd code for the loop
+     65, Loop not fused: function call before adjacent loop
+         Generated vector simd code for the loop
+     83, Generated an alternate version of the loop
+         Generated vector simd code for the loop containing reductions
+         Generated 3 prefetch instructions for the loop
+         Generated vector simd code for the loop containing reductions
+         Generated 3 prefetch instructions for the loop
+     90, Memory copy idiom, loop replaced by call to __c_mcopy4
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ perf stat ./lp3CPU 100
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 100 iterations
+   10, 0.155006
+   20, 0.110024
+   30, 0.089901
+   40, 0.077374
+   50, 0.069623
+   60, 0.063285
+   70, 0.058825
+   80, 0.054946
+   90, 0.051831
+  100, 0.049208
+
+ Performance counter stats for './lp3CPU 100':
+
+       4067,421128      task-clock (msec)         #    0,997 CPUs utilized
+               235      context-switches          #    0,058 K/sec
+                 1      cpu-migrations            #    0,000 K/sec
+               942      page-faults               #    0,232 K/sec
+    13.530.638.842      cycles                    #    3,327 GHz
+     8.306.915.982      stalled-cycles-frontend   #   61,39% frontend cycles idle
+     4.885.900.469      stalled-cycles-backend    #   36,11% backend  cycles idle
+     8.709.044.804      instructions              #    0,64  insns per cycle
+                                                  #    0,95  stalled cycles per insn
+       646.594.780      branches                  #  158,969 M/sec
+       195.050.339      branch-misses             #   30,17% of all branches
+
+       4,078335441 seconds time elapsed
+
+---#laplace4_cm.c (CPU)
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ pgcc -fast -Minfo=all laplace4_cm.c -o lp4CPU
+main:
+     59, Loop not fused: dependence chain to sibling loop
+         Generated vector simd code for the loop
+     65, Loop not fused: function call before adjacent loop
+         Generated vector simd code for the loop
+     83, Generated an alternate version of the loop
+         Generated vector simd code for the loop containing reductions
+         Generated 3 prefetch instructions for the loop
+         Generated vector simd code for the loop containing reductions
+         Generated 3 prefetch instructions for the loop
+     90, Memory copy idiom, loop replaced by call to __c_mcopy4
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ perf stat ./lp4CPU 100
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 100 iterations
+   10, 0.155006
+   20, 0.110024
+   30, 0.089901
+   40, 0.077374
+   50, 0.069623
+   60, 0.063285
+   70, 0.058825
+   80, 0.054946
+   90, 0.051831
+  100, 0.049208
+
+ Performance counter stats for './lp4CPU 100':
+
+       3824,585360      task-clock (msec)         #    0,997 CPUs utilized
+               224      context-switches          #    0,059 K/sec
+                 1      cpu-migrations            #    0,000 K/sec
+               942      page-faults               #    0,246 K/sec
+    12.704.826.140      cycles                    #    3,322 GHz
+     9.234.957.182      stalled-cycles-frontend   #   72,69% frontend cycles idle
+     5.536.971.938      stalled-cycles-backend    #   43,58% backend  cycles idle
+     8.286.593.982      instructions              #    0,65  insns per cycle
+                                                  #    1,11  stalled cycles per insn
+       646.458.597      branches                  #  169,027 M/sec
+         1.348.513      branch-misses             #    0,21% of all branches
+
+       3,834952849 seconds time elapsed
+
+---#laplace5_db.c (CPU)
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ pgcc -fast -Minfo=all laplace5_db.c -o lp5CPU
+main:
+     59, Loop not fused: dependence chain to sibling loop
+         Generated vector simd code for the loop
+     65, Loop not fused: function call before adjacent loop
+         Generated vector simd code for the loop
+     78, Loop not vectorized/parallelized: potential early exits
+     83, Loop not fused: no successor loop
+     84, Generated an alternate version of the loop
+         Generated vector simd code for the loop containing reductions
+         Generated 3 prefetch instructions for the loop
+         Generated vector simd code for the loop containing reductions
+         Generated 3 prefetch instructions for the loop
+     91, Loop not fused: function call before adjacent loop
+     92, Generated an alternate version of the loop
+         Generated vector simd code for the loop containing reductions
+         Generated 3 prefetch instructions for the loop
+         Generated vector simd code for the loop containing reductions
+         Generated 3 prefetch instructions for the loop
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ perf stat ./lp5CPU 100
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 100 iterations
+   10, 0.405117
+   20, 0.410726
+   30, 0.412261
+   40, 0.412927
+   50, 0.413285
+   60, 0.413503
+   70, 0.413647
+   80, 0.413748
+   90, 0.413823
+  100, 0.413879
+
+ Performance counter stats for './lp5CPU 100':
+
+       2084,703677      task-clock (msec)         #    0,997 CPUs utilized
+               132      context-switches          #    0,063 K/sec
+                 2      cpu-migrations            #    0,001 K/sec
+               944      page-faults               #    0,453 K/sec
+     6.805.365.844      cycles                    #    3,264 GHz
+     3.294.406.193      stalled-cycles-frontend   #   48,41% frontend cycles idle
+     2.085.343.377      stalled-cycles-backend    #   30,64% backend  cycles idle
+     6.567.192.317      instructions              #    0,97  insns per cycle
+                                                  #    0,50  stalled cycles per insn
+       531.144.107      branches                  #  254,782 M/sec
+       105.561.039      branch-misses             #   19,87% of all branches
+
+       2,091270481 seconds time elapsed
+
+---#laplace6_db_improve.c (CPU)
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ pgcc -fast -Minfo=all laplace6_db_improve.c -o lp6CPU
+main:
+     59, Loop not fused: dependence chain to sibling loop
+         Generated vector simd code for the loop
+     65, Loop not fused: function call before adjacent loop
+         Generated vector simd code for the loop
+     78, Loop not vectorized/parallelized: potential early exits
+     83, Loop not fused: no successor loop
+     84, Generated an alternate version of the loop
+         Generated vector simd code for the loop containing reductions
+         Generated 3 prefetch instructions for the loop
+         Generated vector simd code for the loop containing reductions
+         Generated 3 prefetch instructions for the loop
+     90, Loop not fused: function call before adjacent loop
+     91, Generated an alternate version of the loop
+         Generated vector simd code for the loop containing reductions
+         Generated 3 prefetch instructions for the loop
+         Generated vector simd code for the loop containing reductions
+         Generated 3 prefetch instructions for the loop
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2d_update$ perf stat ./lp6CPU 100
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 100 iterations
+   10, 0.405117
+   20, 0.410726
+   30, 0.412261
+   40, 0.412927
+   50, 0.413285
+   60, 0.413503
+   70, 0.413647
+   80, 0.413748
+   90, 0.413823
+  100, 0.413879
+
+ Performance counter stats for './lp6CPU 100':
+
+       2066,925594      task-clock (msec)         #    0,997 CPUs utilized
+               138      context-switches          #    0,067 K/sec
+                 2      cpu-migrations            #    0,001 K/sec
+               944      page-faults               #    0,457 K/sec
+     6.780.912.892      cycles                    #    3,281 GHz
+     3.271.089.722      stalled-cycles-frontend   #   48,24% frontend cycles idle
+     2.078.907.767      stalled-cycles-backend    #   30,66% backend  cycles idle
+     6.567.571.198      instructions              #    0,97  insns per cycle
+                                                  #    0,50  stalled cycles per insn
+       531.213.798      branches                  #  257,007 M/sec
+       105.453.863      branch-misses             #   19,85% of all branches
+
+       2,073526262 seconds time elapsed
+
+---#laplace7.c (CPU)
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ pgcc -fast -Minfo=all laplace7.c -o lp7CPU
+main:
+     59, Loop not fused: dependence chain to sibling loop
+         2 loops fused
+         Generated vector simd code for the loop
+     71, Loop not fused: function call before adjacent loop
+         2 loops fused
+         Generated vector simd code for the loop
+     91, Loop not vectorized/parallelized: potential early exits
+     97, Loop not fused: no successor loop
+     98, Generated an alternate version of the loop
+         Generated vector simd code for the loop containing reductions
+         Generated 3 prefetch instructions for the loop
+         Generated vector simd code for the loop containing reductions
+         Generated 3 prefetch instructions for the loop
+    107, Loop not fused: function call before adjacent loop
+    108, Generated an alternate version of the loop
+         Generated vector simd code for the loop containing reductions
+         Generated 3 prefetch instructions for the loop
+         Generated vector simd code for the loop containing reductions
+         Generated 3 prefetch instructions for the loop
+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ perf stat ./lp7CPU 100
+Jacobi relaxation Calculation: 4096 x 4096 mesh, maximum of 100 iterations
+   10, 0.155006
+   20, 0.110024
+   30, 0.089901
+   40, 0.077374
+   50, 0.069623
+   60, 0.063285
+   70, 0.058825
+   80, 0.054946
+   90, 0.051831
+  100, 0.049208
+
+ Performance counter stats for './lp7CPU 100':
+
+       2089,201044      task-clock (msec)         #    0,997 CPUs utilized
+               132      context-switches          #    0,063 K/sec
+                 0      cpu-migrations            #    0,000 K/sec
+            10.142      page-faults               #    0,005 M/sec
+     6.846.285.185      cycles                    #    3,277 GHz
+     3.179.692.756      stalled-cycles-frontend   #   46,44% frontend cycles idle
+     1.994.526.584      stalled-cycles-backend    #   29,13% backend  cycles idle
+     6.595.791.746      instructions              #    0,96  insns per cycle
+                                                  #    0,48  stalled cycles per insn
+       536.030.793      branches                  #  256,572 M/sec
+       121.686.729      branch-misses             #   22,70% of all branches
+
+       2,095479066 seconds time elapsed
+
+

@@ -1,0 +1,76 @@
+module add pgi64/17.4
+module add cuda/7.5
+nvidia-smi
+pgaccelinfo // For 0
+export CUDA_VISIBLE_DEVICES=0,1
+pgaccelinfo // For 0,1
+
+Test for corectness of the problem is the baseline results:
+./diff 50 50 50
+
+---#diff5_double.c 
+Running diffusion kernel with NX=50, NY=50, NZ=50, 124 times
+Accuracy     : 9.971667E-04
+
+-------Baseline Versions
+
+pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel -DREAL=double DIFGPU.c -o DIFGPU
+perf stat ./DIFGPU 
+pgprof ./DIFGPU
+nvvp ./DIFGPU
+
+pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel -DREAL=double DIFGPU2.c -o DIFGPU2
+perf stat ./DIFGPU2 
+pgprof ./DIFGPU2
+nvvp ./DIFGPU2
+
+pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel -DREAL=double DIFGPU3.c -o DIFGPU3
+perf stat ./DIFGPU3 
+pgprof ./DIFGPU3
+nvvp ./DIFGPU3
+
+--------Optimized Versions
+
+---#diff2_unr2.c 
+
+pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel -DREAL=double diff2_unr2.c  -o diff2GPU 
+perf stat ./diff2GPU  
+pgprof ./diff2GPU 
+nvvp ./diff2GPU 
+
+---#diff3_unr4.c (GPU)
+
+pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel -DREAL=double diff3_unr4.c -o diff3GPU
+perf stat ./diff3GPU 
+pgprof ./diff3GPU
+nvvp ./diff3GPU
+
+---#diff4_vect.c (GPU)
+
+pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel -DREAL=double diff4_vect.c-o diff4GPU
+perf stat ./diff4GPU 
+pgprof ./diff4GPU
+nvvp ./diff4GPU
+
+---#diff5_double.c (GPU)
+
+pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel -DREAL=double diff5_double.c -o diff5GPU
+perf stat ./diff5GPU 
+pgprof ./diff5GPU
+nvvp ./diff5GPU
+
+--------Optimized Versions (Extra Testing)
+
+---#diffoper_extra1.c (GPU)
+
+pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel -DREAL=double diffoper_extra1.c -o diffex1GPU
+perf stat ./diffex1GPU 
+pgprof ./diffex1GPU
+nvvp ./diffex1GPU
+
+---#diffreord_extra2.c (GPU)
+
+pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel -DREAL=double diffreord_extra2.c -o diffex2GPU
+perf stat ./diffex2GPU 
+pgprof ./diffex2GPU
+nvvp ./diffex2GPU

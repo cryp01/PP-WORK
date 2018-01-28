@@ -1,0 +1,63 @@
+module add pgi64/17.4
+module add cuda/7.5
+nvidia-smi
+pgaccelinfo // For 0
+export CUDA_VISIBLE_DEVICES=0,1
+pgaccelinfo // For 0,1
+
+-----------------------------------GPU
+
+---#laplace7.c (GPU) (****Very Good!!!!) <--- Using pragma acc kernals (Basic/Intermediate)
+
+pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel laplace7.c -o lp7GPU
+
+perf stat ./lp7GPU 100
+pgprof ./lp7GPU 100
+pgprof --print-gpu-trace ./lp7GPU 1000
+
+
+perf stat ./lp7GPU 1000
+pgprof ./lp7GPU 1000
+pgprof --print-gpu-trace ./lp7GPU 1000
+
+
+---#laplace7_parellel.c (GPU) (****Fair!!!) <--- Using pragma acc parallel loops (Advance)
+
+pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel laplace7_parellel.c -o lp7pGPU
+
+perf stat ./lp7pGPU 100
+pgprof ./lp7pGPU 100
+pgprof --print-gpu-trace ./lp7pGPU 1000
+
+perf stat ./lp7pGPU 1000
+pgprof ./lp7pGPU 1000
+pgprof --print-gpu-trace ./lp7pGPU 1000
+
+---#laplace7_parellel1.c (GPU) (****Good!!!) <--- Using pragma acc parallel loops (Advance)
+
+pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel laplace7_parellel.c -o lp7p1GPU
+
+perf stat ./lp7p1GPU 100
+pgprof ./lp7p1GPU 100
+pgprof --print-gpu-trace ./lp7p1GPU 1000
+
+perf stat ./lp7p1GPU 1000
+pgprof ./lp7p1GPU 1000
+pgprof --print-gpu-trace ./lp7p1GPU 1000
+
+---#laplace7_parellel2.c (GPU) (****Best!!!) <--- Using pragma acc parallel loops (Advance)
+
+pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel laplace7_parellel2.c -o lp7p2GPU
+
+perf stat ./lp7p2GPU 100
+pgprof ./lp7p2GPU 100
+pgprof --print-gpu-trace ./lp7p2GPU 1000
+
+perf stat ./lp7p2GPU 1000
+pgprof ./lp7p2GPU 1000
+pgprof --print-gpu-trace ./lp7p2GPU 1000
+
+perf stat ./lp7p2GPU 10000
+pgprof ./lp7p2GPU 10000
+pgprof --print-gpu-trace ./lp7p2GPU 10000
+

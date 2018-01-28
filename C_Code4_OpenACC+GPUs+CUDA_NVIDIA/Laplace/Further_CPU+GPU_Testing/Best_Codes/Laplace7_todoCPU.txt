@@ -1,0 +1,9 @@
+module add pgi64/17.4
+
+-----------------------------------CPU
+
+---#laplace7.c (CPU)
+
+pgcc -fast -Minfo=all laplace7.c -o lp7CPU
+perf stat ./lp7CPU 100
+

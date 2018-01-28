@@ -1,0 +1,19 @@
+
+----#CPU
+
+module add pgi64/17.4
+
+pgcc -fast -Minfo=all diff1_base.c -o dif1CPU
+perf stat ./dif1CPU 100
+
+pgcc -fast -Minfo=all diff2_unr2.c -o dif2CPU
+perf stat ./dif2CPU 100
+
+pgcc -fast -Minfo=all diff3_unr4.c -o dif3CPU
+perf stat ./dif3CPU 100
+
+pgcc -fast -Minfo=all diff4_vect.c -o dif4CPU
+perf stat ./dif4CPU 100
+
+pgcc -fast -Minfo=all diff5_double.c -o dif5CPU
+perf stat ./dif5CPU 100

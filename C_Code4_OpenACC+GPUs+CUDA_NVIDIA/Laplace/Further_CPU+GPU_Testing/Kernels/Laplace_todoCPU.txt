@@ -1,0 +1,41 @@
+module add pgi64/17.4
+
+-----------------------------------CPU
+
+---#laplace1_baseline.c (CPU)
+
+pgcc -fast -Minfo=all laplace1_baseline.c -o lp1CPU
+perf stat ./lp1CPU 100
+
+---#laplace2_lf.c (CPU)
+
+pgcc -fast -Minfo=all laplace2_lf.c -o lp2CPU
+perf stat ./lp2CPU 100
+
+---#laplace3_li.c (CPU)
+
+pgcc -fast -Minfo=all laplace3_li.c -o lp3CPU
+perf stat ./lp3CPU 100
+
+---#laplace4_cm.c (CPU)
+
+pgcc -fast -Minfo=all laplace4_cm.c -o lp4CPU
+perf stat ./lp4CPU 100
+
+---#laplace5_db.c (CPU)
+
+pgcc -fast -Minfo=all laplace5_db.c -o lp5CPU
+perf stat ./lp5CPU 100
+
+---#laplace6_db_improve.c (CPU)
+
+pgcc -fast -Minfo=all laplace6_db_improve.c -o lp6CPU
+perf stat ./lp6CPU 100
+
+---#laplace7.c (CPU)
+
+pgcc -fast -Minfo=all laplace7.c -o lp7CPU
+perf stat ./lp7CPU 100
+
+
+

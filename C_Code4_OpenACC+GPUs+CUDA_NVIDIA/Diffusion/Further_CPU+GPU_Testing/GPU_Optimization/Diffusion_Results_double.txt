@@ -1,0 +1,1003 @@
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ module add pgi64/17.4
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ module add cuda/7.5
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ nvidia-smi
+Sun Jan 28 15:04:59 2018
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 384.81                 Driver Version: 384.81                    |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|===============================+======================+======================|
+|   0  GeForce GTX 680     Off  | 00000000:02:00.0 N/A |                  N/A |
+| 38%   39C    P0    N/A /  N/A |      0MiB /  1996MiB |     N/A      Default |
++-------------------------------+----------------------+----------------------+
+|   1  GeForce GTX 108...  Off  | 00000000:03:00.0 Off |                  N/A |
+|  0%   41C    P5    26W / 250W |      0MiB / 11172MiB |      0%      Default |
++-------------------------------+----------------------+----------------------+
+
++-----------------------------------------------------------------------------+
+| Processes:                                                       GPU Memory |
+|  GPU       PID   Type   Process name                             Usage      |
+|=============================================================================|
+|    0                    Not Supported                                       |
++-----------------------------------------------------------------------------+
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ pgaccelinfo
+
+CUDA Driver Version:           9000
+NVRM version:                  NVIDIA UNIX x86_64 Kernel Module  384.81  Sat Sep  2 02:43:11 PDT 2017
+
+Device Number:                 0
+Device Name:                   GeForce GTX 680
+Device Revision Number:        3.0
+Global Memory Size:            2093023232
+Number of Multiprocessors:     8
+Number of SP Cores:            1536
+Number of DP Cores:            512
+Concurrent Copy and Execution: Yes
+Total Constant Memory:         65536
+Total Shared Memory per Block: 49152
+Registers per Block:           65536
+Warp Size:                     32
+Maximum Threads per Block:     1024
+Maximum Block Dimensions:      1024, 1024, 64
+Maximum Grid Dimensions:       2147483647 x 65535 x 65535
+Maximum Memory Pitch:          2147483647B
+Texture Alignment:             512B
+Clock Rate:                    1137 MHz
+Execution Timeout:             No
+Integrated Device:             No
+Can Map Host Memory:           Yes
+Compute Mode:                  default
+Concurrent Kernels:            Yes
+ECC Enabled:                   No
+Memory Clock Rate:             3004 MHz
+Memory Bus Width:              256 bits
+L2 Cache Size:                 524288 bytes
+Max Threads Per SMP:           2048
+Async Engines:                 1
+Unified Addressing:            Yes
+Managed Memory:                Yes
+PGI Compiler Option:           -ta=tesla:cc30
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ export CUDA_VISIBLE_DEVICES=0,1
+ppM-1-1@aolin21:~/Escritorio/GPU/Laplace2D_Update1$ pgaccelinfo
+
+CUDA Driver Version:           9000
+NVRM version:                  NVIDIA UNIX x86_64 Kernel Module  384.81  Sat Sep  2 02:43:11 PDT 2017
+
+Device Number:                 0
+Device Name:                   GeForce GTX 1080 Ti
+Device Revision Number:        6.1
+Global Memory Size:            11715084288
+Number of Multiprocessors:     28
+Concurrent Copy and Execution: Yes
+Total Constant Memory:         65536
+Total Shared Memory per Block: 49152
+Registers per Block:           65536
+Warp Size:                     32
+Maximum Threads per Block:     1024
+Maximum Block Dimensions:      1024, 1024, 64
+Maximum Grid Dimensions:       2147483647 x 65535 x 65535
+Maximum Memory Pitch:          2147483647B
+Texture Alignment:             512B
+Clock Rate:                    1620 MHz
+Execution Timeout:             No
+Integrated Device:             No
+Can Map Host Memory:           Yes
+Compute Mode:                  default
+Concurrent Kernels:            Yes
+ECC Enabled:                   No
+Memory Clock Rate:             5505 MHz
+Memory Bus Width:              352 bits
+L2 Cache Size:                 2883584 bytes
+Max Threads Per SMP:           2048
+Async Engines:                 2
+Unified Addressing:            Yes
+Managed Memory:                Yes
+PGI Compiler Option:           -ta=tesla:cc60
+
+Device Number:                 1
+Device Name:                   GeForce GTX 680
+Device Revision Number:        3.0
+Global Memory Size:            2093023232
+Number of Multiprocessors:     8
+Number of SP Cores:            1536
+Number of DP Cores:            512
+Concurrent Copy and Execution: Yes
+Total Constant Memory:         65536
+Total Shared Memory per Block: 49152
+Registers per Block:           65536
+Warp Size:                     32
+Maximum Threads per Block:     1024
+Maximum Block Dimensions:      1024, 1024, 64
+Maximum Grid Dimensions:       2147483647 x 65535 x 65535
+Maximum Memory Pitch:          2147483647B
+Texture Alignment:             512B
+Clock Rate:                    1137 MHz
+Execution Timeout:             No
+Integrated Device:             No
+Can Map Host Memory:           Yes
+Compute Mode:                  default
+Concurrent Kernels:            Yes
+ECC Enabled:                   No
+Memory Clock Rate:             3004 MHz
+Memory Bus Width:              256 bits
+L2 Cache Size:                 524288 bytes
+Max Threads Per SMP:           2048
+Async Engines:                 1
+Unified Addressing:            Yes
+Managed Memory:                Yes
+PGI Compiler Option:           -ta=tesla:cc30
+
+---#diff5_double.c (GPU)
+
+ppM-1-1@aolin21:~/Escritorio/GPUdiffusion/GPU/DiffOP$ pgcc -fast -acc -ta=tesla:cc30 -Minfo=accel -DREAL=double diff5_double.c -o diff5GPU
+diffusion:
+     23, Generating copy(F1[:nz*(ny*nx)],F2[:nz*(ny*nx)])
+     25, Generating present(F2[:],F1[:])
+         Accelerator kernel generated
+         Generating Tesla code
+         26, #pragma acc loop vector(64) /* threadIdx.x */
+         28, #pragma acc loop worker(16) /* threadIdx.y */
+         30, #pragma acc loop gang(2) /* blockIdx.x */
+     26, Loop is parallelizable
+     28, Loop is parallelizable
+ppM-1-1@aolin21:~/Escritorio/GPUdiffusion/GPU/DiffOP$ perf stat ./diff5GPU 50 50 50
+Running diffusion kernel with NX=50, NY=50, NZ=50, 124 times
+Accuracy     : 9.773048E-04
+
+ Performance counter stats for './diff5GPU 50 50 50':
+
+        517,023118      task-clock (msec)         #    0,976 CPUs utilized
+               119      context-switches          #    0,230 K/sec
+                 7      cpu-migrations            #    0,014 K/sec
+             2.940      page-faults               #    0,006 M/sec
+     1.186.633.580      cycles                    #    2,295 GHz
+       644.345.659      stalled-cycles-frontend   #   54,30% frontend cycles idle
+       399.949.176      stalled-cycles-backend    #   33,70% backend  cycles idle
+     1.171.040.783      instructions              #    0,99  insns per cycle
+                                                  #    0,55  stalled cycles per insn
+       237.890.402      branches                  #  460,116 M/sec
+           572.128      branch-misses             #    0,24% of all branches
+
+       0,529633926 seconds time elapsed
+
+ppM-1-1@aolin21:~/Escritorio/GPUdiffusion/GPU/DiffOP$ pgprof ./diff5GPU 50 50 50
+pgprof-Warning-Installed CUDA driver version is not supported for GPU profiling.
+Running diffusion kernel with NX=50, NY=50, NZ=50, 124 times
+==1250== PGPROF is profiling process 1250, command: ./diff5GPU 50 50 50
+Accuracy     : 9.971667E-04
+==1250== Profiling application: ./diff5GPU 50 50 50
+==1250== Profiling result:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 66.74%  169.35ms       124  1.3657ms  1.3096ms  1.4252ms  diffusion_25_gpu
+ 17.93%  45.499ms       248  183.46us  166.08us  435.32us  [CUDA memcpy HtoD]
+ 15.33%  38.913ms       248  156.91us  156.67us  157.95us  [CUDA memcpy DtoH]
+
+==1250== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 49.11%  228.90ms       372  615.33us  164.77us  1.4271ms  cuStreamSynchronize
+ 28.31%  131.95ms         3  43.984ms     310ns  131.95ms  cuDevicePrimaryCtxRetain
+ 11.90%  55.474ms         1  55.474ms  55.474ms  55.474ms  cuDevicePrimaryCtxRelease
+  6.28%  29.273ms         1  29.273ms  29.273ms  29.273ms  cuMemHostAlloc
+  2.04%  9.5093ms         1  9.5093ms  9.5093ms  9.5093ms  cuMemFreeHost
+  0.63%  2.9438ms       248  11.870us  7.4810us  41.749us  cuMemcpyHtoDAsync
+  0.56%  2.6305ms       248  10.606us  6.3140us  24.671us  cuMemcpyDtoHAsync
+  0.53%  2.4666ms       124  19.892us  13.183us  325.52us  cuLaunchKernel
+  0.17%  811.42us       278  2.9180us  1.7710us  64.840us  cuEventRecord
+  0.16%  754.68us         1  754.68us  754.68us  754.68us  cuMemAllocHost
+  0.15%  716.25us         3  238.75us  228.33us  254.17us  cuMemAlloc
+  0.08%  388.36us       276  1.4070us     842ns  4.8790us  cuEventSynchronize
+  0.05%  215.17us         1  215.17us  215.17us  215.17us  cuModuleLoadData
+  0.01%  38.695us         1  38.695us  38.695us  38.695us  cuStreamCreate
+  0.00%  21.303us         5  4.2600us     872ns  10.311us  cuEventCreate
+  0.00%  5.4210us         3  1.8070us     469ns  4.0410us  cuDeviceGetCount
+  0.00%  5.1580us         6     859ns     335ns  1.7000us  cuDeviceGet
+  0.00%  4.8740us         8     609ns     346ns     812ns  cuDeviceGetAttribute
+  0.00%  3.7800us         3  1.2600us     495ns  2.2160us  cuCtxSetCurrent
+  0.00%  3.2840us         1  3.2840us  3.2840us  3.2840us  cuModuleGetFunction
+  0.00%  3.0470us         1  3.0470us  3.0470us  3.0470us  cuMemFree
+  0.00%     985ns         2     492ns     338ns     647ns  cuDeviceComputeCapability
+  0.00%     856ns         2     428ns     308ns     548ns  cuCtxGetCurrent
+
+==1250== OpenACC (excl):
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 44.96%  169.89ms       124  1.3701ms  1.3127ms  1.4294ms  acc_wait@diff5_double.c:25
+ 23.73%  89.661ms       124  723.07us  677.30us  1.2730ms  acc_wait@diff5_double.c:87
+ 21.99%  83.071ms       124  669.93us  375.17us  30.504ms  acc_enter_data@diff5_double.c:23
+  5.86%  22.124ms       124  178.42us  169.22us  571.50us  acc_wait@diff5_double.c:23
+  1.01%  3.8278ms       248  15.434us  9.5190us  42.251us  acc_enqueue_download@diff5_double.c:87
+  0.94%  3.5393ms       248  14.271us  8.9850us  56.862us  acc_enqueue_upload@diff5_double.c:23
+  0.75%  2.8331ms       124  22.847us  15.576us  330.22us  acc_enqueue_launch@diff5_double.c:25 (diffusion_25_gpu)
+  0.37%  1.3844ms       124  11.164us  7.7780us  31.901us  acc_exit_data@diff5_double.c:23
+  0.12%  447.73us       124  3.6100us  2.5320us  25.944us  acc_compute_construct@diff5_double.c:25
+  0.11%  426.11us       124  3.4360us  2.4550us  10.212us  acc_exit_data@diff5_double.c:25
+  0.11%  399.23us       124  3.2190us  2.2510us  16.822us  acc_enter_data@diff5_double.c:25
+  0.06%  239.26us         1  239.26us  239.26us  239.26us  acc_device_init@diff5_double.c:23
+  0.00%       0ns       248       0ns       0ns       0ns  acc_create@diff5_double.c:23
+  0.00%       0ns       248       0ns       0ns       0ns  acc_delete@diff5_double.c:87
+  0.00%       0ns         2       0ns       0ns       0ns  acc_alloc@diff5_double.c:23
+
+======== CPU profiling result (bottom up):
+Time(%)      Time  Name
+ 76.07%  1.81751s  ???
+ 76.07%  1.81751s  | start_thread
+ 76.07%  1.81751s  |   clone
+ 10.26%  245.06ms  cuStreamSynchronize
+ 10.26%  245.06ms  | __pgi_uacc_cuda_wait
+  7.26%  173.58ms  |   __pgi_uacc_computedone
+  7.26%  173.58ms  |   | diffusion
+  1.71%  40.843ms  |   __pgi_uacc_dataexitdone
+  1.71%  40.843ms  |   | diffusion
+  1.28%  30.632ms  |   __pgi_uacc_dataenterdone
+  1.28%  30.632ms  |     diffusion
+  4.70%  112.32ms  cuDevicePrimaryCtxRetain
+  4.70%  112.32ms  | __pgi_uacc_cuda_init_device
+  4.70%  112.32ms  |   __pgi_uacc_cuda_select_valid
+  4.70%  112.32ms  |     __pgi_uacc_select_devid
+  4.70%  112.32ms  |       __pgi_uacc_dataenterstart
+  4.70%  112.32ms  |         diffusion
+  3.85%  91.897ms  __c_mcopy8
+  2.14%  51.054ms  | __pgi_uacc_cuda_dataup1
+  2.14%  51.054ms  | | __pgi_uacc_dataup1
+  2.14%  51.054ms  | |   __pgi_uacc_dataupx
+  2.14%  51.054ms  | |     __pgi_uacc_dataonb
+  2.14%  51.054ms  | |       diffusion
+  1.71%  40.843ms  | __pgi_uacc_cuda_drain_down
+  1.71%  40.843ms  |   __pgi_uacc_cuda_wait
+  1.71%  40.843ms  |     __pgi_uacc_dataexitdone
+  1.71%  40.843ms  |       diffusion
+  2.14%  51.054ms  cuDevicePrimaryCtxRelease
+  2.14%  51.054ms  | __pgi_uacc_cuda_release_buffer
+  2.14%  51.054ms  |   __run_exit_handlers
+  2.14%  51.054ms  |     ???
+  2.14%  51.054ms  |       ???
+  0.85%  20.422ms  cuInit
+  0.85%  20.422ms  | __pgi_uacc_cuda_init
+  0.85%  20.422ms  |   __pgi_uacc_enumerate
+  0.85%  20.422ms  |     __pgi_uacc_initialize
+  0.85%  20.422ms  |       __pgi_uacc_dataenterstart
+  0.85%  20.422ms  |         diffusion
+  0.43%  10.211ms  pthread_cond_signal@@GLIBC_2.3.2
+  0.43%  10.211ms  cuMemFreeHost
+  0.43%  10.211ms  | __pgi_uacc_cuda_free_device_buffers
+  0.43%  10.211ms  |   __pgi_uacc_cuda_release_buffer
+  0.43%  10.211ms  |     __run_exit_handlers
+  0.43%  10.211ms  |       ???
+  0.43%  10.211ms  |         ???
+  0.43%  10.211ms  cuMemHostAlloc
+  0.43%  10.211ms  | __pgi_uacc_cuda_get_buffer
+  0.43%  10.211ms  |   __pgi_uacc_cuda_dataup1
+  0.43%  10.211ms  |     __pgi_uacc_dataup1
+  0.43%  10.211ms  |       __pgi_uacc_dataupx
+  0.43%  10.211ms  |         __pgi_uacc_dataonb
+  0.43%  10.211ms  |           diffusion
+  0.43%  10.211ms  _dl_relocate_object
+  0.43%  10.211ms  | dl_open_worker
+  0.43%  10.211ms  |   _dl_catch_error
+  0.43%  10.211ms  |     _dl_open
+  0.43%  10.211ms  |       dlopen_doit
+  0.43%  10.211ms  |         _dl_catch_error
+  0.43%  10.211ms  |           _dlerror_run
+  0.43%  10.211ms  |             dlopen@@GLIBC_2.2.5
+  0.43%  10.211ms  |               __pgi_uacc_add_profile_library
+  0.43%  10.211ms  |                 __pgi_uacc_add_profile_libraries
+  0.43%  10.211ms  |                   __pgi_uacc_globalinit
+  0.43%  10.211ms  |                     __pgi_uacc_enumerate
+  0.43%  10.211ms  |                       __pgi_uacc_initialize
+  0.43%  10.211ms  |                         __pgi_uacc_dataenterstart
+  0.43%  10.211ms  |                           diffusion
+  0.43%  10.211ms  cuLaunchKernel
+  0.43%  10.211ms    __pgi_uacc_cuda_launch
+  0.43%  10.211ms      __pgi_uacc_launch
+  0.43%  10.211ms        diffusion
+
+======== Data collected at 100Hz frequency
+
+ppM-1-1@aolin21:~/Escritorio/GPUdiffusion/GPU/DiffOP$ pgprof --print-gpu-trace ./diff5GPU 50 50 50
+pgprof-Warning-Installed CUDA driver version is not supported for GPU profiling.
+Running diffusion kernel with NX=50, NY=50, NZ=50, 124 times
+==2741== PGPROF is profiling process 2741, command: ./diff5GPU 50 50 50
+Accuracy     : 9.773048E-04
+==2741== Profiling application: ./diff5GPU 50 50 50
+==2741== Profiling result:
+   Start  Duration            Grid Size      Block Size     Regs*    SSMem*    DSMem*      Size  Throughput           Device   Context    Stream  Name
+343.98ms  167.29us                    -               -         -         -         -  976.56KB  5.5670GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+344.41ms  166.46us                    -               -         -         -         -  976.56KB  5.5948GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+344.66ms  1.4169ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [40]
+346.11ms  157.15us                    -               -         -         -         -  976.56KB  5.9263GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+346.27ms  156.80us                    -               -         -         -         -  976.56KB  5.9396GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+347.51ms  230.17us                    -               -         -         -         -  976.56KB  4.0462GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+347.80ms  165.34us                    -               -         -         -         -  976.56KB  5.6327GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+347.99ms  1.4186ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [55]
+349.43ms  157.21us                    -               -         -         -         -  976.56KB  5.9239GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+349.59ms  156.93us                    -               -         -         -         -  976.56KB  5.9348GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+350.37ms  190.53us                    -               -         -         -         -  976.56KB  4.8882GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+350.81ms  165.76us                    -               -         -         -         -  976.56KB  5.6186GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+351.01ms  1.4216ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [67]
+352.45ms  156.86us                    -               -         -         -         -  976.56KB  5.9372GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+352.61ms  156.89us                    -               -         -         -         -  976.56KB  5.9360GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+353.36ms  208.35us                    -               -         -         -         -  976.56KB  4.4700GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+353.60ms  166.21us                    -               -         -         -         -  976.56KB  5.6034GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+353.80ms  1.4176ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [79]
+355.24ms  156.89us                    -               -         -         -         -  976.56KB  5.9360GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+355.40ms  156.80us                    -               -         -         -         -  976.56KB  5.9396GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+356.21ms  203.93us                    -               -         -         -         -  976.56KB  4.5668GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+356.44ms  164.99us                    -               -         -         -         -  976.56KB  5.6447GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+356.64ms  1.4143ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [91]
+358.07ms  156.93us                    -               -         -         -         -  976.56KB  5.9348GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+358.23ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+358.97ms  199.13us                    -               -         -         -         -  976.56KB  4.6769GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+359.21ms  166.17us                    -               -         -         -         -  976.56KB  5.6045GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+359.40ms  1.4140ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [103]
+360.84ms  156.99us                    -               -         -         -         -  976.56KB  5.9324GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+361.01ms  156.73us                    -               -         -         -         -  976.56KB  5.9421GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+361.82ms  198.21us                    -               -         -         -         -  976.56KB  4.6988GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+362.06ms  166.53us                    -               -         -         -         -  976.56KB  5.5927GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+362.25ms  1.4176ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [115]
+363.69ms  156.86us                    -               -         -         -         -  976.56KB  5.9372GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+363.85ms  157.15us                    -               -         -         -         -  976.56KB  5.9263GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+364.58ms  183.71us                    -               -         -         -         -  976.56KB  5.0695GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+364.88ms  166.69us                    -               -         -         -         -  976.56KB  5.5873GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+365.07ms  1.4223ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [127]
+366.51ms  157.47us                    -               -         -         -         -  976.56KB  5.9143GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+366.68ms  156.73us                    -               -         -         -         -  976.56KB  5.9421GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+367.40ms  198.30us                    -               -         -         -         -  976.56KB  4.6965GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+367.64ms  166.01us                    -               -         -         -         -  976.56KB  5.6099GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+367.83ms  1.4203ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [141]
+369.28ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+369.45ms  156.89us                    -               -         -         -         -  976.56KB  5.9360GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+370.21ms  200.45us                    -               -         -         -         -  976.56KB  4.6463GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+370.44ms  166.27us                    -               -         -         -         -  976.56KB  5.6013GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+370.72ms  1.4194ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [155]
+372.16ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+372.32ms  156.86us                    -               -         -         -         -  976.56KB  5.9372GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+373.05ms  200.19us                    -               -         -         -         -  976.56KB  4.6522GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+373.28ms  165.92us                    -               -         -         -         -  976.56KB  5.6131GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+373.48ms  1.4077ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [167]
+374.91ms  156.90us                    -               -         -         -         -  976.56KB  5.9360GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+375.07ms  157.34us                    -               -         -         -         -  976.56KB  5.9191GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+375.84ms  208.41us                    -               -         -         -         -  976.56KB  4.4686GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+376.08ms  165.60us                    -               -         -         -         -  976.56KB  5.6240GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+376.27ms  1.4072ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [179]
+377.70ms  157.12us                    -               -         -         -         -  976.56KB  5.9275GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+377.86ms  156.99us                    -               -         -         -         -  976.56KB  5.9324GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+378.60ms  199.61us                    -               -         -         -         -  976.56KB  4.6656GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+378.84ms  165.98us                    -               -         -         -         -  976.56KB  5.6110GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+379.03ms  1.4071ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [191]
+380.46ms  158.01us                    -               -         -         -         -  976.56KB  5.8939GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+380.62ms  158.59us                    -               -         -         -         -  976.56KB  5.8725GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+381.39ms  208.19us                    -               -         -         -         -  976.56KB  4.4734GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+381.63ms  165.95us                    -               -         -         -         -  976.56KB  5.6121GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+381.82ms  1.4133ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [203]
+383.25ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+383.42ms  156.70us                    -               -         -         -         -  976.56KB  5.9432GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+384.19ms  200.13us                    -               -         -         -         -  976.56KB  4.6537GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+384.42ms  165.34us                    -               -         -         -         -  976.56KB  5.6327GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+384.61ms  1.4144ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [215]
+386.05ms  156.86us                    -               -         -         -         -  976.56KB  5.9372GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+386.21ms  156.89us                    -               -         -         -         -  976.56KB  5.9360GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+387.01ms  203.90us                    -               -         -         -         -  976.56KB  4.5675GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+387.24ms  165.82us                    -               -         -         -         -  976.56KB  5.6164GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+387.44ms  1.4227ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [227]
+388.88ms  156.80us                    -               -         -         -         -  976.56KB  5.9396GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+389.04ms  157.37us                    -               -         -         -         -  976.56KB  5.9179GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+389.84ms  202.91us                    -               -         -         -         -  976.56KB  4.5898GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+390.07ms  165.73us                    -               -         -         -         -  976.56KB  5.6196GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+390.26ms  1.4170ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [241]
+391.71ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+391.87ms  157.18us                    -               -         -         -         -  976.56KB  5.9251GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+392.60ms  197.85us                    -               -         -         -         -  976.56KB  4.7071GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+392.84ms  165.76us                    -               -         -         -         -  976.56KB  5.6186GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+393.04ms  1.4199ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [255]
+394.48ms  157.02us                    -               -         -         -         -  976.56KB  5.9312GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+394.64ms  157.02us                    -               -         -         -         -  976.56KB  5.9311GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+395.36ms  197.57us                    -               -         -         -         -  976.56KB  4.7140GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+395.59ms  165.50us                    -               -         -         -         -  976.56KB  5.6273GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+395.82ms  1.4237ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [267]
+397.27ms  156.93us                    -               -         -         -         -  976.56KB  5.9348GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+397.43ms  156.80us                    -               -         -         -         -  976.56KB  5.9396GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+398.16ms  200.45us                    -               -         -         -         -  976.56KB  4.6463GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+398.39ms  165.28us                    -               -         -         -         -  976.56KB  5.6349GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+398.58ms  1.4187ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [279]
+400.02ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+400.18ms  156.80us                    -               -         -         -         -  976.56KB  5.9396GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+401.17ms  197.69us                    -               -         -         -         -  976.56KB  4.7109GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+401.40ms  165.92us                    -               -         -         -         -  976.56KB  5.6131GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+401.60ms  1.4212ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [291]
+403.04ms  156.86us                    -               -         -         -         -  976.56KB  5.9372GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+403.20ms  156.73us                    -               -         -         -         -  976.56KB  5.9421GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+403.94ms  200.93us                    -               -         -         -         -  976.56KB  4.6352GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+404.18ms  165.53us                    -               -         -         -         -  976.56KB  5.6262GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+404.37ms  1.4182ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [303]
+405.81ms  157.31us                    -               -         -         -         -  976.56KB  5.9203GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+405.97ms  156.77us                    -               -         -         -         -  976.56KB  5.9408GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+406.71ms  195.77us                    -               -         -         -         -  976.56KB  4.7571GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+406.94ms  165.82us                    -               -         -         -         -  976.56KB  5.6164GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+407.14ms  1.4075ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [315]
+408.56ms  156.89us                    -               -         -         -         -  976.56KB  5.9360GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+408.72ms  157.02us                    -               -         -         -         -  976.56KB  5.9312GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+409.45ms  198.05us                    -               -         -         -         -  976.56KB  4.7026GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+409.69ms  166.21us                    -               -         -         -         -  976.56KB  5.6034GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+409.88ms  1.4159ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [327]
+411.32ms  157.50us                    -               -         -         -         -  976.56KB  5.9131GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+411.48ms  156.70us                    -               -         -         -         -  976.56KB  5.9432GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+412.22ms  199.01us                    -               -         -         -         -  976.56KB  4.6799GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+412.45ms  165.05us                    -               -         -         -         -  976.56KB  5.6425GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+412.64ms  1.4199ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [341]
+414.09ms  156.93us                    -               -         -         -         -  976.56KB  5.9348GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+414.25ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+414.99ms  200.80us                    -               -         -         -         -  976.56KB  4.6381GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+415.22ms  165.02us                    -               -         -         -         -  976.56KB  5.6436GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+415.41ms  1.4198ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [355]
+416.85ms  156.86us                    -               -         -         -         -  976.56KB  5.9372GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+417.01ms  156.80us                    -               -         -         -         -  976.56KB  5.9396GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+417.75ms  204.35us                    -               -         -         -         -  976.56KB  4.5575GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+417.98ms  166.01us                    -               -         -         -         -  976.56KB  5.6099GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+418.17ms  1.4036ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [367]
+419.59ms  156.86us                    -               -         -         -         -  976.56KB  5.9372GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+419.75ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+420.48ms  173.05us                    -               -         -         -         -  976.56KB  5.3817GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+420.93ms  165.79us                    -               -         -         -         -  976.56KB  5.6175GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+421.12ms  1.4125ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [379]
+422.55ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+422.71ms  156.74us                    -               -         -         -         -  976.56KB  5.9420GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+423.44ms  203.33us                    -               -         -         -         -  976.56KB  4.5804GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+423.67ms  166.59us                    -               -         -         -         -  976.56KB  5.5905GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+423.87ms  1.4033ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [391]
+425.29ms  157.05us                    -               -         -         -         -  976.56KB  5.9300GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+425.45ms  156.73us                    -               -         -         -         -  976.56KB  5.9421GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+426.18ms  207.68us                    -               -         -         -         -  976.56KB  4.4845GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+426.41ms  166.14us                    -               -         -         -         -  976.56KB  5.6056GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+426.61ms  1.4147ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [403]
+428.04ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+428.20ms  156.70us                    -               -         -         -         -  976.56KB  5.9433GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+428.93ms  201.76us                    -               -         -         -         -  976.56KB  4.6160GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+429.17ms  165.05us                    -               -         -         -         -  976.56KB  5.6425GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+429.36ms  1.4153ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [415]
+430.80ms  156.89us                    -               -         -         -         -  976.56KB  5.9360GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+430.96ms  156.96us                    -               -         -         -         -  976.56KB  5.9335GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+431.69ms  201.31us                    -               -         -         -         -  976.56KB  4.6263GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+431.92ms  165.89us                    -               -         -         -         -  976.56KB  5.6142GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+432.12ms  1.4219ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [427]
+433.56ms  156.86us                    -               -         -         -         -  976.56KB  5.9372GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+433.72ms  156.73us                    -               -         -         -         -  976.56KB  5.9421GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+434.49ms  206.56us                    -               -         -         -         -  976.56KB  4.5088GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+434.73ms  166.43us                    -               -         -         -         -  976.56KB  5.5959GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+434.93ms  1.4152ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [441]
+436.36ms  156.89us                    -               -         -         -         -  976.56KB  5.9360GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+436.53ms  156.77us                    -               -         -         -         -  976.56KB  5.9408GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+437.27ms  200.89us                    -               -         -         -         -  976.56KB  4.6359GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+437.51ms  166.43us                    -               -         -         -         -  976.56KB  5.5959GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+437.71ms  1.4141ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [455]
+439.14ms  156.80us                    -               -         -         -         -  976.56KB  5.9396GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+439.30ms  156.70us                    -               -         -         -         -  976.56KB  5.9433GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+440.15ms  202.27us                    -               -         -         -         -  976.56KB  4.6044GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+440.38ms  166.11us                    -               -         -         -         -  976.56KB  5.6067GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+440.85ms  1.4127ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [467]
+442.29ms  157.05us                    -               -         -         -         -  976.56KB  5.9300GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+442.45ms  157.70us                    -               -         -         -         -  976.56KB  5.9058GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+443.22ms  203.58us                    -               -         -         -         -  976.56KB  4.5747GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+443.46ms  165.47us                    -               -         -         -         -  976.56KB  5.6283GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+443.65ms  1.4128ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [479]
+445.08ms  156.90us                    -               -         -         -         -  976.56KB  5.9360GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+445.24ms  156.89us                    -               -         -         -         -  976.56KB  5.9360GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+446.01ms  198.11us                    -               -         -         -         -  976.56KB  4.7010GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+446.24ms  165.47us                    -               -         -         -         -  976.56KB  5.6283GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+446.43ms  1.4205ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [491]
+447.87ms  156.89us                    -               -         -         -         -  976.56KB  5.9360GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+448.03ms  156.80us                    -               -         -         -         -  976.56KB  5.9396GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+448.79ms  199.26us                    -               -         -         -         -  976.56KB  4.6739GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+449.02ms  165.86us                    -               -         -         -         -  976.56KB  5.6153GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+449.21ms  1.4134ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [503]
+450.66ms  156.93us                    -               -         -         -         -  976.56KB  5.9348GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+450.83ms  156.93us                    -               -         -         -         -  976.56KB  5.9348GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+451.55ms  198.49us                    -               -         -         -         -  976.56KB  4.6920GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+451.79ms  165.05us                    -               -         -         -         -  976.56KB  5.6425GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+451.98ms  1.4215ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [515]
+453.42ms  157.21us                    -               -         -         -         -  976.56KB  5.9239GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+453.59ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+454.32ms  201.28us                    -               -         -         -         -  976.56KB  4.6270GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+454.55ms  166.37us                    -               -         -         -         -  976.56KB  5.5980GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+454.74ms  1.4159ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [527]
+456.18ms  157.85us                    -               -         -         -         -  976.56KB  5.8999GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+456.34ms  156.73us                    -               -         -         -         -  976.56KB  5.9421GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+457.08ms  193.66us                    -               -         -         -         -  976.56KB  4.8090GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+457.31ms  166.14us                    -               -         -         -         -  976.56KB  5.6056GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+457.50ms  1.4225ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [541]
+458.95ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+459.11ms  156.80us                    -               -         -         -         -  976.56KB  5.9396GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+459.85ms  201.98us                    -               -         -         -         -  976.56KB  4.6109GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+460.08ms  165.44us                    -               -         -         -         -  976.56KB  5.6294GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+460.28ms  1.4188ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [555]
+461.72ms  156.89us                    -               -         -         -         -  976.56KB  5.9360GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+461.88ms  157.09us                    -               -         -         -         -  976.56KB  5.9287GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+462.61ms  189.37us                    -               -         -         -         -  976.56KB  4.9179GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+462.87ms  165.92us                    -               -         -         -         -  976.56KB  5.6131GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+463.06ms  1.4243ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [567]
+464.51ms  156.93us                    -               -         -         -         -  976.56KB  5.9348GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+464.67ms  156.70us                    -               -         -         -         -  976.56KB  5.9433GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+465.40ms  200.13us                    -               -         -         -         -  976.56KB  4.6537GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+465.64ms  165.76us                    -               -         -         -         -  976.56KB  5.6186GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+465.83ms  1.4173ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [579]
+467.27ms  157.09us                    -               -         -         -         -  976.56KB  5.9287GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+467.43ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+468.16ms  207.26us                    -               -         -         -         -  976.56KB  4.4935GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+468.40ms  165.79us                    -               -         -         -         -  976.56KB  5.6175GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+468.59ms  1.4187ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [591]
+470.03ms  158.30us                    -               -         -         -         -  976.56KB  5.8832GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+470.19ms  156.96us                    -               -         -         -         -  976.56KB  5.9336GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+471.08ms  202.59us                    -               -         -         -         -  976.56KB  4.5971GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+471.31ms  166.75us                    -               -         -         -         -  976.56KB  5.5851GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+471.51ms  1.4212ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [603]
+472.95ms  156.89us                    -               -         -         -         -  976.56KB  5.9360GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+473.11ms  156.70us                    -               -         -         -         -  976.56KB  5.9433GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+473.84ms  207.58us                    -               -         -         -         -  976.56KB  4.4866GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+474.08ms  165.41us                    -               -         -         -         -  976.56KB  5.6305GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+474.27ms  1.4191ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [615]
+475.79ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+475.96ms  156.74us                    -               -         -         -         -  976.56KB  5.9420GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+476.68ms  202.69us                    -               -         -         -         -  976.56KB  4.5949GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+476.92ms  166.11us                    -               -         -         -         -  976.56KB  5.6067GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+477.11ms  1.4212ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [627]
+478.55ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+478.71ms  156.73us                    -               -         -         -         -  976.56KB  5.9421GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+479.45ms  203.77us                    -               -         -         -         -  976.56KB  4.5704GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+479.69ms  166.05us                    -               -         -         -         -  976.56KB  5.6088GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+479.88ms  1.4050ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [641]
+481.31ms  157.38us                    -               -         -         -         -  976.56KB  5.9179GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+481.48ms  156.74us                    -               -         -         -         -  976.56KB  5.9420GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+482.21ms  199.87us                    -               -         -         -         -  976.56KB  4.6596GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+482.44ms  165.82us                    -               -         -         -         -  976.56KB  5.6164GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+482.63ms  1.4190ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [655]
+484.33ms  158.05us                    -               -         -         -         -  976.56KB  5.8927GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+484.49ms  157.02us                    -               -         -         -         -  976.56KB  5.9312GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+485.22ms  201.89us                    -               -         -         -         -  976.56KB  4.6131GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+485.45ms  167.71us                    -               -         -         -         -  976.56KB  5.5532GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+485.65ms  1.3872ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [667]
+487.06ms  157.44us                    -               -         -         -         -  976.56KB  5.9155GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+487.22ms  157.66us                    -               -         -         -         -  976.56KB  5.9071GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+488.01ms  204.03us                    -               -         -         -         -  976.56KB  4.5646GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+488.24ms  167.61us                    -               -         -         -         -  976.56KB  5.5564GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+488.43ms  1.3842ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [679]
+489.84ms  156.86us                    -               -         -         -         -  976.56KB  5.9372GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+490.00ms  156.80us                    -               -         -         -         -  976.56KB  5.9396GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+491.09ms  201.53us                    -               -         -         -         -  976.56KB  4.6212GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+491.32ms  167.29us                    -               -         -         -         -  976.56KB  5.5670GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+491.51ms  1.3769ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [691]
+492.91ms  156.89us                    -               -         -         -         -  976.56KB  5.9360GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+493.07ms  156.73us                    -               -         -         -         -  976.56KB  5.9421GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+493.80ms  198.59us                    -               -         -         -         -  976.56KB  4.6897GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+494.03ms  167.65us                    -               -         -         -         -  976.56KB  5.5553GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+494.23ms  1.3787ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [703]
+495.63ms  156.93us                    -               -         -         -         -  976.56KB  5.9348GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+495.79ms  156.74us                    -               -         -         -         -  976.56KB  5.9420GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+496.51ms  196.38us                    -               -         -         -         -  976.56KB  4.7424GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+496.86ms  166.97us                    -               -         -         -         -  976.56KB  5.5777GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+497.05ms  1.3712ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [715]
+498.44ms  156.99us                    -               -         -         -         -  976.56KB  5.9324GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+498.60ms  157.28us                    -               -         -         -         -  976.56KB  5.9215GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+499.32ms  198.88us                    -               -         -         -         -  976.56KB  4.6829GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+499.55ms  167.68us                    -               -         -         -         -  976.56KB  5.5542GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+499.75ms  1.3838ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [727]
+501.16ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+501.32ms  157.05us                    -               -         -         -         -  976.56KB  5.9300GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+502.07ms  197.60us                    -               -         -         -         -  976.56KB  4.7132GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+502.30ms  167.49us                    -               -         -         -         -  976.56KB  5.5606GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+502.50ms  1.3733ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [741]
+503.90ms  156.86us                    -               -         -         -         -  976.56KB  5.9372GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+504.06ms  156.80us                    -               -         -         -         -  976.56KB  5.9396GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+504.80ms  203.17us                    -               -         -         -         -  976.56KB  4.5841GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+505.04ms  167.87us                    -               -         -         -         -  976.56KB  5.5479GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+505.23ms  1.3809ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [755]
+506.63ms  156.80us                    -               -         -         -         -  976.56KB  5.9396GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+506.79ms  156.80us                    -               -         -         -         -  976.56KB  5.9396GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+507.53ms  199.81us                    -               -         -         -         -  976.56KB  4.6611GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+507.76ms  167.10us                    -               -         -         -         -  976.56KB  5.5734GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+507.95ms  1.3862ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [767]
+509.36ms  156.89us                    -               -         -         -         -  976.56KB  5.9360GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+509.52ms  156.70us                    -               -         -         -         -  976.56KB  5.9433GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+510.36ms  185.82us                    -               -         -         -         -  976.56KB  5.0119GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+510.81ms  167.68us                    -               -         -         -         -  976.56KB  5.5542GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+511.01ms  1.3858ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [779]
+512.41ms  157.05us                    -               -         -         -         -  976.56KB  5.9300GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+512.57ms  156.86us                    -               -         -         -         -  976.56KB  5.9372GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+513.36ms  203.20us                    -               -         -         -         -  976.56KB  4.5833GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+513.59ms  167.65us                    -               -         -         -         -  976.56KB  5.5553GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+513.79ms  1.3850ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [791]
+515.19ms  157.31us                    -               -         -         -         -  976.56KB  5.9203GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+515.36ms  156.77us                    -               -         -         -         -  976.56KB  5.9408GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+516.11ms  208.96us                    -               -         -         -         -  976.56KB  4.4570GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+516.34ms  167.58us                    -               -         -         -         -  976.56KB  5.5574GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+516.54ms  1.3781ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [803]
+517.94ms  156.80us                    -               -         -         -         -  976.56KB  5.9396GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+518.10ms  156.67us                    -               -         -         -         -  976.56KB  5.9445GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+518.83ms  203.61us                    -               -         -         -         -  976.56KB  4.5740GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+519.07ms  167.84us                    -               -         -         -         -  976.56KB  5.5489GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+519.26ms  1.3843ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [815]
+520.71ms  156.80us                    -               -         -         -         -  976.56KB  5.9396GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+520.87ms  156.70us                    -               -         -         -         -  976.56KB  5.9432GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+521.59ms  203.45us                    -               -         -         -         -  976.56KB  4.5776GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+521.83ms  166.82us                    -               -         -         -         -  976.56KB  5.5830GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+522.02ms  1.3813ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [827]
+523.43ms  157.50us                    -               -         -         -         -  976.56KB  5.9131GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+523.59ms  156.74us                    -               -         -         -         -  976.56KB  5.9420GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+524.31ms  203.71us                    -               -         -         -         -  976.56KB  4.5718GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+524.55ms  167.49us                    -               -         -         -         -  976.56KB  5.5606GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+524.74ms  1.3753ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [841]
+526.14ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+526.30ms  156.74us                    -               -         -         -         -  976.56KB  5.9420GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+527.04ms  196.51us                    -               -         -         -         -  976.56KB  4.7393GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+527.27ms  167.01us                    -               -         -         -         -  976.56KB  5.5766GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+527.47ms  1.3841ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [855]
+528.87ms  157.02us                    -               -         -         -         -  976.56KB  5.9312GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+529.03ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+529.76ms  199.81us                    -               -         -         -         -  976.56KB  4.6611GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+529.99ms  168.19us                    -               -         -         -         -  976.56KB  5.5373GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+530.19ms  1.3719ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [867]
+531.58ms  157.28us                    -               -         -         -         -  976.56KB  5.9215GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+531.75ms  156.86us                    -               -         -         -         -  976.56KB  5.9372GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+532.47ms  205.09us                    -               -         -         -         -  976.56KB  4.5411GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+532.80ms  167.26us                    -               -         -         -         -  976.56KB  5.5680GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+532.99ms  1.3852ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [879]
+534.40ms  156.99us                    -               -         -         -         -  976.56KB  5.9324GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+534.56ms  156.77us                    -               -         -         -         -  976.56KB  5.9408GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+535.28ms  198.59us                    -               -         -         -         -  976.56KB  4.6897GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+535.52ms  167.97us                    -               -         -         -         -  976.56KB  5.5447GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+535.71ms  1.3737ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [891]
+537.11ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+537.27ms  157.41us                    -               -         -         -         -  976.56KB  5.9167GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+538.00ms  201.41us                    -               -         -         -         -  976.56KB  4.6241GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+538.23ms  167.78us                    -               -         -         -         -  976.56KB  5.5510GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+538.42ms  1.3813ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [903]
+539.83ms  156.89us                    -               -         -         -         -  976.56KB  5.9360GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+539.99ms  157.02us                    -               -         -         -         -  976.56KB  5.9311GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+540.96ms  198.37us                    -               -         -         -         -  976.56KB  4.6950GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+541.20ms  167.33us                    -               -         -         -         -  976.56KB  5.5659GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+541.39ms  1.3716ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [915]
+542.80ms  157.25us                    -               -         -         -         -  976.56KB  5.9227GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+542.96ms  156.73us                    -               -         -         -         -  976.56KB  5.9421GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+543.68ms  198.37us                    -               -         -         -         -  976.56KB  4.6950GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+543.92ms  167.26us                    -               -         -         -         -  976.56KB  5.5680GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+544.11ms  1.3824ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [927]
+545.51ms  157.25us                    -               -         -         -         -  976.56KB  5.9227GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+545.67ms  156.80us                    -               -         -         -         -  976.56KB  5.9396GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+546.39ms  194.17us                    -               -         -         -         -  976.56KB  4.7963GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+546.63ms  167.84us                    -               -         -         -         -  976.56KB  5.5489GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+546.82ms  1.3786ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [941]
+548.22ms  157.05us                    -               -         -         -         -  976.56KB  5.9300GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+548.38ms  156.99us                    -               -         -         -         -  976.56KB  5.9324GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+549.11ms  203.39us                    -               -         -         -         -  976.56KB  4.5790GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+549.35ms  168.25us                    -               -         -         -         -  976.56KB  5.5352GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+549.54ms  1.3800ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [955]
+550.95ms  156.90us                    -               -         -         -         -  976.56KB  5.9360GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+551.11ms  157.41us                    -               -         -         -         -  976.56KB  5.9167GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+551.84ms  201.69us                    -               -         -         -         -  976.56KB  4.6175GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+552.07ms  167.45us                    -               -         -         -         -  976.56KB  5.5617GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+552.27ms  1.3820ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [967]
+553.67ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+553.83ms  156.73us                    -               -         -         -         -  976.56KB  5.9421GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+554.58ms  202.17us                    -               -         -         -         -  976.56KB  4.6065GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+554.82ms  167.55us                    -               -         -         -         -  976.56KB  5.5585GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+555.01ms  1.3741ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [979]
+556.41ms  156.89us                    -               -         -         -         -  976.56KB  5.9360GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+556.57ms  156.70us                    -               -         -         -         -  976.56KB  5.9432GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+557.30ms  203.17us                    -               -         -         -         -  976.56KB  4.5840GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+557.53ms  167.58us                    -               -         -         -         -  976.56KB  5.5574GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+557.73ms  1.3752ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [991]
+559.12ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+559.28ms  156.86us                    -               -         -         -         -  976.56KB  5.9372GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+560.01ms  210.75us                    -               -         -         -         -  976.56KB  4.4191GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+560.25ms  168.00us                    -               -         -         -         -  976.56KB  5.5436GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+560.44ms  1.3831ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1003]
+561.87ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+562.03ms  157.25us                    -               -         -         -         -  976.56KB  5.9227GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+562.95ms  196.25us                    -               -         -         -         -  976.56KB  4.7455GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+563.19ms  167.77us                    -               -         -         -         -  976.56KB  5.5511GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+563.38ms  1.3723ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1015]
+564.79ms  157.53us                    -               -         -         -         -  976.56KB  5.9119GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+564.95ms  156.77us                    -               -         -         -         -  976.56KB  5.9408GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+565.86ms  188.73us                    -               -         -         -         -  976.56KB  4.9346GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+566.12ms  167.07us                    -               -         -         -         -  976.56KB  5.5744GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+566.33ms  1.3861ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1027]
+567.75ms  157.15us                    -               -         -         -         -  976.56KB  5.9263GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+567.91ms  156.80us                    -               -         -         -         -  976.56KB  5.9396GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+568.84ms  191.52us                    -               -         -         -         -  976.56KB  4.8629GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+569.09ms  167.71us                    -               -         -         -         -  976.56KB  5.5532GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+569.30ms  1.3806ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1041]
+570.77ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+570.93ms  156.80us                    -               -         -         -         -  976.56KB  5.9396GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+571.79ms  189.66us                    -               -         -         -         -  976.56KB  4.9104GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+572.05ms  167.45us                    -               -         -         -         -  976.56KB  5.5617GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+572.25ms  1.3911ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1055]
+573.68ms  157.09us                    -               -         -         -         -  976.56KB  5.9287GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+573.84ms  156.70us                    -               -         -         -         -  976.56KB  5.9433GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+574.68ms  190.11us                    -               -         -         -         -  976.56KB  4.8989GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+574.94ms  167.81us                    -               -         -         -         -  976.56KB  5.5500GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+575.15ms  1.3877ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1067]
+576.57ms  156.93us                    -               -         -         -         -  976.56KB  5.9348GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+576.73ms  157.28us                    -               -         -         -         -  976.56KB  5.9215GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+577.58ms  187.52us                    -               -         -         -         -  976.56KB  4.9666GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+577.84ms  167.45us                    -               -         -         -         -  976.56KB  5.5617GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+578.04ms  1.3863ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1079]
+579.46ms  156.86us                    -               -         -         -         -  976.56KB  5.9372GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+579.62ms  156.73us                    -               -         -         -         -  976.56KB  5.9421GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+580.47ms  175.33us                    -               -         -         -         -  976.56KB  5.3119GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+580.98ms  167.87us                    -               -         -         -         -  976.56KB  5.5479GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+581.19ms  1.3864ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1091]
+582.60ms  156.89us                    -               -         -         -         -  976.56KB  5.9360GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+582.76ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+583.63ms  182.40us                    -               -         -         -         -  976.56KB  5.1060GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+583.89ms  168.00us                    -               -         -         -         -  976.56KB  5.5437GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+584.10ms  1.3909ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1103]
+585.52ms  157.60us                    -               -         -         -         -  976.56KB  5.9094GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+585.68ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+586.55ms  183.33us                    -               -         -         -         -  976.56KB  5.0801GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+586.83ms  167.30us                    -               -         -         -         -  976.56KB  5.5669GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+587.03ms  1.3738ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1115]
+588.43ms  157.09us                    -               -         -         -         -  976.56KB  5.9287GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+588.60ms  156.96us                    -               -         -         -         -  976.56KB  5.9335GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+589.44ms  188.54us                    -               -         -         -         -  976.56KB  4.9396GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+589.69ms  167.42us                    -               -         -         -         -  976.56KB  5.5627GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+589.89ms  1.3801ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1127]
+591.31ms  157.25us                    -               -         -         -         -  976.56KB  5.9227GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+591.47ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+592.31ms  186.81us                    -               -         -         -         -  976.56KB  4.9853GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+592.55ms  168.09us                    -               -         -         -         -  976.56KB  5.5405GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+592.77ms  1.3875ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1141]
+594.19ms  157.54us                    -               -         -         -         -  976.56KB  5.9118GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+594.36ms  156.96us                    -               -         -         -         -  976.56KB  5.9336GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+595.19ms  192.77us                    -               -         -         -         -  976.56KB  4.8314GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+595.44ms  167.81us                    -               -         -         -         -  976.56KB  5.5500GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+595.65ms  1.3856ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1155]
+597.06ms  156.86us                    -               -         -         -         -  976.56KB  5.9372GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+597.22ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+598.05ms  190.85us                    -               -         -         -         -  976.56KB  4.8800GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+598.30ms  167.39us                    -               -         -         -         -  976.56KB  5.5638GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+598.51ms  1.3770ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1167]
+599.91ms  156.90us                    -               -         -         -         -  976.56KB  5.9360GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+600.07ms  157.02us                    -               -         -         -         -  976.56KB  5.9311GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+601.11ms  192.13us                    -               -         -         -         -  976.56KB  4.8475GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+601.36ms  167.49us                    -               -         -         -         -  976.56KB  5.5606GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+601.57ms  1.3864ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1179]
+602.99ms  156.86us                    -               -         -         -         -  976.56KB  5.9372GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+603.15ms  157.02us                    -               -         -         -         -  976.56KB  5.9311GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+603.98ms  194.53us                    -               -         -         -         -  976.56KB  4.7877GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+604.22ms  167.55us                    -               -         -         -         -  976.56KB  5.5585GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+604.43ms  1.3868ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1191]
+605.85ms  156.96us                    -               -         -         -         -  976.56KB  5.9336GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+606.01ms  156.89us                    -               -         -         -         -  976.56KB  5.9360GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+606.85ms  196.29us                    -               -         -         -         -  976.56KB  4.7447GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+607.10ms  169.02us                    -               -         -         -         -  976.56KB  5.5101GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+607.30ms  1.3893ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1203]
+608.78ms  156.96us                    -               -         -         -         -  976.56KB  5.9336GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+608.94ms  156.70us                    -               -         -         -         -  976.56KB  5.9432GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+609.75ms  197.05us                    -               -         -         -         -  976.56KB  4.7262GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+610.00ms  166.85us                    -               -         -         -         -  976.56KB  5.5819GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+610.20ms  1.3754ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1215]
+611.62ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+611.78ms  156.73us                    -               -         -         -         -  976.56KB  5.9421GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+612.59ms  186.75us                    -               -         -         -         -  976.56KB  4.9870GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+612.86ms  167.20us                    -               -         -         -         -  976.56KB  5.5702GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+613.07ms  1.3862ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1227]
+614.48ms  157.15us                    -               -         -         -         -  976.56KB  5.9263GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+614.64ms  156.70us                    -               -         -         -         -  976.56KB  5.9432GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+615.45ms  191.74us                    -               -         -         -         -  976.56KB  4.8572GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+615.70ms  167.49us                    -               -         -         -         -  976.56KB  5.5606GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+615.91ms  1.3888ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1241]
+617.33ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+617.49ms  156.77us                    -               -         -         -         -  976.56KB  5.9408GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+618.30ms  191.49us                    -               -         -         -         -  976.56KB  4.8637GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+618.55ms  167.33us                    -               -         -         -         -  976.56KB  5.5659GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+618.75ms  1.3877ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1255]
+620.16ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+620.32ms  157.25us                    -               -         -         -         -  976.56KB  5.9227GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+621.35ms  201.82us                    -               -         -         -         -  976.56KB  4.6146GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+621.59ms  169.09us                    -               -         -         -         -  976.56KB  5.5080GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+621.79ms  1.3768ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1267]
+623.20ms  156.86us                    -               -         -         -         -  976.56KB  5.9372GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+623.36ms  156.80us                    -               -         -         -         -  976.56KB  5.9396GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+624.18ms  197.02us                    -               -         -         -         -  976.56KB  4.7270GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+624.43ms  167.20us                    -               -         -         -         -  976.56KB  5.5702GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+624.63ms  1.3830ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1279]
+626.04ms  156.86us                    -               -         -         -         -  976.56KB  5.9372GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+626.20ms  156.70us                    -               -         -         -         -  976.56KB  5.9433GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+627.03ms  194.37us                    -               -         -         -         -  976.56KB  4.7916GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+627.27ms  167.13us                    -               -         -         -         -  976.56KB  5.5723GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+627.48ms  1.3839ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1291]
+628.89ms  156.86us                    -               -         -         -         -  976.56KB  5.9372GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+629.05ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+629.84ms  193.50us                    -               -         -         -         -  976.56KB  4.8130GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+630.09ms  167.71us                    -               -         -         -         -  976.56KB  5.5532GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+630.29ms  1.3727ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1303]
+631.70ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+631.86ms  156.77us                    -               -         -         -         -  976.56KB  5.9408GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+632.67ms  185.41us                    -               -         -         -         -  976.56KB  5.0232GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+632.95ms  167.52us                    -               -         -         -         -  976.56KB  5.5595GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+633.15ms  1.3831ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1315]
+634.56ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+634.72ms  156.89us                    -               -         -         -         -  976.56KB  5.9360GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+635.50ms  196.45us                    -               -         -         -         -  976.56KB  4.7409GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+635.75ms  167.81us                    -               -         -         -         -  976.56KB  5.5500GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+635.95ms  1.3835ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1327]
+637.36ms  157.34us                    -               -         -         -         -  976.56KB  5.9191GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+637.52ms  157.18us                    -               -         -         -         -  976.56KB  5.9251GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+638.31ms  193.57us                    -               -         -         -         -  976.56KB  4.8114GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+638.56ms  167.65us                    -               -         -         -         -  976.56KB  5.5553GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+638.76ms  1.3763ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1341]
+640.17ms  156.86us                    -               -         -         -         -  976.56KB  5.9372GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+640.33ms  156.89us                    -               -         -         -         -  976.56KB  5.9360GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+641.33ms  198.62us                    -               -         -         -         -  976.56KB  4.6889GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+641.57ms  167.71us                    -               -         -         -         -  976.56KB  5.5532GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+641.77ms  1.3831ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1355]
+643.21ms  156.86us                    -               -         -         -         -  976.56KB  5.9372GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+643.37ms  156.80us                    -               -         -         -         -  976.56KB  5.9396GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+644.17ms  196.09us                    -               -         -         -         -  976.56KB  4.7494GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+644.41ms  167.07us                    -               -         -         -         -  976.56KB  5.5744GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+644.61ms  1.3878ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1367]
+646.02ms  156.99us                    -               -         -         -         -  976.56KB  5.9324GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+646.19ms  156.73us                    -               -         -         -         -  976.56KB  5.9421GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+647.00ms  196.77us                    -               -         -         -         -  976.56KB  4.7332GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+647.24ms  167.81us                    -               -         -         -         -  976.56KB  5.5500GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+647.44ms  1.3852ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1379]
+648.85ms  156.90us                    -               -         -         -         -  976.56KB  5.9360GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+649.01ms  156.77us                    -               -         -         -         -  976.56KB  5.9408GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+649.79ms  195.61us                    -               -         -         -         -  976.56KB  4.7610GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+650.03ms  168.99us                    -               -         -         -         -  976.56KB  5.5111GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+650.23ms  1.3913ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1391]
+651.66ms  157.02us                    -               -         -         -         -  976.56KB  5.9311GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+651.82ms  156.86us                    -               -         -         -         -  976.56KB  5.9372GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+652.64ms  392.48us                    -               -         -         -         -  976.56KB  2.3729GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+653.08ms  370.72us                    -               -         -         -         -  976.56KB  2.5122GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+653.50ms  1.3320ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1403]
+654.87ms  156.80us                    -               -         -         -         -  976.56KB  5.9396GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+655.03ms  156.70us                    -               -         -         -         -  976.56KB  5.9433GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+655.89ms  194.46us                    -               -         -         -         -  976.56KB  4.7892GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+656.14ms  165.57us                    -               -         -         -         -  976.56KB  5.6251GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+656.33ms  1.3244ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1415]
+657.69ms  156.80us                    -               -         -         -         -  976.56KB  5.9396GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+657.85ms  156.73us                    -               -         -         -         -  976.56KB  5.9421GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+658.62ms  195.17us                    -               -         -         -         -  976.56KB  4.7720GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+658.87ms  166.01us                    -               -         -         -         -  976.56KB  5.6099GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+659.06ms  1.3148ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1427]
+660.40ms  156.89us                    -               -         -         -         -  976.56KB  5.9360GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+660.56ms  157.15us                    -               -         -         -         -  976.56KB  5.9263GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+661.40ms  195.61us                    -               -         -         -         -  976.56KB  4.7610GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+661.64ms  166.05us                    -               -         -         -         -  976.56KB  5.6088GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+661.84ms  1.3170ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1441]
+663.19ms  157.53us                    -               -         -         -         -  976.56KB  5.9119GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+663.35ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+664.14ms  193.09us                    -               -         -         -         -  976.56KB  4.8234GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+664.38ms  165.85us                    -               -         -         -         -  976.56KB  5.6153GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+664.58ms  1.3216ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1455]
+665.92ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+666.09ms  156.70us                    -               -         -         -         -  976.56KB  5.9433GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+666.88ms  194.08us                    -               -         -         -         -  976.56KB  4.7987GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+667.12ms  165.82us                    -               -         -         -         -  976.56KB  5.6164GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+667.32ms  1.3210ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1467]
+668.67ms  156.93us                    -               -         -         -         -  976.56KB  5.9348GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+668.83ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+669.59ms  200.22us                    -               -         -         -         -  976.56KB  4.6514GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+669.85ms  166.08us                    -               -         -         -         -  976.56KB  5.6077GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+670.05ms  1.3263ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1479]
+671.41ms  156.89us                    -               -         -         -         -  976.56KB  5.9360GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+671.57ms  156.70us                    -               -         -         -         -  976.56KB  5.9432GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+672.34ms  193.41us                    -               -         -         -         -  976.56KB  4.8154GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+672.58ms  165.82us                    -               -         -         -         -  976.56KB  5.6164GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+672.78ms  1.3216ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1491]
+674.12ms  156.86us                    -               -         -         -         -  976.56KB  5.9372GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+674.28ms  156.80us                    -               -         -         -         -  976.56KB  5.9396GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+675.05ms  192.19us                    -               -         -         -         -  976.56KB  4.8458GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+675.29ms  166.21us                    -               -         -         -         -  976.56KB  5.6034GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+675.49ms  1.3113ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1503]
+676.82ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+676.98ms  157.60us                    -               -         -         -         -  976.56KB  5.9095GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+677.75ms  193.63us                    -               -         -         -         -  976.56KB  4.8098GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+677.99ms  165.63us                    -               -         -         -         -  976.56KB  5.6229GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+678.18ms  1.3121ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1515]
+679.52ms  156.80us                    -               -         -         -         -  976.56KB  5.9396GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+679.68ms  156.73us                    -               -         -         -         -  976.56KB  5.9421GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+680.44ms  181.47us                    -               -         -         -         -  976.56KB  5.1321GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+680.87ms  166.65us                    -               -         -         -         -  976.56KB  5.5884GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+681.07ms  1.3194ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1527]
+682.41ms  156.93us                    -               -         -         -         -  976.56KB  5.9348GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+682.57ms  156.73us                    -               -         -         -         -  976.56KB  5.9421GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+683.34ms  194.81us                    -               -         -         -         -  976.56KB  4.7806GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+683.58ms  165.82us                    -               -         -         -         -  976.56KB  5.6164GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+683.78ms  1.3215ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1541]
+685.13ms  156.77us                    -               -         -         -         -  976.56KB  5.9408GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+685.29ms  156.83us                    -               -         -         -         -  976.56KB  5.9384GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+686.06ms  197.25us                    -               -         -         -         -  976.56KB  4.7216GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+686.30ms  165.82us                    -               -         -         -         -  976.56KB  5.6164GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+686.50ms  1.3238ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1555]
+687.85ms  156.80us                    -               -         -         -         -  976.56KB  5.9396GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+688.01ms  156.77us                    -               -         -         -         -  976.56KB  5.9408GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+688.76ms  200.03us                    -               -         -         -         -  976.56KB  4.6559GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+689.00ms  166.27us                    -               -         -         -         -  976.56KB  5.6013GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+689.19ms  1.3214ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1567]
+690.57ms  157.25us                    -               -         -         -         -  976.56KB  5.9227GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+690.86ms  156.73us                    -               -         -         -         -  976.56KB  5.9421GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+691.61ms  197.47us                    -               -         -         -         -  976.56KB  4.7163GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+691.85ms  165.31us                    -               -         -         -         -  976.56KB  5.6338GB/s  GeForce GTX 680         1        14  [CUDA memcpy HtoD]
+692.05ms  1.3192ms              (2 1 1)       (64 16 1)        53        0B        0B         -           -  GeForce GTX 680         1        14  diffusion_25_gpu [1579]
+693.39ms  156.80us                    -               -         -         -         -  976.56KB  5.9396GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+693.56ms  156.77us                    -               -         -         -         -  976.56KB  5.9408GB/s  GeForce GTX 680         1        14  [CUDA memcpy DtoH]
+
+Regs: Number of registers used per CUDA thread. This number includes registers used internally by the CUDA driver and/or tools and can be more than what the compiler shows.
+SSMem: Static shared memory allocated per CUDA block.
+DSMem: Dynamic shared memory allocated per CUDA block.
+
+======== CPU profiling result (bottom up):
+Time(%)      Time  Name
+ 76.07%  1.81751s  ???
+ 76.07%  1.81751s  | start_thread
+ 76.07%  1.81751s  |   clone
+ 10.26%  245.06ms  cuStreamSynchronize
+ 10.26%  245.06ms  | __pgi_uacc_cuda_wait
+  7.26%  173.58ms  |   __pgi_uacc_computedone
+  7.26%  173.58ms  |   | diffusion
+  1.71%  40.843ms  |   __pgi_uacc_dataexitdone
+  1.71%  40.843ms  |   | diffusion
+  1.28%  30.632ms  |   __pgi_uacc_dataenterdone
+  1.28%  30.632ms  |     diffusion
+  4.70%  112.32ms  cuDevicePrimaryCtxRetain
+  4.70%  112.32ms  | __pgi_uacc_cuda_init_device
+  4.70%  112.32ms  |   __pgi_uacc_cuda_select_valid
+  4.70%  112.32ms  |     __pgi_uacc_select_devid
+  4.70%  112.32ms  |       __pgi_uacc_dataenterstart
+  4.70%  112.32ms  |         diffusion
+  3.85%  91.897ms  __c_mcopy8
+  2.14%  51.054ms  | __pgi_uacc_cuda_dataup1
+  2.14%  51.054ms  | | __pgi_uacc_dataup1
+  2.14%  51.054ms  | |   __pgi_uacc_dataupx
+  2.14%  51.054ms  | |     __pgi_uacc_dataonb
+  2.14%  51.054ms  | |       diffusion
+  1.71%  40.843ms  | __pgi_uacc_cuda_drain_down
+  1.71%  40.843ms  |   __pgi_uacc_cuda_wait
+  1.71%  40.843ms  |     __pgi_uacc_dataexitdone
+  1.71%  40.843ms  |       diffusion
+  2.14%  51.054ms  cuDevicePrimaryCtxRelease
+  2.14%  51.054ms  | __pgi_uacc_cuda_release_buffer
+  2.14%  51.054ms  |   __run_exit_handlers
+  2.14%  51.054ms  |     ???
+  2.14%  51.054ms  |       ???
+  0.85%  20.422ms  cuInit
+  0.85%  20.422ms  | __pgi_uacc_cuda_init
+  0.85%  20.422ms  |   __pgi_uacc_enumerate
+  0.85%  20.422ms  |     __pgi_uacc_initialize
+  0.85%  20.422ms  |       __pgi_uacc_dataenterstart
+  0.85%  20.422ms  |         diffusion
+  0.43%  10.211ms  pthread_cond_signal@@GLIBC_2.3.2
+  0.43%  10.211ms  cuMemFreeHost
+  0.43%  10.211ms  | __pgi_uacc_cuda_free_device_buffers
+  0.43%  10.211ms  |   __pgi_uacc_cuda_release_buffer
+  0.43%  10.211ms  |     __run_exit_handlers
+  0.43%  10.211ms  |       ???
+  0.43%  10.211ms  |         ???
+  0.43%  10.211ms  cuMemHostAlloc
+  0.43%  10.211ms  | __pgi_uacc_cuda_get_buffer
+  0.43%  10.211ms  |   __pgi_uacc_cuda_dataup1
+  0.43%  10.211ms  |     __pgi_uacc_dataup1
+  0.43%  10.211ms  |       __pgi_uacc_dataupx
+  0.43%  10.211ms  |         __pgi_uacc_dataonb
+  0.43%  10.211ms  |           diffusion
+  0.43%  10.211ms  _dl_relocate_object
+  0.43%  10.211ms  | dl_open_worker
+  0.43%  10.211ms  |   _dl_catch_error
+  0.43%  10.211ms  |     _dl_open
+  0.43%  10.211ms  |       dlopen_doit
+  0.43%  10.211ms  |         _dl_catch_error
+  0.43%  10.211ms  |           _dlerror_run
+  0.43%  10.211ms  |             dlopen@@GLIBC_2.2.5
+  0.43%  10.211ms  |               __pgi_uacc_add_profile_library
+  0.43%  10.211ms  |                 __pgi_uacc_add_profile_libraries
+  0.43%  10.211ms  |                   __pgi_uacc_globalinit
+  0.43%  10.211ms  |                     __pgi_uacc_enumerate
+  0.43%  10.211ms  |                       __pgi_uacc_initialize
+  0.43%  10.211ms  |                         __pgi_uacc_dataenterstart
+  0.43%  10.211ms  |                           diffusion
+  0.43%  10.211ms  cuLaunchKernel
+  0.43%  10.211ms    __pgi_uacc_cuda_launch
+  0.43%  10.211ms      __pgi_uacc_launch
+  0.43%  10.211ms        diffusion
+
+======== Data collected at 100Hz frequency
