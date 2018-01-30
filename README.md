@@ -1,5 +1,5 @@
 # PP-Work
-Parrellel Programming  
+Parallel Programming 
 
 -Develop C/C+ programs
 
