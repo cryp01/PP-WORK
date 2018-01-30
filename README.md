@@ -1,14 +1,13 @@
 # PP-Work
-Parrellel Programming 
+Parrellel Programming  
 
-The objective to:
-
--Develop C programs
+-Develop C/C+ programs
 
 -Identify difficulties related to parallel programming
 
 -Apply an adequate methodology for the development of parallel applications
- understand the differences of parallel programming approaches: Shared memory, message passing
+
+-Understand the differences of parallel programming approaches: Shared memory, message passing
 
 -Determine the most convinient parallel programming approach to develop a particular application
 
