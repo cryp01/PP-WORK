@@ -1,5 +1,5 @@
 # PP-Work
-Parallel Programming 
+Parallel Programming aimed at developing parallel applications using an adequate programming model and to evaluate the application performance.
 
 -Develop C/C+ programs
 
